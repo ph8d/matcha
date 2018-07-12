@@ -1,0 +1,21 @@
+{
+  "name": "matcha-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "connect-flash": "^0.1.1",
+    "express": "^4.16.3",
+    "express-messages": "^1.0.1",
+    "express-session": "^1.15.6",
+    "nodemon": "^1.18.1",
+    "swig": "^1.4.2"
+  }
+}
