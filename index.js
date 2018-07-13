@@ -18,12 +18,10 @@ var db = mysql.createConnection({
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Set The Public Folder
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cookieParser());
-
-// Express Session Config
 app.use(session({
     secret: 'keyboard cat',
     resave: true,
@@ -31,28 +29,20 @@ app.use(session({
     cookie: { maxAge: 60000 }
 }));
 
-// Express Messages
+
 app.use(require('connect-flash')());
 app.use(function (req, res, next) {
   res.locals.messages = require('express-messages')(req, res);
   next();
 });
 
-// Set The View Engine
 app.set('view engine', 'ejs');
-
-// Set The Views Folder
 app.set('views', path.join(__dirname, 'views'));
 
 
 function formValidation(formData) {
-    return 'ti govno!';
+    // RegExp form validation here
 }
-
-
-/*
- *  Routes
- */
 
 app.get('/', (req, res) => {
     res.render('home');
