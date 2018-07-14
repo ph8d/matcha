@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const flash = require('connect-flash');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
+const simpleValidator = require('./my_modules/simple-validator/validator.js');
 
 const app = express();
 
@@ -18,7 +19,6 @@ var db = mysql.createConnection({
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cookieParser());
@@ -29,22 +29,19 @@ app.use(session({
     cookie: { maxAge: 60000 }
 }));
 
-
 app.use(require('connect-flash')());
 app.use(function (req, res, next) {
   res.locals.messages = require('express-messages')(req, res);
   next();
 });
 
+app.use(simpleValidator());
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-
-function formValidation(formData) {
-    // RegExp form validation here
-}
-
 app.get('/', (req, res) => {
+    req.validateBody("login", [data => { return (data.length > 2); }, data => { return !!data; }], "Nepravilno!!!");
     res.render('home');
 });
 
@@ -66,8 +63,12 @@ app.all('/register', (req, res, next) => {
         formData.last_name = req.body.last_name;
         formData.password = req.body.password;
         formData.confirm_password = req.body.confirm_password;
+        req.checkBody().isEmail();
 
-        error = formValidation(formData);
+        // I need to create some sort of module which will store all requiered validators
+        // I need to come up with a way to pass validators to 'validateBody' func
+
+        validator.validateBody("hanlo");
 
         if (!!error) {
             req.flash('danger', error);
@@ -81,7 +82,7 @@ app.all('/register', (req, res, next) => {
 });
 
 app.listen(process.env.port || 5000, () => {
-    console.log('now listening for requests');
+    console.log('Server started at port 5000!');
 });
 
 
