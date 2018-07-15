@@ -19,7 +19,7 @@ var simpleValidator = function() {
 			var data = req.body[param];
 
 			if (typeof data === 'undefined') {
-				req._validatorErrors.push("Validation error: no such variavle (" + param + ")");
+				req._validatorErrors.push("Validation error: no such variable (" + param + ")");
 			}
 
 			console.log("Data: " + data);
