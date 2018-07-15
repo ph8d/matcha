@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const flash = require('connect-flash');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const simpleValidator = require('./my_modules/simple-validator/validator.js');
+const simpleValidator = require('./my_modules/simple-validator/simple_validator');
 
 const app = express();
 
@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cookieParser());
 app.use(session({
-    secret: 'keyboard cat',
+    secret: 'potato cat',
     resave: true,
     saveUninitialized: true,
     cookie: { maxAge: 60000 }
@@ -41,7 +41,6 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.get('/', (req, res) => {
-    req.validateBody("login", [data => { return (data.length > 2); }, data => { return !!data; }], "Nepravilno!!!");
     res.render('home');
 });
 
@@ -63,12 +62,8 @@ app.all('/register', (req, res, next) => {
         formData.last_name = req.body.last_name;
         formData.password = req.body.password;
         formData.confirm_password = req.body.confirm_password;
-        req.checkBody().isEmail();
 
-        // I need to create some sort of module which will store all requiered validators
-        // I need to come up with a way to pass validators to 'validateBody' func
-
-        validator.validateBody("hanlo");
+        req.validateBody("login");
 
         if (!!error) {
             req.flash('danger', error);
