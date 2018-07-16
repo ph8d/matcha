@@ -6,6 +6,7 @@ const flash = require('connect-flash');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const simpleValidator = require('./my_modules/simple-validator/simple_validator');
+const { check, validationResult } = require('express-validator/check');
 
 const app = express();
 
@@ -44,7 +45,8 @@ app.get('/', (req, res) => {
     res.render('home');
 });
 
-app.all('/register', (req, res, next) => {
+app.all('/register', (req, res) => {
+    check('login', 'Shieeeet').isEmail()
     let error = '';
     let formData = {
         login: '',
@@ -62,8 +64,6 @@ app.all('/register', (req, res, next) => {
         formData.last_name = req.body.last_name;
         formData.password = req.body.password;
         formData.confirm_password = req.body.confirm_password;
-
-        req.validateBody("login");
 
         if (!!error) {
             req.flash('danger', error);
