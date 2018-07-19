@@ -19,6 +19,7 @@
     "express-session": "^1.15.6",
     "express-validator": "^5.2.0",
     "mysql": "^2.15.0",
-    "nodemon": "^1.18.2"
+    "nodemon": "^1.18.2",
+    "underscore": "^1.9.1"
   }
 }
