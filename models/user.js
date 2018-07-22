@@ -1,4 +1,5 @@
 // I need to fix this repeating code for error handling
+// And also i need to decide how to pass query results farther, by callback functions or by promises
 
 exports.logAllUsers = (dbConnection) => {
     let sql = 'SELECT * FROM user';
@@ -26,6 +27,24 @@ exports.add = (user, dbConnection) => {
     });
 };
 
+exports.getOneByLoginInformation = (loginInfo, dbConnection) => {
+    let sql = 'SELECT * FROM user WHERE login = ? AND password = ?'
+    let query = dbConnection.query(sql, loginInfo, (error, rows, fields) => {
+        if (!!error) {
+            console.log("Error in the query: " + error);
+            return false;
+        } else {
+            console.log(rows);
+            if (rows.length > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    });
+    return true;
+};
+
 exports.getOneById = (userId, dbConnection) => {
     let sql = 'SELECT * FROM user WHERE id = ?';
     let query = dbConnection.query(sql, userId, (error, rows, fields) => {
@@ -33,7 +52,7 @@ exports.getOneById = (userId, dbConnection) => {
             console.log("Error in the query: " + error);
             return false;
         } else {
-            console.log(result);
+            console.log(rows);
             return true;
         }
     });
@@ -46,7 +65,7 @@ exports.getOneByLogin = (userLogin, dbConnection) => {
             console.log("Error in the query: " + error);
             return false;
         } else {
-            console.log(result);
+            console.log(rows);
             return true;
         }
     });

@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-const flash = require('connect-flash');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const router = require('./routes/router');
@@ -37,7 +36,7 @@ app.use((req, res, next) => {
 	next();
 });
 
-app.use(flash());
+app.use(require('connect-flash')());
 app.use(function (req, res, next) {
 	res.locals.messages = require('express-messages')(req, res);
 	next();

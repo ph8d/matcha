@@ -3,7 +3,7 @@ const router = express.Router();
 const home = require('../controllers/home');
 const account = require('../controllers/account');
 
-// Middleware to check if user is logged in and if user is not logged in redirect to a homepage
+// Middleware to check if user is logged in and refirect to the homepage if not logged in
 function requiresLogin(req, res, next) {
     if (req.session && req.session.userId) {
         return next();
