@@ -1,9 +1,6 @@
 const User = require('../models/user')
 
 exports.register = (req, res) => {
-    // User.logAllUsers(res.locals.db.pool);
-    console.log(User.getOneByLoginInformation(['rtarasen', 'ghbdtn123'], res.locals.db.pool));
-
     let validationError = false;
     let form = {
         login: '',
@@ -55,18 +52,18 @@ exports.login = (req, res) => {
 		form.login = req.body.login;
 		form.password = req.body.password;
 
-        let user = User.getOneByLoginInformation(form, res.locals.db.pool);
-        if (!!user) {
+        /* Still need to implement login/password validation */
 
-            /* Implement authentication */
-
-            res.flash('success', 'Registration successful! Please check your email.')
-            return res.redirect('/');
-        } else {
-
-            /* Handle the error if there is one */
-
-        }
+        User.getOneByLoginInformation([form.login, form.password])
+            .then(user => {
+                User.authenticate(user);
+                res.redirect('/');
+            }, reason => {
+                req.flash('danger', reason);
+                res.render('login', {form: form});
+            })
+            .catch(console.error);
+    } else {
+        res.render('login', {form: form});         
     }
-    res.render('login');
 };

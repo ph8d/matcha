@@ -1,17 +1,39 @@
+const db = require('../services/db');
+
 // I need to fix this repeating code for error handling
 // And also i need to decide how to pass query results farther, by callback functions or by promises
 
-exports.logAllUsers = (dbConnection) => {
-    let sql = 'SELECT * FROM user';
-    dbConnection.query(sql, (error, rows, fields) => {
-        if (!!error) {
-            console.log("Error in the query: " + error);
-            return false;
-        } else {
-            console.log(rows);
-            return true;
-        }
-    });  
+
+// Promises example
+function imgLoad(url) {
+    return new Promise(function(resolve, reject) {
+        var request = new XMLHttpRequest();
+        request.open('GET', url);
+        request.responseType = 'blob';
+        request.onload = function() {
+            if (request.status === 200) {
+                resolve(request.response);
+            } else {
+                reject(Error('Image didn\'t load successfully; error code:' + request.statusText));
+            }
+        };
+        request.onerror = function() {
+            reject(Error('There was a network error.'));
+        };
+        request.send();
+    });
+}
+
+exports.logAllUsers = () => {
+    db.get()
+        .then(connection => {
+            let sql = 'SELECT * FROM user';
+            connection.query(sql, (error, rows, fields) => {
+                if (error) throw error;
+                console.log(rows);
+            });
+        })
+        .catch(console.error);
 };
 
 exports.add = (user, dbConnection) => {
@@ -28,21 +50,19 @@ exports.add = (user, dbConnection) => {
 };
 
 exports.getOneByLoginInformation = (loginInfo, dbConnection) => {
-    let sql = 'SELECT * FROM user WHERE login = ? AND password = ?'
-    let query = dbConnection.query(sql, loginInfo, (error, rows, fields) => {
-        if (!!error) {
-            console.log("Error in the query: " + error);
-            return false;
-        } else {
-            console.log(rows);
-            if (rows.length > 0) {
-                return true;
-            } else {
-                return false;
-            }
-        }
+    return new Promise((resolve, reject) => {
+        db.get()
+        .then(connection => {
+            let sql = 'SELECT * FROM user WHERE login = ? AND password = ?';
+            connection.query(sql, loginInfo, (error, rows, fields) => {
+                if (error) throw error;
+                if (rows.length > 0) {
+                    resolve(rows);
+                }
+                reject('Login or password is incorrect');
+            });
+        });
     });
-    return true;
 };
 
 exports.getOneById = (userId, dbConnection) => {
@@ -69,4 +89,10 @@ exports.getOneByLogin = (userLogin, dbConnection) => {
             return true;
         }
     });
+}
+
+exports.authenticate = (user) => {
+
+    /* Need to add implementation */
+
 }

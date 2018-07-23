@@ -4,8 +4,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const router = require('./routes/router');
-const DataBase = require('./services/DB');
-const db = new DataBase();
+const db = require('./services/db');
 
 const app = express();
 const config = require('./config');
@@ -30,17 +29,13 @@ app.use(session({
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-/* Attaching database to responce object */
-app.use((req, res, next) => {
-	res.locals.db = db;
-	next();
-});
-
 app.use(require('connect-flash')());
 app.use(function (req, res, next) {
 	res.locals.messages = require('express-messages')(req, res);
 	next();
 });
+
+db.connect();
 
 app.use('/', router);
 

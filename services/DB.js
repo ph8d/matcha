@@ -1,12 +1,25 @@
 const mysql = require('mysql');
 const config = require('../config');
 
-class DataBase {
-    constructor() {
-        this._pool = mysql.createPool(config.mysql);
-    };
+var state = {
+    pool: null
+};
 
-    get pool() { return this._pool };
-}
+exports.connect = () => {
+    state.pool = mysql.createPool(config.mysql);
+};
 
-module.exports = DataBase;
+exports.get = () => {
+    return new Promise((resolve, reject) => {
+        var pool = state.pool;
+        if (!pool) {
+            throw new Error('Database connection error.');
+        }
+        pool.getConnection((error, connection) => {
+            if (error) {
+                throw error;         
+            }
+            resolve(connection);
+        }); 
+    });
+};
