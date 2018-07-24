@@ -25,45 +25,37 @@ exports.add = (user, dbConnection) => {
     });
 };
 
-exports.getOneByLoginInformation = (loginInfo, dbConnection) => {
+exports.getById = (id) => {
     return new Promise((resolve, reject) => {
         db.get()
-        .then(connection => {
-            let sql = 'SELECT * FROM user WHERE login = ? AND password = ?';
-            connection.query(sql, loginInfo, (error, rows, fields) => {
-                if (error) throw error;
-                if (rows.length > 0) {
-                    resolve(rows);
-                }
-                reject('Login or password is incorrect');
-            });
-        });
-    });
-};
-
-exports.getOneById = (userId, dbConnection) => {
-    let sql = 'SELECT * FROM user WHERE id = ?';
-    let query = dbConnection.query(sql, userId, (error, rows, fields) => {
-        if (!!error) {
-            console.log("Error in the query: " + error);
-            return false;
-        } else {
-            console.log(rows);
-            return true;
-        }
+            .then(connection => {
+                let sql = 'SELECT * FROM user WHERE id = ?';
+                connection.query(sql, id, (error, rows, fields) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(rows[0]);
+                    }
+                });                
+            })
+            .catch(console.error);
     });
 }
 
-exports.getOneByLogin = (userLogin, dbConnection) => {
-    let sql = 'SELECT * FROM user WHERE login = ?';
-    let query = dbConnection.query(sql, userLogin, (error, rows, fields) => {
-        if (!!error) {
-            console.log("Error in the query: " + error);
-            return false;
-        } else {
-            console.log(rows);
-            return true;
-        }
+exports.getOneByLogin = (userLogin) => {
+    return new Promise((resolve, reject) => {
+        db.get()
+            .then(connection => {
+                let sql = 'SELECT * FROM user WHERE login = ?';
+                connection.query(sql, userLogin, (error, rows, fields) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(rows[0]);
+                    }
+                });
+            })
+            .catch(console.error);
     });
 }
 

@@ -1,12 +1,12 @@
 const mysql = require('mysql');
-const config = require('../config');
+const config = require('../config/db');
 
 var state = {
     pool: null
 };
 
 exports.connect = () => {
-    state.pool = mysql.createPool(config.mysql);
+    state.pool = mysql.createPool(config);
 };
 
 exports.get = () => {

@@ -4,10 +4,11 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const router = require('./routes/router');
+const passport = require('passport');
 const db = require('./services/db');
 
 const app = express();
-const config = require('./config');
+const config = require('./config/express');
 
 app.use(bodyParser.urlencoded({
 	extended: false
@@ -34,6 +35,12 @@ app.use(function (req, res, next) {
 	res.locals.messages = require('express-messages')(req, res);
 	next();
 });
+
+//Passport config
+require('./config/passport')(passport);
+//Passport Middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 db.connect();
 
