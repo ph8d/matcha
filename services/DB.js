@@ -23,3 +23,7 @@ exports.get = () => {
         }); 
     });
 };
+
+exports.getPool = () => {
+    return state.pool;
+}

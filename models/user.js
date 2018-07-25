@@ -12,17 +12,19 @@ exports.logAllUsers = () => {
         .catch(console.error);
 };
 
-exports.add = (user, dbConnection) => {
-    let sql = 'INSERT INTO user SET ?';
-    let query = dbConnection.query(sql, user, (error, result) => {
-        if (!!error) {
-            console.log("Error in the query: " + error);
-            return false;
-        } else {
-            console.log(result);
-            return true;
-        }
-    });
+exports.add = (user) => {
+    db.get()
+        .then(connection => {
+            let sql = 'INSERT INTO user SET ?';
+            connection.query(sql, user, (error, result) => {
+                if (!!error) {
+                    console.log("Error in the query: " + error);
+                } else {
+                    console.log(result);
+                }
+            });
+        })
+        .catch(console.error);
 };
 
 exports.getById = (id) => {
@@ -57,10 +59,4 @@ exports.getOneByLogin = (userLogin) => {
             })
             .catch(console.error);
     });
-}
-
-exports.authenticate = (user) => {
-
-    /* Need to add implementation */
-
 }

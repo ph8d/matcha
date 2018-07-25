@@ -10,17 +10,20 @@ module.exports = (passport) => {
         User.getOneByLogin(login)
             .then(user => {
                 if (!user) {
-                    done(null, false, {message: 'Login or password is incorrect.'});
+                    return done(null, false, {message: 'Login or password is incorrect.'});
                 }
+
+                /* Code below used only for debugging, i need to replace it with commented out code */
+
                 if (password === user.password) {
                     return done(null, user);
                 } else {
                     return done(null, false, 'Login or password is incorrect.');
                 }
-                // bcrypt.compare(password, user[0].password, (error, isMatch) => {
+                // bcrypt.compare(password, user.password, (error, isMatch) => {
                 //     if (error) throw error;
                 //     if (isMatch) {
-                //         return done(null, user[0]);
+                //         return done(null, user);
                 //     } else {
                 //         return done(null, false, {message: 'Login or password is incorrect.'});
                 //     };
@@ -29,7 +32,7 @@ module.exports = (passport) => {
                 return done(reason);
             })
     }));
-    
+
     passport.serializeUser(function(user, done) {
         done(null, user.id);
     });
