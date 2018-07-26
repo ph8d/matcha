@@ -9,21 +9,19 @@ exports.connect = () => {
     state.pool = mysql.createPool(config);
 };
 
-exports.get = () => {
-    return new Promise((resolve, reject) => {
-        var pool = state.pool;
-        if (!pool) {
-            throw new Error('Database connection error.');
-        }
-        pool.getConnection((error, connection) => {
-            if (error) {
-                throw error;         
-            }
-            resolve(connection);
-        }); 
+exports.get = (done) => {
+    var pool = state.pool;
+    if (!pool) {
+        return done(new Error('Missing database connection'));
+    }
+    pool.getConnection((error, connection) => {
+        if (error) return done(error);
+        done(null, connection);
+        console.log('A database connection was used!');
+        connection.release();
     });
 };
 
 exports.getPool = () => {
     return state.pool;
-}
+};

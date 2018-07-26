@@ -1,15 +1,14 @@
 const db = require('../services/db');
 
 exports.logAllUsers = () => {
-    db.get()
-        .then(connection => {
-            let sql = 'SELECT * FROM user';
-            connection.query(sql, (error, rows, fields) => {
-                if (error) throw error;
-                console.log(rows);
-            });
-        })
-        .catch(console.error);
+    db.get((error, connection) => {
+        if (error) console.error(error);
+        let sql = 'SELECT * FROM user';
+        connection.query(sql, (error, rows, fields) => {
+            if (error) console.error(error);
+            console.log(rows);
+        });
+    });
 };
 
 exports.add = (user) => {
@@ -27,36 +26,24 @@ exports.add = (user) => {
         .catch(console.error);
 };
 
-exports.getById = (id) => {
-    return new Promise((resolve, reject) => {
-        db.get()
-            .then(connection => {
-                let sql = 'SELECT * FROM user WHERE id = ?';
-                connection.query(sql, id, (error, rows, fields) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve(rows[0]);
-                    }
-                });                
-            })
-            .catch(console.error);
-    });
+exports.getById = (id, done) => {
+    db.get((error, connection) => {
+        if (error) return done(error);
+        let sql = 'SELECT * FROM user WHERE id = ?';
+        connection.query(sql, id, (error, rows, fields) => {
+            if (error) return done(error);
+            return done(null, rows[0]);
+        });
+    });                
 }
 
-exports.getOneByLogin = (userLogin) => {
-    return new Promise((resolve, reject) => {
-        db.get()
-            .then(connection => {
-                let sql = 'SELECT * FROM user WHERE login = ?';
-                connection.query(sql, userLogin, (error, rows, fields) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve(rows[0]);
-                    }
-                });
-            })
-            .catch(console.error);
+exports.getByLogin = (login, done) => {
+    db.get((error, connection) => {
+        if (error) return done(error);
+        let sql = 'SELECT * FROM user WHERE login = ?';
+        connection.query(sql, login, (error, rows, fields) => {
+            if (error) return done(error);
+            return done(null, rows[0]);
+        });
     });
 }

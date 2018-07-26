@@ -1,5 +1,3 @@
-var config = {
+module.exports = {
     port: 5000
-}
-
-module.exports = config;
+};

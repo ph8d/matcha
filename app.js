@@ -1,10 +1,9 @@
 const express = require('express');
-const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
-const cookieParser = require('cookie-parser');
-const router = require('./routes/router');
 const passport = require('passport');
+const router = require('./routes/router');
+const path = require('path');
 const db = require('./services/db');
 const MySQLStore = require('express-mysql-session')(session);
 
@@ -12,24 +11,22 @@ const app = express();
 const config = require('./config/express');
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
 db.connect();
 const sessionStore = new MySQLStore({}, db.getPool());
 
-app.use(cookieParser());
 app.use(session({
 	secret: 'potato cat',
 	resave: false,
-	saveUninitialized: true,
+	saveUninitialized: false,
 	store: sessionStore,
 	cookie: {
-		maxAge: 60000
+		maxAge: 1000 * 60 * 60 * 24 // 24h
 	}
 }));
 
@@ -47,6 +44,6 @@ app.use(passport.session());
 
 app.use('/', router);
 
-app.listen(process.env.port || config.port, () => {
+app.listen(config.port, () => {
 	console.log('Server started at port ' + config.port);
 });

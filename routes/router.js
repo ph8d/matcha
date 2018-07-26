@@ -21,14 +21,14 @@ router.get('/about', home.about);
 router.all('/register', account.register);
 
 router.get('/login', (req, res) => {
-    res.render('login');
+	res.render('login');
 });
 
 router.post('/login', account.login);
 
 router.get('/logout', (req, res) => {
-    req.logout();
-    res.redirect('/');
+	req.logout();
+	res.redirect('/');
 });
 
 module.exports = router;

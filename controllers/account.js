@@ -3,6 +3,7 @@ const passport = require('passport');
 const validator = require('../lib/simple-validator/my_validator');
 
 exports.register = (req, res) => {
+    User.logAllUsers();
     let validationErrors = [];
     let form = {
         login: '',
