@@ -60,31 +60,3 @@ exports.login = (req, res, next) => {
         failureFlash: true
     })(req, res, next);
 };
-
-/* Right now i'm using passport instead of this */
-
-// exports.login = (req, res) => {
-//     let form = {
-//         login: '',
-//         password: ''
-//     };
-
-//     if (req.method === 'POST' && req.body.submit === 'OK') {
-// 		form.login = req.body.login;
-// 		form.password = req.body.password;
-
-//         /* Still need to implement login/password validation */
-
-//         User.getOneByLoginInformation([form.login, form.password])
-//             .then(user => {
-//                 User.authenticate(user);
-//                 res.redirect('/');
-//             }, reason => {
-//                 req.flash('danger', reason);
-//                 res.render('login', {form: form});
-//             })
-//             .catch(console.error);
-//     } else {
-//         res.render('login', {form: form});         
-//     }
-// };

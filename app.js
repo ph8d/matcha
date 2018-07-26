@@ -38,6 +38,7 @@ app.use(function (req, res, next) {
 
 //Passport config
 require('./config/passport')(passport);
+
 //Passport Middleware
 app.use(passport.initialize());
 app.use(passport.session());

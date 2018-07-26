@@ -18,7 +18,7 @@ exports.get = (done) => {
         if (error) return done(error);
         done(null, connection);
         console.log('A database connection was used!');
-        connection.release();
+        connection.release(); // Need to find a way to release connections properly
     });
 };
 

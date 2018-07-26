@@ -3,16 +3,16 @@ const router = express.Router();
 const home = require('../controllers/home');
 const account = require('../controllers/account');
 
-/* Custom middleware to check if user is logged in and refirect to the homepage if not logged in [unused] */
+/* Access Control Middleware */
 
-// function requiresLogin(req, res, next) {
-//     if (req.session && req.session.userId) {
-//         return next();
-//     } else {
-//         req.flash('danger', 'You must log in to access that page!');     
-//         return res.redirect('/');
-//     }
-// };
+function requiresLogin(req, res, next) {
+	if (req.isAuthenticated()) {
+		return next();
+	} else {
+		req.flash('danger', 'You must log in to access that page!');
+		return res.redirect('/login');
+	}
+};
 
 router.get('/', home.index);
 
