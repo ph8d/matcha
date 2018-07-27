@@ -9,10 +9,12 @@ module.exports = (passport) => {
 
     (login, password, done) => {
         User.getByLogin(login, (error, user) => {
-            console.log(user);
             if (error) return done(error);
             if (!user) {
                 return done(null, false, {type: 'danger', message: 'Login or password is incorrect.'});
+            }
+            if (!user.is_verified) {
+                return done(null, false, {type: 'danger', message: 'Your nedd to confirm your email before logging in. Check your email.'});
             }
             if (password !== user.password) {
                 return done(null, false, {type: 'danger', message: 'Login or password is incorrect.'});

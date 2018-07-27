@@ -1,62 +1,67 @@
 const User = require('../models/user');
 const passport = require('passport');
-const validator = require('../lib/simple-validator/my_validator');
+const registrationValidation = require('../lib/registrationValidation');
+const bcrypt = require('bcrypt');
 
 exports.register = (req, res) => {
-    User.logAllUsers();
-    let validationErrors = [];
-    let form = {
-        login: '',
-        email: '',
-        first_name: '',
-        last_name: '',
-        password: '',
-        confirm_password: ''
-    };
+	let form = {
+		login: '',
+		email: '',
+		first_name: '',
+		last_name: '',
+	};
 
-    if (req.method === 'POST' && req.body.submit === 'OK') {
+	if (req.method === 'POST' && req.body.submit === 'OK') {
 		form.login = req.body.login;
 		form.email = req.body.email;
 		form.first_name = req.body.first_name;
 		form.last_name = req.body.last_name;
 		form.password = req.body.password;
-        form.confirm_password = req.body.confirm_password;
+		form.password_confirm = req.body.password_confirm;
 
-        if (!validator.isLength(form.login, {min: 4, max: 24})) {
-            validationErrors.push('Invalid login');
-        }
+		let validationErrors = registrationValidation(form);
 
-        // Email should be converted to lowercase to avoid creating accounts with similar emails Mark@gmail.com mark@gmail.com!
+		if (validationErrors.length > 0) {
+			validationErrors.forEach(msg => {
+				req.flash('danger', msg);
+			});
+			res.render('register', {form:form});		
+		} else {
 
-        if (!validator.isEmail(form.email)) {
-            validationErrors.push('Invalid email');
-        }
+			/* I need to check if user with this email or login already exist! */
 
-        /* Need to implement validation */
+			/* And i think i want to use promises on everything again. */
+			/* Mixing promises with callbacks is a really bad idea!!! */
 
-        if (validationErrors.length > 0) {
-            req.flash('danger', validationErrors[0]);
-        } else {
+			delete form.password_confirm;
 
-            /* Add new user to database */
+			bcrypt.genSalt(12)
+				.then(salt => {
+					return bcrypt.hash(form.password, salt);
+				})
+				.then(hash => {
+					form.password = hash;
 
-            delete form.confirm_password;
-            User.add(form);
+					/* Need to add new user to database */
 
-            /* Need to send an email to verify user account -> https://www.npmjs.com/package/express-mailer */
-
-            req.flash('success', 'Registration successful! Please check your email.')
-            return res.redirect('/');
-        }
-    }
-
-    res.render('register', {form: form});
+					req.flash('success', 'Registration successful! Please, check your email.');
+					res.redirect('/');
+				})
+				.catch(error => {
+					console.error(error);
+					req.flash('danger', 'Some server side error occured, please try again.');
+					res.render('register', {form:form});
+				});
+		}
+	} else {
+		res.render('register', {form:form});
+	}
 };
 
 exports.login = (req, res, next) => {
-    passport.authenticate('local', {
-        successRedirect: '/',
-        failureRedirect: '/login',
-        failureFlash: true
-    })(req, res, next);
+	passport.authenticate('local', {
+		successRedirect: '/',
+		failureRedirect: '/login',
+		failureFlash: true
+	})(req, res, next);
 };

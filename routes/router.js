@@ -14,6 +14,11 @@ function requiresLogin(req, res, next) {
 	}
 };
 
+router.all('*', (req, res, next) => {
+	res.locals.isAuthenticated = (!!req.user);
+	next();
+});
+
 router.get('/', home.index);
 
 router.get('/about', home.about);
@@ -21,7 +26,12 @@ router.get('/about', home.about);
 router.all('/register', account.register);
 
 router.get('/login', (req, res) => {
-	res.render('login');
+	if (req.isAuthenticated()) {
+		req.flash('info', 'You are already logged in.');
+		res.redirect('/');
+	} else {
+		res.render('login');		
+	}
 });
 
 router.post('/login', account.login);

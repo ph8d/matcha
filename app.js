@@ -3,12 +3,19 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const passport = require('passport');
 const router = require('./routes/router');
+const mailer = require('express-mailer')
 const path = require('path');
 const db = require('./services/db');
 const MySQLStore = require('express-mysql-session')(session);
 
 const app = express();
 const config = require('./config/express');
+
+// mailer.extend(app, {
+// 	from: 'no-reply@matcha.com',
+// 	host: 'localhost',
+// 	secureConnection: false,
+// });
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
