@@ -1,27 +1,24 @@
-const mysql = require('mysql');
+const mysql = require('promise-mysql');
 const config = require('../config/db');
 
 var state = {
-    pool: null
+	pool: null
 };
 
 exports.connect = () => {
-    state.pool = mysql.createPool(config);
+	state.pool = mysql.createPool(config);
 };
 
-exports.get = (done) => {
-    var pool = state.pool;
-    if (!pool) {
-        return done(new Error('Missing database connection'));
-    }
-    pool.getConnection((error, connection) => {
-        if (error) return done(error);
-        done(null, connection);
-        console.log('A database connection was used!');
-        connection.release(); // Need to find a way to release connections properly
-    });
+exports.get = () => {
+	return new Promise((resolve, reject) => {
+		if (!state.pool) {
+			reject(new Error('Missing database connection'));
+		} else {
+			resolve(state.pool)
+		}
+	});
 };
 
 exports.getPool = () => {
-    return state.pool;
+	return state.pool;
 };

@@ -1,9 +1,10 @@
 const User = require('../models/user');
 const passport = require('passport');
-const registrationValidation = require('../lib/registrationValidation');
+const validator = require('../lib/registrationValidation');
 const bcrypt = require('bcrypt');
 
 exports.register = (req, res) => {
+	User.findOne({id:5}).then(console.log);
 	let form = {
 		login: '',
 		email: '',
@@ -28,22 +29,18 @@ exports.register = (req, res) => {
 			res.render('register', {form:form});		
 		} else {
 
-			/* I need to check if user with this email or login already exist! */
-
-			/* And i think i want to use promises on everything again. */
-			/* Mixing promises with callbacks is a really bad idea!!! */
-
 			delete form.password_confirm;
 
-			bcrypt.genSalt(12)
-				.then(salt => {
-					return bcrypt.hash(form.password, salt);
-				})
+			/* I need to check if user with this email or login already exist! */			
+			/* Maybe i can add isUniqueCredentials function to the top of this promise chain */
+
+			bcrypt.hash(form.password, 12)
 				.then(hash => {
 					form.password = hash;
-
-					/* Need to add new user to database */
-
+					return User.add(form);
+				})
+				.then(insertedId => {
+					console.log('ID of inserted user: ' + insertedId)
 					req.flash('success', 'Registration successful! Please, check your email.');
 					res.redirect('/');
 				})

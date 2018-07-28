@@ -1,45 +1,41 @@
 const db = require('../services/db');
 
 exports.logAllUsers = () => {
-	db.get((error, connection) => {
-		if (error) console.error(error);
-		let sql = 'SELECT * FROM user';
-		connection.query(sql, (error, rows, fields) => {
-			if (error) console.error(error);
+	db.get()
+		.then(connection => {
+			let sql = 'SELECT * FROM user';
+			return connection.query(sql);
+		})
+		.then(rows => {
 			console.log(rows);
-		});
+		})
+		.catch(console.error);
+};
+
+exports.add = (user) => {
+	return new Promise((resolve, reject) => {
+		db.get()
+			.then(connection => {
+				let sql = 'INSERT INTO user SET ?';
+				return connection.query(sql, user);
+			})
+			.then(result => {
+				resolve(result.insertId);
+			})
+			.catch(reject);
 	});
 };
 
-exports.add = (user, done) => {
-	db.get((error, connection) => {
-		if (error) return done(error);
-		let sql = 'INSERT INTO user SET ?';
-		connection.query(sql, user, (error, result) => {
-			if (error) return done(error);
-			return done(result.insertId);
-		});
-	});
-};
-
-exports.getById = (id, done) => {
-	db.get((error, connection) => {
-		if (error) return done(error);
-		let sql = 'SELECT * FROM user WHERE id = ?';
-		connection.query(sql, id, (error, rows, fields) => {
-			if (error) return done(error);
-			return done(null, rows[0]);
-		});
-	});
-}
-
-exports.getByLogin = (login, done) => {
-	db.get((error, connection) => {
-		if (error) return done(error);
-		let sql = 'SELECT * FROM user WHERE login = ?';
-		connection.query(sql, login, (error, rows, fields) => {
-			if (error) return done(error);
-			return done(null, rows[0]);
-		});
+exports.findOne = (data) => {
+	return new Promise((resolve, reject) => {
+		db.get()
+			.then(connection => {
+				let sql = 'SELECT * FROM user WHERE ?';
+				return connection.query(sql, data);
+			})
+			.then(rows => {
+				resolve(rows[0]);
+			})
+			.catch(reject);
 	});
 }
