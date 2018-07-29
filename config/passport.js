@@ -13,7 +13,7 @@ module.exports = (passport) => {
 				if (!user) {
 					done(null, false, {type: 'danger', message: 'Login or password is incorrect.'});
 				} else if (!user.is_verified) {
-					done(null, false, {type: 'danger', message: 'Your need to confirm your email before logging in. Check your email.'});
+					done(null, false, {type: 'danger', message: 'Your need to verify your email before logging in. Check your email.'});
 				} else {
 					bcrypt.compare(password, user.password)
 						.then(isMatch => {

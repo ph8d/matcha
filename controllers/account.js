@@ -19,7 +19,7 @@ exports.register = (req, res) => {
 		form.password = req.body.password;
 		form.password_confirm = req.body.password_confirm;
 
-		/* Validation works but it looks scary, probably requires some refactoring */
+		/* Validation works but it looks scary, probably requires refactoring */
 
 		validator.registrationValidation(form)
 			.then(validationErrors => {
@@ -37,6 +37,9 @@ exports.register = (req, res) => {
 						})
 						.then(insertedId => {
 							console.log('ID of inserted user: ' + insertedId)
+
+							/* Need to send generate rendom hash and send it to user via email */
+
 							req.flash('success', 'Registration successful! Please, check your email.');
 							res.redirect('/');
 						})
@@ -55,6 +58,31 @@ exports.register = (req, res) => {
 	} else {
 		res.render('register', {form:form});
 	}
+};
+
+exports.verify = (req, res) => {
+	User.findOne({id:req.params.id})
+		.then(user => {
+			console.log(user);
+
+			/* Also need to check if hash is valid */
+
+			if (user && !user.is_verified) {
+				User.update({id:req.params.id}, {is_verified:1})
+					.then(result => {
+						req.flash('success', 'Your email is now verified, you may login in.')
+						res.redirect('/login');
+					})
+					.catch(error => {
+						console.error(error);
+						req.flash('danger', 'Some server side error occured, please try again.')
+						res.redirect('/');
+					})
+			} else {
+				res.redirect('/');
+			}
+		})
+		.catch(console.error);
 };
 
 exports.login = (req, res, next) => {

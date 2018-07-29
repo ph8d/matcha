@@ -25,6 +25,8 @@ router.get('/about', home.about);
 
 router.all('/register', account.register);
 
+router.all('/confirm/:id/:hash', account.verify);
+
 router.get('/login', (req, res) => {
 	if (req.isAuthenticated()) {
 		req.flash('info', 'You are already logged in.');

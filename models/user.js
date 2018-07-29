@@ -39,3 +39,18 @@ exports.findOne = (data) => {
 			.catch(reject);
 	});
 }
+
+exports.update = (dataToFind, dataToUpdate) => {
+	return new Promise((resolve, reject) => {
+		db.get()
+			.then(connection => {
+				let data = [dataToUpdate, dataToFind];
+				let sql = 'UPDATE user SET ? WHERE ?';
+				return connection.query(sql, data);
+			})
+			.then(result => {
+				resolve(result);
+			})
+			.catch(reject);
+	});
+};
