@@ -11,12 +11,6 @@ const MySQLStore = require('express-mysql-session')(session);
 const app = express();
 const config = require('./config/express');
 
-// mailer.extend(app, {
-// 	from: 'no-reply@matcha.com',
-// 	host: 'localhost',
-// 	secureConnection: false,
-// });
-
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -25,17 +19,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 db.connect();
-const sessionStore = new MySQLStore({}, db.getPool());
 
 app.use(session({
 	secret: 'potato cat',
 	resave: false,
 	saveUninitialized: false,
-	store: sessionStore,
+	store: new MySQLStore({}, db.getPool()),
 	cookie: {
 		maxAge: 1000 * 60 * 60 * 24 // 24h
 	}
 }));
+
+mailer.extend(app, require('./config/mailer'));
 
 app.use(require('connect-flash')());
 app.use(function (req, res, next) {

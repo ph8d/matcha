@@ -2,6 +2,7 @@ const User = require('../models/user');
 const passport = require('passport');
 const validator = require('../lib/validator');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 
 exports.register = (req, res) => {
 	let form = {
@@ -33,15 +34,22 @@ exports.register = (req, res) => {
 					bcrypt.hash(form.password, 12)
 						.then(hash => {
 							form.password = hash;
+							form.verification_hash = crypto.randomBytes(20).toString('hex');
 							return User.add(form);
 						})
 						.then(insertedId => {
-							console.log('ID of inserted user: ' + insertedId)
-
-							/* Need to send generate rendom hash and send it to user via email */
-
-							req.flash('success', 'Registration successful! Please, check your email.');
-							res.redirect('/');
+							res.mailer.send('./emails/verification', {
+								to: form.email,
+								subject: 'Matcha | Verification',
+								userId: insertedId,
+								user: form,
+							}, error => {
+								// If error occures on this step of registration i need to do something like deleting user form database
+								// So he can register with his email and username again
+								if (error) console.error(error);
+								req.flash('success', 'Registration successful! Please, check your email.');
+								res.redirect('/');
+							});
 						})
 						.catch(reason => {
 							console.error(error);
@@ -63,11 +71,7 @@ exports.register = (req, res) => {
 exports.verify = (req, res) => {
 	User.findOne({id:req.params.id})
 		.then(user => {
-			console.log(user);
-
-			/* Also need to check if hash is valid */
-
-			if (user && !user.is_verified) {
+			if (user && !user.is_verified && req.params.hash === user.verification_hash) {
 				User.update({id:req.params.id}, {is_verified:1})
 					.then(result => {
 						req.flash('success', 'Your email is now verified, you may login in.')

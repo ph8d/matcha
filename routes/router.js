@@ -10,22 +10,23 @@ function requiresLogin(req, res, next) {
 		return next();
 	} else {
 		req.flash('danger', 'You must log in to access that page!');
-		return res.redirect('/login');
+		return res.status(401).redirect('/login');
 	}
 };
 
 router.all('*', (req, res, next) => {
+	// Creating a local variable that contains true if user is authenticated, otherwise it is false
 	res.locals.isAuthenticated = (!!req.user);
 	next();
 });
 
 router.get('/', home.index);
 
-router.get('/about', home.about);
+router.get('/about', requiresLogin, home.about);
 
 router.all('/register', account.register);
 
-router.all('/confirm/:id/:hash', account.verify);
+router.all('/verify/:id/:hash', account.verify);
 
 router.get('/login', (req, res) => {
 	if (req.isAuthenticated()) {
