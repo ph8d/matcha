@@ -3,8 +3,6 @@ const router = express.Router();
 const home = require('../controllers/home');
 const account = require('../controllers/account');
 
-/* Access Control Middleware */
-
 function requiresLogin(req, res, next) {
 	if (req.isAuthenticated()) {
 		return next();
@@ -26,7 +24,7 @@ router.get('/about', requiresLogin, home.about);
 
 router.all('/register', account.register);
 
-router.all('/verify/:id/:hash', account.verify);
+router.get('/verify/:id/:hash', account.verify);
 
 router.get('/login', (req, res) => {
 	if (req.isAuthenticated()) {
@@ -36,6 +34,10 @@ router.get('/login', (req, res) => {
 		res.render('login');		
 	}
 });
+
+router.all('/reset/:id/:hash', account.reset);
+
+router.all('/recovery', account.recovery);
 
 router.post('/login', account.login);
 

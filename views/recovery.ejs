@@ -12,25 +12,19 @@
 		<% } %>
 
 	</head>
-	<body>
+	<body class="bg-light">
 		<%- include('includes/_navbar.ejs'); -%>
 		<main role="main">
 			<div class="container my-4">
 				<%- messages('includes/_messages', locals) %>
+				<h4 class="mb-3">Recovery</h4>
 				<form method="POST" action="">
-					<fieldset class="form-group">
-						<legend class="border-bottom mb-4">Log in</legend>
-						<div class="form-group">
-							<label for="login" class="form-control-label">Login</label>
-							<input type="text" name="login" id="login" class="form-control" placeholder="Login" minlength="4" required>
-						</div>
-						<div class="form-group">
-							<label for="password" class="form-control-label">Password</label>
-							<input type="password" pattern=".{8,24}" title="Length from 8 to 24 characters" name="password" id="password" class="form-control" placeholder="Password" required>
-							<small><a href="/recovery">Forgot your password?</a></small>
-						</div>
-						<button type="submit" class="btn btn-primary btn-lg btn-block" name="submit" value="OK">Log in</button>
-					</fieldset>
+					<div class="mb-3">
+						<label for="email">Enter your email address and we will send you a link to reset your password.</label>
+						<input type="email" class="form-control" id="email" name="email" placeholder="Enter your email adress" value="<%= email %>" required>
+					</div>
+					<hr class="mb-4">
+					<button class="btn btn-primary btn-lg btn-block" type="submit" name="submit" value="OK">Send password reset email</button>
 				</form>
 			</div>
 		</main>

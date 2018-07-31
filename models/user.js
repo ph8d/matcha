@@ -1,4 +1,5 @@
 const db = require('../services/db');
+const crypto = require('crypto');
 
 exports.logAllUsers = () => {
 	db.get()
@@ -47,6 +48,54 @@ exports.update = (dataToFind, dataToUpdate) => {
 				let data = [dataToUpdate, dataToFind];
 				let sql = 'UPDATE user SET ? WHERE ?';
 				return connection.query(sql, data);
+			})
+			.then(result => {
+				resolve(result);
+			})
+			.catch(reject);
+	});
+};
+
+exports.genRecoveryRequest = userId => {
+	return new Promise((resolve, reject) => {
+		let hash = crypto.randomBytes(20).toString('hex');
+		db.get()
+			.then(connection => {
+				let data = {
+					user_id: userId,
+					hash: hash
+				}
+				let sql = 'INSERT recovery_requests SET ?';
+				return connection.query(sql, data);
+			})
+			.then(result => {
+				resolve(hash);
+			})
+			.catch(reject);
+	});
+};
+
+exports.findRecoveryRequest = (userId, hash) => {
+	return new Promise((resolve, reject) => {
+		db.get()
+			.then(connection => {
+				let data = [userId, hash];
+				let sql = 'SELECT hash FROM recovery_requests WHERE user_id = ? AND hash = ?';
+				return connection.query(sql, data);
+			})
+			.then(rows => {
+				resolve(rows);
+			})
+			.catch(reject);
+	});
+};
+
+exports.delAllRecoveryRequestsByUserId = userId => {
+	return new Promise((resolve, reject) => {
+		db.get()
+			.then(connection => {
+				let sql = 'DELETE FROM recovery_requests WHERE user_id = ?';
+				return connection.query(sql, userId);
 			})
 			.then(result => {
 				resolve(result);

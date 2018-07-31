@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<style>
+			body {
+				font-family: Arial, Helvetica, sans-serif;
+				text-align: center;
+			}
+
+			a {
+				text-decoration: none;
+			}
+
+			button {
+				background-color: black;
+				color: white;
+				font-size: 16px;
+				padding: 20px;
+				border-radius: 4px;
+			}
+
+			button:hover {
+				cursor: pointer;
+				background-color: rgb(35, 35, 35);
+			}
+
+			.btn-container {
+				margin-top: 40px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1 class="jumbotron-heading">Hello <%= user.first_name %>!</h1>
+			<p class="lead text-muted">Your password can be reset by clicking the button below.</p>
+			<a role="button" href="http://localhost:5000/reset/<%= user.id %>/<%= hash %>"><button>Reset password</button></a>
+		</div>
+	</body>
+</html>
