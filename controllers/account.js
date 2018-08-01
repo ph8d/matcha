@@ -16,8 +16,8 @@ exports.register = (req, res) => {
 	};
 
 	if (req.method === 'POST' && req.body.submit === 'OK') {
-		form.login = req.body.login;
-		form.email = req.body.email;
+		form.login = req.body.login; // This needs to be converted to lowercase
+		form.email = req.body.email; // And this too
 		form.first_name = req.body.first_name;
 		form.last_name = req.body.last_name;
 		form.password = req.body.password;
@@ -108,6 +108,7 @@ exports.recovery = (req, res) => {
 		email = req.body.email;
 		if (!validator.isValidEmail(email)) {
 			req.flash('danger', 'Email is invalid.');
+			res.render('recovery', {email:email});
 		} else {
 			User.findOne({email:email})
 				.then(user => {
@@ -115,7 +116,10 @@ exports.recovery = (req, res) => {
 						req.flash('success', 'We have sent instructions on how to reset your password to your email. If letter is not arriving check your spam folder and make sure you entered correct email adress.');
 						res.render('recovery', {email:email});
 					} else {
-						User.genRecoveryRequest(user.id)
+						User.delAllRecoveryRequestsByUserId(user.id)
+							.then(result => {
+								return User.genRecoveryRequest(user.id);
+							})
 							.then(hash => {
 								res.mailer.send('./emails/recovery', {
 									to: user.email,
