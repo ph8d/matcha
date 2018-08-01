@@ -62,8 +62,8 @@ exports.genRecoveryRequest = userId => {
 		db.get()
 			.then(connection => {
 				let data = {
-					user_id: userId,
-					hash: hash
+					id: hash,
+					user_id: userId
 				}
 				let sql = 'INSERT recovery_requests SET ?';
 				return connection.query(sql, data);
@@ -75,16 +75,15 @@ exports.genRecoveryRequest = userId => {
 	});
 };
 
-exports.findRecoveryRequest = (userId, hash) => {
+exports.findRecoveryRequest = hash => {
 	return new Promise((resolve, reject) => {
 		db.get()
 			.then(connection => {
-				let data = [userId, hash];
-				let sql = 'SELECT hash FROM recovery_requests WHERE user_id = ? AND hash = ?';
-				return connection.query(sql, data);
+				let sql = 'SELECT * FROM recovery_requests WHERE id = ?';
+				return connection.query(sql, hash);
 			})
 			.then(rows => {
-				resolve(rows);
+				resolve(rows[0]);
 			})
 			.catch(reject);
 	});

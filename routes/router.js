@@ -24,7 +24,7 @@ router.get('/about', requiresLogin, home.about);
 
 router.all('/register', account.register);
 
-router.get('/verify/:id/:hash', account.verify);
+router.get('/verify/:hash', account.verify);
 
 router.get('/login', (req, res) => {
 	if (req.isAuthenticated()) {
@@ -35,7 +35,7 @@ router.get('/login', (req, res) => {
 	}
 });
 
-router.all('/reset/:id/:hash', account.reset);
+router.all('/reset/:hash', account.reset);
 
 router.all('/recovery', account.recovery);
 
@@ -45,5 +45,7 @@ router.get('/logout', (req, res) => {
 	req.logout();
 	res.redirect('/');
 });
+
+router.get('/profile', requiresLogin, home.profile);
 
 module.exports = router;

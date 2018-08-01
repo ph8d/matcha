@@ -34,7 +34,7 @@
 		<div class="container">
 			<h1 class="jumbotron-heading">Hello <%= user.first_name %>!</h1>
 			<p class="lead text-muted">Your password can be reset by clicking the button below.</p>
-			<a role="button" href="http://localhost:5000/reset/<%= user.id %>/<%= hash %>"><button>Reset password</button></a>
+			<a role="button" href="http://localhost:5000/reset/<%= hash %>"><button>Reset password</button></a>
 		</div>
 	</body>
 </html>

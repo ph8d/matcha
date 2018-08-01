@@ -44,8 +44,7 @@ exports.register = (req, res) => {
 							res.mailer.send('./emails/verification', {
 								to: form.email,
 								subject: 'Matcha | Verification',
-								userId: insertedId,
-								user: form,
+								user: form
 							}, error => {
 
 								// If error occures on this step of registration i need to do something like deleting user form database
@@ -74,10 +73,10 @@ exports.register = (req, res) => {
 };
 
 exports.verify = (req, res) => {
-	User.findOne({id:req.params.id})
+	User.findOne({verification_hash:req.params.hash})
 		.then(user => {
-			if (user && !user.is_verified && req.params.hash === user.verification_hash) {
-				User.update({id:req.params.id}, {is_verified:1})
+			if (user && !user.is_verified) {
+				User.update({id:user.id}, {is_verified:1})
 					.then(result => {
 						req.flash('success', 'Your email is now verified, you may login in.')
 						res.redirect('/login');
@@ -121,8 +120,8 @@ exports.recovery = (req, res) => {
 								res.mailer.send('./emails/recovery', {
 									to: user.email,
 									subject: 'Matcha | Password recovery',
-									hash: hash,
 									user: user,
+									hash: hash
 								}, error => {
 									if (error) {
 										throw error;
@@ -151,28 +150,29 @@ exports.recovery = (req, res) => {
 };
 
 exports.reset = (req, res) => {
-	let userId = req.params.id;
 	let receivedHash = req.params.hash;
-
-	User.findRecoveryRequest(userId, receivedHash)
-		.then(rows => {
-			if (rows.length === 0) {
+	User.findRecoveryRequest(receivedHash)
+		.then(recoveryRequest => {
+			if (!recoveryRequest) {
 				res.redirect('/');
 			} else {
 				if (req.method === 'POST' && req.body.submit === 'OK') {
 					let password = req.body.password;
 					let password_confirm = req.body.password_confirm;
 
-					if (!validator.isValidPassword(password) || password !== password_confirm) {
+					if (!validator.isValidPassword(password)) {
 						req.flash('danger', 'Password should be 8-24 symbols long, must contain at least one uppercase letter and a number.');
+						res.render('reset');
+					} else if (password !== password_confirm) {
+						req.flash('danger', 'Passwords does not match.');
 						res.render('reset');
 					} else {
 						bcrypt.hash(password, 12)
 							.then(hash => {
-								return User.update({id:userId}, {password:hash});
+								return User.update({id:recoveryRequest.user_id}, {password:hash});
 							})
 							.then(responce => {
-								return User.delAllRecoveryRequestsByUserId(userId);
+								return User.delAllRecoveryRequestsByUserId(recoveryRequest.user_id);
 							})
 							.then(result => {
 								req.flash('success', 'Your password was successfuly changed, you may log in now.');

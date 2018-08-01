@@ -19,7 +19,7 @@
 				<%- messages('includes/_messages', locals) %>
 				<form method="POST" action="">
 					<fieldset class="form-group">
-						<legend class="border-bottom mb-4">Log in</legend>
+						<legend class="mb-4">Log in</legend>
 						<div class="form-group">
 							<label for="login" class="form-control-label">Login</label>
 							<input type="text" name="login" id="login" class="form-control" placeholder="Login" minlength="4" required>
@@ -27,7 +27,7 @@
 						<div class="form-group">
 							<label for="password" class="form-control-label">Password</label>
 							<input type="password" pattern=".{8,24}" title="Length from 8 to 24 characters" name="password" id="password" class="form-control" placeholder="Password" required>
-							<small><a href="/recovery">Forgot your password?</a></small>
+							<small><a href="/recovery" class="text-primary">Forgot your password?</a></small>
 						</div>
 						<button type="submit" class="btn btn-primary btn-lg btn-block" name="submit" value="OK">Log in</button>
 					</fieldset>
