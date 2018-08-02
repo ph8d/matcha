@@ -8,10 +8,16 @@ exports.about = (req, res) => {
 	res.render('about');
 };
 
-exports.profile = (req, res) => {
+exports.profile = (req, res, next) => {
 	let user = req.user;
 	delete user.password;
 	delete user.verification_hash;
 	delete user.is_verified;
-	res.send(user);
+
+	User.findAllInterestsByUserId(user.id)
+		.then(interests => {
+			console.log(interests);
+			res.render('profile', {user:user, interests:interests});
+		})
+		.catch(console.error);
 };

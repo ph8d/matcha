@@ -27,7 +27,7 @@ exports.add = (user) => {
 	});
 };
 
-exports.findOne = (data) => {
+exports.findOne = data => {
 	return new Promise((resolve, reject) => {
 		db.get()
 			.then(connection => {
@@ -39,7 +39,7 @@ exports.findOne = (data) => {
 			})
 			.catch(reject);
 	});
-}
+};
 
 exports.update = (dataToFind, dataToUpdate) => {
 	return new Promise((resolve, reject) => {

@@ -4,17 +4,41 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
-		{% if title %}
-			<title>Matcha - {{ title }}</title>
-		{% else %}
+
+		<% if (typeof title == 'undefined') { %>
 			<title>Matcha</title>
-		{% endif %}
+		<% } else { %>
+			<title>Matcha - <%= title %></title>
+		<% } %>
+
 	</head>
 	<body>
-		{% include 'includes/_navbar.html' %}
+		<%- include('includes/_navbar.ejs'); -%>
 		<main role="main">
-			{% include 'includes/_messages.html' %}
-			{% block content %} {% endblock %}
+			<div class="container my-4">
+				<%- messages('includes/_messages', locals) %>
+				<div class="container">
+					<% interests.forEach(interest => { %>
+						<span class="badge badge-primary"><%=interest.value%></span>
+					<% }) %>
+				</div>
+				<form method="POST" action="">
+					<div class="form-row">
+						<div class="col-auto">
+							<label class="sr-only" for="inlineFormInputGroup">Interest</label>
+							<div class="input-group mb-2">
+								<div class="input-group-prepend">
+									<div class="input-group-text">+</div>
+								</div>
+								<input type="text" class="form-control" id="inlineFormInputGroup" placeholder="Interest" name="interest">
+							</div>
+						</div>
+						<div class="col-auto">
+							<button type="submit" class="btn btn-primary mb-2">Add</button>
+						</div>
+					</div>
+				</form>
+			</div>
 		</main>
 		<hr class="m-4">
 		<footer class="container"><p class="text-muted">© rtarasen 2018</p></footer>

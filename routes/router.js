@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const home = require('../controllers/home');
 const account = require('../controllers/account');
+const interest = require('../controllers/interest');
 
 function requiresLogin(req, res, next) {
 	if (req.isAuthenticated()) {
@@ -13,14 +14,14 @@ function requiresLogin(req, res, next) {
 };
 
 router.all('*', (req, res, next) => {
-	// Creating a local variable that contains true if user is authenticated, otherwise it is false
+	// Creating a variable that contains true if user is authenticated, otherwise it is false
 	res.locals.isAuthenticated = (!!req.user);
 	next();
 });
 
 router.get('/', home.index);
 
-router.get('/about', requiresLogin, home.about);
+router.get('/about', home.about);
 
 router.all('/register', account.register);
 
@@ -46,6 +47,9 @@ router.get('/logout', (req, res) => {
 	res.redirect('/');
 });
 
-router.get('/profile', requiresLogin, home.profile);
+router.all('/profile', requiresLogin, home.profile);
+
+router.post('/interest/add', requiresLogin, interest.add);
+router.post('/interest/delete', requiresLogin, interest.delete);
 
 module.exports = router;
