@@ -32,7 +32,7 @@
 
 			function ipLookUp () {
 				var xhr = new XMLHttpRequest();
-				xhr.open('GET', 'http://ip-api.com/json');
+				xhr.open('GET', 'http://maps.googleapis.com/maps/api/geocode/json?latlng=50.464208899999996,30.466489&sensor=false');
 				xhr.onload = function() {
 					if (xhr.status === 200) {
 						console.log(JSON.parse(xhr.responseText));
@@ -43,6 +43,19 @@
 				};
 				xhr.send();
 			}
+
+			// if ("geolocation" in navigator) {
+			// 	navigator.geolocation.getCurrentPosition(function (position) {
+			// 		console.log(position);
+			// 		ipLookUp();
+			// 	},
+			// 	function(error) {
+			// 		console.error('An error has occured while retrievinglocation', error);
+			// 	},  {maximumAge:600000});
+			// } else {
+			// 	console.log('geolocation is not enabled on this browser');
+			// 	ipLookUp();
+			// }
 		</script>
 	</body>
 </html>

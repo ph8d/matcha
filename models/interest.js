@@ -1,6 +1,6 @@
 const db = require('../services/db');
 
-exports.find = data => {
+exports.findAll = data => {
 	return new Promise((resolve, reject) => {
 		db.get()
 			.then(connection => {
@@ -28,6 +28,20 @@ exports.add = interest => {
 	});
 };
 
-exports.remove = someDataToFindRightInterest => {
-	/* Remove the interest */
+exports.delete = interest => {
+	return new Promise((resolve, reject) => {
+		db.get()
+			.then(connection => {
+
+				// This query removes all rows with same user_id & value
+				// because there is no unique index in the table
+				
+				let sql = 'DELETE FROM interests WHERE user_id = ? AND value = ?';
+				return connection.query(sql, [interest.user_id, interest.value]);
+			})
+			.then(result => {
+				resolve(result);
+			})
+			.catch(reject);
+	});
 };

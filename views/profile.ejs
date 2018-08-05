@@ -4,6 +4,7 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/profile.css">
 
 		<% if (typeof title == 'undefined') { %>
 			<title>Matcha</title>
@@ -12,32 +13,63 @@
 		<% } %>
 
 	</head>
-	<body>
+	<body class="bg-light">
 		<%- include('includes/_navbar.ejs'); -%>
 		<main role="main">
 			<div class="container my-4">
 				<%- messages('includes/_messages', locals) %>
-				<div class="container">
-					<% interests.forEach(interest => { %>
-						<span class="badge badge-primary"><%=interest.value%></span>
-					<% }) %>
-				</div>
-				<form method="POST" action="">
-					<div class="form-row">
-						<div class="col-auto">
-							<label class="sr-only" for="inlineFormInputGroup">Interest</label>
-							<div class="input-group mb-2">
-								<div class="input-group-prepend">
-									<div class="input-group-text">+</div>
+				<h4 class="mb-3">Interests:</h4>
+				<div class="row">
+					<form id="interest-form" method="POST">
+						<div class="form-row">
+							<div class="col-auto">
+								<label class="sr-only" for="inlineFormInputGroup">Interest</label>
+								<div class="input-group mb-2">
+									<div class="input-group-prepend">
+										<div class="input-group-text">+</div>
+									</div>
+									<input type="text" class="form-control" placeholder="Interest" name="interest">
 								</div>
-								<input type="text" class="form-control" id="inlineFormInputGroup" placeholder="Interest" name="interest">
+							</div>
+							<div class="col-auto">
+								<button id="addInterest" type="submit" class="btn btn-primary mb-2">Add</button>
 							</div>
 						</div>
-						<div class="col-auto">
-							<button type="submit" class="btn btn-primary mb-2">Add</button>
+					</form>
+				</div>
+				<div class="interests-container row">
+					<% interests.forEach(interest => { %>
+						<span class="badge badge-primary m-1">
+							<span class="interest-value"><%=interest.value%></span>
+							<span id="remove-interest"> ×</span>
+						</span>
+					<% }) %>
+				</div>
+				<h4 class="my-3">Pictures:</h4>
+				<div class="container">
+					<div class="row">
+						<% pictures.forEach(picture => { %>
+							<div class="col-md-4">
+								<img class="img-thumbnail" src="<%=picture.src%>" alt="E">
+							</div>
+						<% }) %>
+					</div>
+				</div>
+				<form id="upload-form" class="row my-4" method="POST">
+					<div class="form-row">
+						<div class="col">
+							<div class="custom-file">
+								<input type="file" class="custom-file-input" name="image" multiple>
+								<label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
+							</div>
+						</div>
+						<div class="col">
+							<button id="upload" type="submit" class="btn btn-primary">upload</button>
 						</div>
 					</div>
 				</form>
+				<h4 class="mb-3">Location:</h4>
+				<div id="map"></div>
 			</div>
 		</main>
 		<hr class="m-4">
@@ -45,5 +77,7 @@
 		<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+		<script type="text/javascript" src="js/profile.js"></script>
+		<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBj7XDClRGcxA9xTV3KPIwyijuHODynh4w&amp&callback=initMap"></script>
 	</body>
 </html>
