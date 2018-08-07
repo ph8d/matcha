@@ -30,24 +30,33 @@
 
 			/* Script for looking up user geolocation using their ip adress */
 
-			function ipLookUp () {
-				var xhr = new XMLHttpRequest();
-				xhr.open('GET', 'http://maps.googleapis.com/maps/api/geocode/json?latlng=50.464208899999996,30.466489&sensor=false');
-				xhr.onload = function() {
-					if (xhr.status === 200) {
-						console.log(JSON.parse(xhr.responseText));
-					}
-					else {
-						alert('Request failed.  Returned status of ' + xhr.status);
-					}
-				};
-				xhr.send();
-			}
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', 'http://ip-api.com/json');
+			xhr.addEventListener("load", function(event) {
+				let userPosition = JSON.parse(xhr.responseText);
+				xhr.open('POST', '/profile/create');
+				xhr.send(userPosition);
+			});
+			
+			xhr.send();
+
+			// function ipLookUp () {
+			// 	var xhr = new XMLHttpRequest();
+			// 	xhr.open('GET', 'http://ip-api.com/json');
+			// 	xhr.onload = function() {
+			// 		if (xhr.status === 200) {
+			// 			console.log(JSON.parse(xhr.responseText));
+			// 		}
+			// 		else {
+			// 			alert('Request failed.  Returned status of ' + xhr.status);
+			// 		}
+			// 	};
+			// 	xhr.send();
+			// }
 
 			// if ("geolocation" in navigator) {
 			// 	navigator.geolocation.getCurrentPosition(function (position) {
-			// 		console.log(position);
-			// 		ipLookUp();
+			// 		console.log(position); city: "Kiev", country: "Ukraine",
 			// 	},
 			// 	function(error) {
 			// 		console.error('An error has occured while retrievinglocation', error);

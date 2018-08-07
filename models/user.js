@@ -41,6 +41,20 @@ exports.findOne = data => {
 	});
 };
 
+exports.getProfileByUserId = userId => {
+	return new Promise((resolve, reject) => {
+		db.get()
+			.then(connection => {
+				let sql = 'SELECT * FROM profile WHERE ?';
+				return connection.query(sql, userId);
+			})
+			.then(rows => {
+				resolve(rows[0]);
+			})
+			.catch(reject);
+	});
+};
+
 exports.update = (dataToFind, dataToUpdate) => {
 	return new Promise((resolve, reject) => {
 		db.get()

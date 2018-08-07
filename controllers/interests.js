@@ -1,12 +1,19 @@
-const Interest = require('../models/interest');
+const express = require('express');
+const router = express.Router();
+const multer = require('multer');
+const upload = multer(require('../config/multer')); // Error handling https://github.com/expressjs/multer#error-handling
+const requiresLogin = require('../lib/requresLogin');
+const Interests = require('../models/interests');
 
-exports.add = (req, res) => {
+router.use('*', requiresLogin);
+
+router.post('/html', upload.none(), (req, res) => {
 	if (req.body.interest) {
 		let newInterest = {
 			user_id: req.user.id,
 			value: req.body.interest
 		}
-		Interest.add(newInterest)
+		Interests.add(newInterest)
 			.then(insertId => {
 				res.send(
 					`<span class="badge badge-primary m-1">
@@ -22,15 +29,15 @@ exports.add = (req, res) => {
 	} else {
 		res.status(400).end();
 	}
-};
+});
 
-exports.delete = (req, res) => {
+router.delete('/', (req, res) => {
 	if (req.body.interest) {
 		let interest = {
 			user_id: req.user.id,
 			value: req.body.interest
 		}
-		Interest.delete(interest)
+		Interests.delete(interest)
 			.then(result => {
 				res.status(200).end();
 			})
@@ -41,10 +48,10 @@ exports.delete = (req, res) => {
 	} else {
 		res.status(400).end();
 	}
-};
+});
 
-exports.get = (req, res) => {
-	Interest.findAll({user_id:req.user.id})
+router.get('/json', (req, res) => {
+	Interests.findAll({user_id:req.user.id})
 		.then(interests => {
 			res.json({interests:interests});
 		})
@@ -52,4 +59,17 @@ exports.get = (req, res) => {
 			console.error(error);
 			res.status(500).end();
 		});
-};
+});
+
+router.get('/:userId', (req, res) => {
+	Interests.findAll({user_id:req.user.userId})
+		.then(interests => {
+			res.json({interests:interests});
+		})
+		.catch(error => {
+			console.error(error);
+			res.status(500).end();
+		});
+});
+
+module.exports = router;

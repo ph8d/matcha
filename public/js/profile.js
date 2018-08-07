@@ -47,32 +47,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
 			btnAdd.removeAttribute('disabled');
 		});
 	
-		XHR.open('POST', '/interest/get');
+		XHR.open('GET', '/interests/json');
 		XHR.send();
 		btnAdd.setAttribute('disabled', '');
 	}
 
 	getUserInterests();
-
-	function sendFormData(form, method, url) {
-		return new Promise((resolve, reject) => {
-			var XHR = new XMLHttpRequest();
-			var formData = new FormData(form);
-
-			XHR.addEventListener("load", function(event) {
-				resolve({
-					text: event.target.responseText,
-					status: event.target.status
-				});
-			});
-			XHR.addEventListener("error", function(event) {
-				reject(new Error(`Somthing went wrong with XHR request to ${url}`));
-			});
-		
-			XHR.open(method, url);
-			XHR.send(formData);
-		});
-	}
 
 	document.querySelector('#interest-form').addEventListener('submit', function(event) {
 		event.preventDefault();
@@ -86,10 +66,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		btnAdd.setAttribute('disabled', '');
 		let interestsForm = document.querySelector('#interest-form');
 
-		sendFormData(interestsForm, 'POST', '/interest/add')
+		sendFormData(interestsForm, 'POST', '/interests/html')
 			.then(function(response) {
 				userInterests.push(inputField.value);
-				document.querySelector(".interests-container").insertAdjacentHTML('beforeend', response.text);
+				document.querySelector(".interests-container").insertAdjacentHTML('beforeend', response.body);
 				inputField.value = '';
 				btnAdd.removeAttribute('disabled');
 			})
@@ -103,8 +83,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		event.preventDefault();
 
 		let uploadForm = document.querySelector('#upload-form');
+		let file = document.querySelector('#upload-picture').value
 
-		sendFormData(uploadForm, 'POST', '/picture/add')
+		if (!file) return;
+
+		sendFormData(uploadForm, 'POST', '/picture')
 			.then(function(response) {
 
 			})
@@ -133,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 			console.log('Oops! Something went wrong.');
 		});
 
-		XHR.open('POST', '/interest/delete');
+		XHR.open('DELETE', '/interests');
 		XHR.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 		XHR.send('interest=' + interest);
 

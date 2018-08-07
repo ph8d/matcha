@@ -1,35 +1,12 @@
-const User = require('../models/user');
-const Interest = require('../models/interest');
+const express = require('express');
+const router = express.Router();
 
-exports.index = (req, res) => {
+router.get('/', (req, res) => {
 	res.render('home');
-};
+});
 
-exports.about = (req, res) => {
+router.get('/about', (req, res) => {
 	res.render('about');
-};
+});
 
-exports.profile = (req, res) => {
-	let user = req.user;
-	delete user.password;
-	delete user.verification_hash;
-	delete user.is_verified;
-
-	let interests = [];
-	let pictures = [];
-
-	Interest.findAll({user_id:user.id})
-		.then(result => {
-			interests = result;
-			return User.getAllPicturesByUserId(user.id);
-		})
-		.then(result => {
-			pictures = result;
-			res.render('profile',{
-				user:user,
-				interests:interests,
-				pictures:pictures
-			});
-		})
-		.catch(console.error);
-};
+module.exports = router;
