@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 			btnAdd.removeAttribute('disabled');
 		});
 	
-		XHR.open('GET', '/interests/json');
+		XHR.open('GET', '/interests/');
 		XHR.send();
 		btnAdd.setAttribute('disabled', '');
 	}

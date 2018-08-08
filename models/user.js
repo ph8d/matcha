@@ -1,7 +1,7 @@
 const db = require('../services/db');
 const crypto = require('crypto');
 
-exports.logAllUsers = () => {
+exports.logAll = () => {
 	db.get()
 		.then(connection => {
 			let sql = 'SELECT * FROM user';
@@ -13,6 +13,20 @@ exports.logAllUsers = () => {
 		.catch(console.error);
 };
 
+exports.getAll = () => {
+	return new Promise((resolve, reject) => {
+		db.get()
+			.then(connection => {
+				let sql = 'SELECT * FROM user';
+				return connection.query(sql);
+			})
+			.then(rows => {
+				resolve(rows);
+			})
+			.catch(reject);
+	});
+};
+
 exports.add = (user) => {
 	return new Promise((resolve, reject) => {
 		db.get()
@@ -21,7 +35,7 @@ exports.add = (user) => {
 				return connection.query(sql, user);
 			})
 			.then(result => {
-				resolve(result.insertId);
+				resolve(result);
 			})
 			.catch(reject);
 	});
@@ -33,20 +47,6 @@ exports.findOne = data => {
 			.then(connection => {
 				let sql = 'SELECT * FROM user WHERE ?';
 				return connection.query(sql, data);
-			})
-			.then(rows => {
-				resolve(rows[0]);
-			})
-			.catch(reject);
-	});
-};
-
-exports.getProfileByUserId = userId => {
-	return new Promise((resolve, reject) => {
-		db.get()
-			.then(connection => {
-				let sql = 'SELECT * FROM profile WHERE ?';
-				return connection.query(sql, userId);
 			})
 			.then(rows => {
 				resolve(rows[0]);
@@ -112,34 +112,6 @@ exports.delAllRecoveryRequestsByUserId = userId => {
 			})
 			.then(result => {
 				resolve(result);
-			})
-			.catch(reject);
-	});
-};
-
-exports.getAllPicturesByUserId = userId => {
-	return new Promise((resolve, reject) => {
-		db.get()
-			.then(connection => {
-				let sql = 'SELECT * FROM pictures WHERE user_id = ?';
-				return connection.query(sql, userId);
-			})
-			.then(rows => {
-				resolve(rows);
-			})
-			.catch(reject);
-	});
-};
-
-exports.addPicture = picture => {
-	return new Promise((resolve, reject) => {
-		db.get()
-			.then(connection => {
-				let sql = 'INSERT INTO pictures SET ?';
-				return connection.query(sql, picture);
-			})
-			.then(result => {
-				resolve(result.insertId);
 			})
 			.catch(reject);
 	});

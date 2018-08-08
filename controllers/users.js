@@ -9,7 +9,17 @@ const upload = multer(require('../config/multer'));
 const requiresLogin = require('../lib/requresLogin');
 const User = require('../models/user');
 const Interests = require('../models/interests');
+const Picture = require('../models/picture');
 
+
+router.get('/', (req, res) => {
+	User.getAll()
+		.then(users => res.json(users))
+		.catch(error => {
+			console.error(error);
+			res.status(500).end();
+	});
+})
 
 router.get('/register', (req, res) => {
 	res.render('register');
@@ -216,7 +226,7 @@ router.get('/profile', (req, res) => {
 	Interests.findAll({user_id:user.id})
 		.then(result => {
 			interests = result;
-			return User.getAllPicturesByUserId(user.id);
+			return Picture.findAllByUserId(user.id);
 		})
 		.then(result => {
 			pictures = result;

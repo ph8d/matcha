@@ -50,7 +50,7 @@ router.delete('/', (req, res) => {
 	}
 });
 
-router.get('/json', (req, res) => {
+router.get('/', (req, res) => {
 	Interests.findAll({user_id:req.user.id})
 		.then(interests => {
 			res.json({interests:interests});

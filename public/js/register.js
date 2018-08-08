@@ -15,13 +15,15 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	
 				if (response.status === 200) {
 					window.location.replace('/');
-					// XHRSend('http://ip-api.com/json', 'GET')
-					// 	.then(response => {
-					// 		window.location.replace('/');
-					// 	})
-					// 	.catch(error => {
-					// 		console.log(error);
-					// 	});
+					XHRSend('http://ip-api.com/json', 'GET')
+						.then(response => {
+							let parsedBody = JSON.parse(response.body);
+							return XHRSend('/profile', 'POST')
+							window.location.replace('/');
+						})
+						.catch(error => {
+							console.log(error);
+						});
 				} else {
 					let invalidFields = JSON.parse(response.body);
 					for (var field in invalidFields) {
