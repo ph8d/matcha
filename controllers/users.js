@@ -25,7 +25,8 @@ router.get('/register', (req, res) => {
 	res.render('register');
 });
 
-router.post('/register', upload.none(), (req, res) => {
+router.post('/', upload.none(), (req, res) => {
+	console.log('REGISTER ROUTE!');
 	let form = {
 		login: req.body.login, // This needs to be converted to lowercase
 		email: req.body.email, // And this too
