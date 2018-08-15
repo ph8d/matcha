@@ -9,7 +9,7 @@ const MySQLStore = require('express-mysql-session')(session);
 const home = require('./controllers/home');
 const users = require('./controllers/users');
 const interests = require('./controllers/interests');
-const picture = require('./controllers/picture');
+const pictures = require('./controllers/pictures');
 
 const app = express();
 const config = require('./config/express');
@@ -48,16 +48,10 @@ require('./config/passport')(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('*', (req, res, next) => {
-	// Creating a variable that contains true if user is authenticated, otherwise it is false
-	res.locals.isAuthenticated = (!!req.user);
-	next();
-});
-
 app.use('/', home);
 app.use('/users', users);
 app.use('/interests', interests);
-app.use('/picture', picture);
+app.use('/pictures', pictures);
 
 app.listen(config.port, () => {
 	console.log('Server started at port ' + config.port);

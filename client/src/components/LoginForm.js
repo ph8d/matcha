@@ -4,7 +4,7 @@ import BaseInputField from './BaseInputField';
 import BootstrapAlert from './BootstrapAlert';
 import axios from 'axios';
 
-class RegistrationForm extends React.Component {
+class LoginForm extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -29,21 +29,13 @@ class RegistrationForm extends React.Component {
 		let formData = new FormData(this.formElem);
 		let newState = { ...this.state, isValidating: true };
 		this.setState(newState);
-		axios.post('/users/', formData)
+		axios.post('/users/login', formData)
 			.then(response => {
 				newState.isValidating = false;
-				Object.keys(newState.errors).forEach(field => {
-					newState.errors[field] = '';
-				})
 				if (response.status === 200) {
 					newState.success = true;
-				} else {
-					console.log('handling errors')
-					let errors = response.data;
-					for (let field in errors) {
-						newState.errors[field] = errors[field];
-					}
 				}
+				console.log(response);
 				this.setState(newState);
 				console.log(this.state);
 			})
@@ -65,31 +57,10 @@ class RegistrationForm extends React.Component {
 		return (
 			<form ref={form => this.formElem = form} onSubmit={this.onSubmit}>
 				<BaseInputField
-					name="first_name"
-					labelText="First Name"
-					type="text"
-					error={this.state.errors.first_name}
-				/>
-
-				<BaseInputField
-					name="last_name"
-					labelText="Last Name"
-					type="text"
-					error={this.state.errors.last_name}
-				/>
-
-				<BaseInputField
 					name="login"
 					labelText="Login"
 					type="text"
 					error={this.state.errors.login}
-				/>
-
-				<BaseInputField
-					name="email"
-					labelText="Email"
-					type="email"
-					error={this.state.errors.email}
 				/>
 
 				<BaseInputField
@@ -98,15 +69,8 @@ class RegistrationForm extends React.Component {
 					type="password"
 					error={this.state.errors.password}
 				/>
-
-				<BaseInputField
-					name="password_confirm"
-					labelText="Confirm password"
-					type="password"
-					error={this.state.errors.password_confirm}
-				/>
 				<hr/>
-				<button disabled={btnStatus} id="submit" className="button is-outlined is-black is-medium is-fullwidth" type="submit" name="submit" value="OK">Register</button>
+				<button disabled={btnStatus} id="submit" className="button is-outlined is-medium is-fullwidth" type="submit" name="submit" value="OK">Login</button>
 			</form>
 		);
 	}
@@ -120,4 +84,4 @@ class RegistrationForm extends React.Component {
 	}
 }
 
-export default RegistrationForm;
+export default LoginForm;

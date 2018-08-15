@@ -1,11 +1,25 @@
 const db = require('../services/db');
 
-exports.findAllByUserId = userId => {
+exports.findOne = data => {
 	return new Promise((resolve, reject) => {
 		db.get()
 			.then(connection => {
-				let sql = 'SELECT * FROM pictures WHERE user_id = ?';
-				return connection.query(sql, userId);
+				let sql = 'SELECT * FROM pictures WHERE ?';
+				return connection.query(sql, data);
+			})
+			.then(rows => {
+				resolve(rows[0]);
+			})
+			.catch(reject);
+	});
+}
+
+exports.findAll = data => {
+	return new Promise((resolve, reject) => {
+		db.get()
+			.then(connection => {
+				let sql = 'SELECT * FROM pictures WHERE ?';
+				return connection.query(sql, data);
 			})
 			.then(rows => {
 				resolve(rows);

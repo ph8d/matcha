@@ -4,7 +4,7 @@ exports.findAll = data => {
 	return new Promise((resolve, reject) => {
 		db.get()
 			.then(connection => {
-				let sql = 'SELECT * FROM interests WHERE ?';
+				let sql = 'SELECT * FROM interests WHERE ?'
 				return connection.query(sql, data);
 			})
 			.then(rows => {
@@ -12,7 +12,21 @@ exports.findAll = data => {
 			})
 			.catch(reject);
 	});
-};
+}
+
+exports.findOne = data => {
+	return new Promise((resolve, reject) => {
+		db.get()
+			.then(connection => {
+				let sql = 'SELECT * FROM interests WHERE ?'
+				return connection.query(sql, data);
+			})
+			.then(rows => {
+				resolve(rows[0]);
+			})
+			.catch(reject);
+	});
+}
 
 exports.add = interest => {
 	return new Promise((resolve, reject) => {
@@ -22,22 +36,18 @@ exports.add = interest => {
 				return connection.query(sql, interest);
 			})
 			.then(result => {
-				resolve(result.insertId);
+				resolve(result);
 			})
 			.catch(reject);
 	});
 };
 
-exports.delete = interest => {
+exports.delete = data => {
 	return new Promise((resolve, reject) => {
 		db.get()
 			.then(connection => {
-
-				// This query removes all rows with same user_id & value
-				// because there is no unique index in the table
-				
-				let sql = 'DELETE FROM interests WHERE user_id = ? AND value = ?';
-				return connection.query(sql, [interest.user_id, interest.value]);
+				let sql = 'DELETE FROM interests WHERE ?';
+				return connection.query(sql, data);
 			})
 			.then(result => {
 				resolve(result);

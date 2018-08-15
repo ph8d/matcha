@@ -1,0 +1,26 @@
+html, body {
+	margin: 0;
+	height: 100%;
+}
+
+.primary-white {
+	background: #f5f3ef
+}
+.primary-gray {
+	background: #464240
+}
+.primary-accent {
+	color: #f5f3ef;
+	background: #e66761;
+}
+
+/* .hero {
+
+	background: linear-gradient(left, rgba(255, 81, 47, 0.85), rgba(221, 36, 118, 0.85)), url('https://images.unsplash.com/photo-1505073033382-af5d8c3cdb7b') no-repeat center;
+	background-size: cover;
+} */
+
+
+/* #e66761 - red */ 
+/* #464240 - gray */ 
+/* #f5f3ef - white */ 

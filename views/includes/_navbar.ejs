@@ -12,13 +12,8 @@
 		</div>
 		<div class="navbar-collapse collapse w-100 order-3 navbarNav">
 			<ul class="navbar-nav ml-auto">
-				<% if (isAuthenticated) { %>
-					<li class="nav-item"><a class="nav-link" href="/users/profile">My Profile</a></li>
-					<li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
-				<% } else { %>
-					<li class="nav-item"><a class="nav-link" href="/users/login">Login</a></li>
-					<li class="nav-item"><a class="nav-link" href="/users/register">Register</a></li>
-				<% } %>
+				<li class="nav-item"><a class="nav-link" href="/users/login">Login</a></li>
+				<li class="nav-item"><a class="nav-link" href="/users/register">Register</a></li>
 			</ul>
 		</div>
 	</div>

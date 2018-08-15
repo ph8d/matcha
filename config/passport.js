@@ -32,7 +32,7 @@ module.exports = (passport) => {
 	passport.serializeUser((user, done) => {
 		done(null, user.id);
 	});
-	  
+
 	passport.deserializeUser(function(id, done) {
 		User.findOne({id:id})
 			.then(user => {

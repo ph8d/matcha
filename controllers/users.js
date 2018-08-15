@@ -5,21 +5,12 @@ const validator = require('../lib/validator');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const multer = require('multer');
+const jwt = require('jsonwebtoken');
 const upload = multer(require('../config/multer'));
-const requiresLogin = require('../lib/requresLogin');
+const requiresAuth = require('../lib/requiresAuth');
 const User = require('../models/user');
 const Interests = require('../models/interests');
 const Picture = require('../models/picture');
-
-
-router.get('/', (req, res) => {
-	User.getAll()
-		.then(users => res.json(users))
-		.catch(error => {
-			console.error(error);
-			res.status(500).end();
-	});
-})
 
 router.get('/register', (req, res) => {
 	res.render('register');
@@ -85,11 +76,34 @@ router.get('/login', (req, res) => {
 });
 
 router.post('/login', (req, res, next) => {
-	passport.authenticate('local', {
-		successRedirect: '/',
-		failureRedirect: '/users/login',
-		failureFlash: true
-	})(req, res, next);
+	User.findOne({ login: req.body.login })
+		.then(user => {
+			if (!user) {
+				return res.sendStatus(401);
+			}
+			bcrypt.compare(req.body.password, user.password)
+				.then(isMatch => {
+					if (!isMatch) {
+						return res.sendStatus(401);
+					}
+					jwt.sign({
+						userId: user.id,
+						login: user.login
+					}, 'SECRET_KEY_THAT_I_NEED_TO_REPLACE_LATER', {
+						expiresIn: '12h'
+					}, (error, token) => {
+						if (error) throw error;
+						res.json({ token });
+					});
+				})
+				.catch(error => {
+					throw error;
+				});
+		})
+		.catch(error => {
+			console.error(error);
+			res.sendStatus(401);
+		});
 });
 
 router.all('/logout', (req, res) => {
@@ -103,7 +117,7 @@ router.get('/verify/:hash', (req, res) => {
 			if (!user || user.is_verified) {
 				return res.redirect('/');
 			}
-			User.update({id:user.id}, {is_verified:1})
+			User.update({id:user.id}, { is_verified: 1 })
 				.then(result => {
 					req.flash('success', 'Your email is now verified, you may login in.')
 					res.redirect('/users/login');
@@ -212,32 +226,60 @@ router.all('/recovery', (req, res) => {
 	}
 });
 
-router.all('*', requiresLogin); // From this point all routes will require authentication
+router.all('*', requiresAuth); // From this point all routes will require authentication
 
-/* this route is not cool */
-router.get('/profile', (req, res) => {
-	let user = req.user;
-	delete user.password;
-	delete user.verification_hash;
-	delete user.is_verified;
+router.get('/', (req, res) => {
+	User.getAll()
+		.then(users => res.json(users))
+		.catch(error => {
+			console.error(error);
+			res.status(500).end();
+	});
+});
 
-	let interests = [];
-	let pictures = [];
-
-	Interests.findAll({user_id:user.id})
-		.then(result => {
-			interests = result;
-			return Picture.findAllByUserId(user.id);
+router.get('/:id/pictures', (req, res) => {
+	Picture.findAll({ user_id: req.params.id })
+		.then(pictures => {
+			if (!pictures) {
+				res.sendStatus(404);
+			} else {
+				res.json(pictures);
+			}
 		})
-		.then(result => {
-			pictures = result;
-			res.render('profile',{
-				user:user,
-				interests:interests,
-				pictures:pictures
-			});
+		.catch(error => {
+			console.error(error);
+			res.sendStatus(500);
 		})
-		.catch(console.error);
+});
+
+router.get('/:id/interests', (req, res) => {
+	Interests.findAll({ user_id: req.params.id })
+		.then(interests => {
+			if (interests.length < 1) {
+				res.sendStatus(404);
+			} else {
+				res.json(interests);				
+			}
+		})
+		.catch(error => {
+			console.error(error);
+			res.sendStatus(500);
+		});
+});
+
+router.get('/:id', (req, res) => {
+	User.findOne({ id: req.params.id })
+		.then(user => {
+			if (!user) {
+				res.sendStatus(404)
+			} else {
+				res.json(user);				
+			}
+		})
+		.catch(error => {
+			console.error(error);
+			res.status(500).end();
+	});
 });
 
 module.exports = router;

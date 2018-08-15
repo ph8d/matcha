@@ -2,12 +2,13 @@ import React from 'react';
 
 class BaseInputField extends React.Component {
 	render() {
-		let validity = this.props.error ? 'is-invalid' : '';
-		let inputClasses = `${validity} form-control`
+		let validity = this.props.error ? 'is-danger' : '';
+		let inputClasses = `${validity} input`
 
 		return (
 			<div className={this.props.className}>
-				<label htmlFor={this.props.name}>{this.props.labelText}</label>
+				<label className="label is-small has-text-grey" htmlFor={this.props.name}>{this.props.labelText}</label>
+				<div className="control"></div>
 				<input
 					id={this.props.name}
 					className={inputClasses}
@@ -16,7 +17,7 @@ class BaseInputField extends React.Component {
 					placeholder={this.props.placeholder}
 					required
 				/>
-				<div className="invalid-feedback">{this.props.error}</div>
+			<div className="help is-danger">{this.props.error}</div>
 			</div>
 		);
 	}

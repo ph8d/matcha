@@ -2,10 +2,24 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const upload = multer(require('../config/multer')); // Error handling https://github.com/expressjs/multer#error-handling
-const requiresLogin = require('../lib/requresLogin');
+const requiresAuth = require('../lib/requiresAuth');
 const Interests = require('../models/interests');
 
-router.use('*', requiresLogin);
+router.use('*', requiresAuth);
+
+router.get('/:id', (req, res) => {
+	Interests.findOne({ id: req.params.id })
+		.then(interest => {
+			if (!interest) {
+				res.sendStatus(404);
+			}
+			res.json(interest);
+		})
+		.catch(error => {
+			console.error(error);
+			res.sendStatus(500);
+		});
+});
 
 router.post('/html', upload.none(), (req, res) => {
 	if (req.body.interest) {
@@ -14,7 +28,7 @@ router.post('/html', upload.none(), (req, res) => {
 			value: req.body.interest
 		}
 		Interests.add(newInterest)
-			.then(insertId => {
+			.then(result => {
 				res.send(
 					`<span class="badge badge-primary m-1">
 						<span class="interest-value">${newInterest.value}</span>
@@ -24,52 +38,42 @@ router.post('/html', upload.none(), (req, res) => {
 			})
 			.catch(error => {
 				console.error(error);
-				res.status(500).end();
+				res.sendStatus(500);
 			});
 	} else {
-		res.status(400).end();
+		res.sendStatus(400);
 	}
 });
 
-router.delete('/', (req, res) => {
+router.post('/json', upload.none(), (req, res) => {
 	if (req.body.interest) {
-		let interest = {
+		let newInterest = {
 			user_id: req.user.id,
 			value: req.body.interest
 		}
-		Interests.delete(interest)
+		Interests.add(newInterest)
 			.then(result => {
-				res.status(200).end();
+				newInterest.id = result.insertId;
+				res.json(newInterest);
 			})
 			.catch(error => {
 				console.error(error);
-				res.status(500).end();
+				res.sendStatus(500);
 			});
 	} else {
-		res.status(400).end();
+		res.sendStatus(400);
 	}
 });
 
-router.get('/', (req, res) => {
-	Interests.findAll({user_id:req.user.id})
-		.then(interests => {
-			res.json({interests:interests});
+router.delete('/:id', (req, res) => {
+	Interests.delete({ id: req.params.id })
+		.then(result => {
+			res.sendStatus(200);
 		})
 		.catch(error => {
 			console.error(error);
-			res.status(500).end();
+			res.sendStatus(500);
 		});
-});
-
-router.get('/:userId', (req, res) => {
-	Interests.findAll({user_id:req.user.userId})
-		.then(interests => {
-			res.json({interests:interests});
-		})
-		.catch(error => {
-			console.error(error);
-			res.status(500).end();
-		});
-});
+})
 
 module.exports = router;

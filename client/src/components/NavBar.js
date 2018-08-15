@@ -1,60 +1,38 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import '../App.css'
 
 class NavBar extends Component {
 	render() {
 		return (
-			<nav className="navbar navbar-expand-lg navbar-light shadow-sm">
+			<nav className="navbar has-shadow" aria-label="main navigation">
 				<div className="container">
-					<a className="navbar-brand" href="/">Matcha</a>
-					<button className="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-						<span className="navbar-toggler-icon"></span>
-					</button>
-					<div className="collapse navbar-collapse navbarNav">
-						<ul className="navbar-nav">
-							<li className="nav-item"><a className="nav-link" href="/">Home</a></li>
-							<li className="nav-item"><a className="nav-link" href="/about">About</a></li>
-						</ul>
+					<div className="navbar-brand">
+						<Link className="navbar-item" to='/'>
+							<strong>MATCHA</strong>
+						</Link>
+						<a role="button" className="navbar-burger" aria-label="menu" aria-expanded="false">
+							<span aria-hidden="true"></span>
+							<span aria-hidden="true"></span>
+							<span aria-hidden="true"></span>
+						</a>
 					</div>
-					<div className="navbar-collapse collapse w-100 order-3 navbarNav">
-						<ul className="navbar-nav ml-auto">
-							<li className="nav-item"> <Link className="nav-link" to={"/users/login"} >Login</Link></li>
-							<li className="nav-item"><Link className="nav-link" to={"/users/register"}>Register</Link></li>
-						</ul>
+
+					<div className="navbar-menu">
+						<div className="navbar-start">
+							<Link className="navbar-item" to="/">Home</Link>
+							<Link className="navbar-item" to="/about">About</Link>
+						</div>
+
+						<div className="navbar-end">
+							<Link className="navbar-item" to="/users/login">Login</Link>
+							<Link className="navbar-item" to="/users/register">Register</Link>
+						</div>
 					</div>
 				</div>
 			</nav>
-		)
+		);
 	}
 }
 
 export default NavBar;
-
-
-// render() {
-// 	<nav className="navbar navbar-expand-lg navbar-light shadow-sm">
-// 		<div className="container">
-// 			<a className="navbar-brand" href="/">Matcha</a>
-// 			<button className="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-// 				<span className="navbar-toggler-icon"></span>
-// 			</button>
-// 			<div className="collapse navbar-collapse navbarNav">
-// 				<ul className="navbar-nav">
-// 					<li className="nav-item"><a className="nav-link" href="/">Home</a></li>
-// 					<li className="nav-item"><a className="nav-link" href="/about">About</a></li>
-// 				</ul>
-// 			</div>
-// 			<div className="navbar-collapse collapse w-100 order-3 navbarNav">
-// 				<ul className="navbar-nav ml-auto">
-// 					<% if (isAuthenticated) { %>
-// 						<li className="nav-item"><a className="nav-link" href="/users/profile">My Profile</a></li>
-// 						<li className="nav-item"><a className="nav-link" href="/users/logout">Logout</a></li>
-// 					<% } else { %>
-// 						<li className="nav-item"><a className="nav-link" href="/users/login">Login</a></li>
-// 						<li className="nav-item"><a className="nav-link" href="/users/register">Register</a></li>
-// 					<% } %>
-// 				</ul>
-// 			</div>
-// 		</div>
-// 	</nav>
-// }
