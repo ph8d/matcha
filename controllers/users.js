@@ -78,7 +78,7 @@ router.get('/login', (req, res) => {
 router.post('/login', (req, res, next) => {
 	User.findOne({ login: req.body.login })
 		.then(user => {
-			if (!user) {
+			if (!user || user.is_verified === 0) {
 				return res.sendStatus(401);
 			}
 			bcrypt.compare(req.body.password, user.password)
@@ -90,7 +90,7 @@ router.post('/login', (req, res, next) => {
 						userId: user.id,
 						login: user.login
 					}, 'SECRET_KEY_THAT_I_NEED_TO_REPLACE_LATER', {
-						expiresIn: '12h'
+						expiresIn: '1h'
 					}, (error, token) => {
 						if (error) throw error;
 						res.json({ token });

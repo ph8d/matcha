@@ -1,7 +1,5 @@
 import React from 'react';
-import { Redirect } from 'react-router-dom';
-import BaseInputField from './BaseInputField';
-import BootstrapAlert from './BootstrapAlert';
+import BaseInputField from '../BaseInputField';
 import axios from 'axios';
 
 class RegistrationForm extends React.Component {
@@ -9,7 +7,6 @@ class RegistrationForm extends React.Component {
 		super(props);
 		this.state = {
 			isValidating: false,
-			success: false,
 			errors: {
 				first_name: '',
 				last_name: '',
@@ -31,32 +28,23 @@ class RegistrationForm extends React.Component {
 		this.setState(newState);
 		axios.post('/users/', formData)
 			.then(response => {
-				newState.isValidating = false;
 				Object.keys(newState.errors).forEach(field => {
 					newState.errors[field] = '';
 				})
 				if (response.status === 200) {
-					newState.success = true;
+					this.props.onSuccess();
 				} else {
 					console.log('handling errors')
 					let errors = response.data;
 					for (let field in errors) {
 						newState.errors[field] = errors[field];
 					}
+					newState.isValidating = false;
+					this.setState(newState);
 				}
-				this.setState(newState);
 				console.log(this.state);
 			})
 			.catch(error => console.error);
-	}
-
-	renderSuccessMessage() {
-		return (
-			<BootstrapAlert
-				heading="Registration successful!"
-				msg="Please, check your email."
-			/>
-		)
 	}
 
 	renderForm() {
@@ -106,15 +94,13 @@ class RegistrationForm extends React.Component {
 					error={this.state.errors.password_confirm}
 				/>
 				<hr/>
-				<button disabled={btnStatus} id="submit" className="button is-outlined is-black is-medium is-fullwidth" type="submit" name="submit" value="OK">Register</button>
+				<button disabled={btnStatus} id="submit" className="button is-outlined is-medium is-fullwidth" type="submit" name="submit" value="OK">Register</button>
 			</form>
 		);
 	}
 
 	render() {
 		return (
-			this.state.success ?
-			this.renderSuccessMessage() :
 			this.renderForm()
 		)
 	}

@@ -1,7 +1,7 @@
-import users from './collections/Users'
+import user from './models/User'
 
 const stores = {
-	users,
+	user,
 };
 
 export default stores;

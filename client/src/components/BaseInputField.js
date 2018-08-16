@@ -15,6 +15,7 @@ class BaseInputField extends React.Component {
 					type={this.props.type}
 					name={this.props.name}
 					placeholder={this.props.placeholder}
+					onChange={this.props.onChange}
 					required
 				/>
 			<div className="help is-danger">{this.props.error}</div>
