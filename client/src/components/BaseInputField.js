@@ -10,6 +10,7 @@ class BaseInputField extends React.Component {
 				<label className="label is-small has-text-grey" htmlFor={this.props.name}>{this.props.labelText}</label>
 				<div className="control"></div>
 				<input
+					value={this.props.value}
 					id={this.props.name}
 					className={inputClasses}
 					type={this.props.type}

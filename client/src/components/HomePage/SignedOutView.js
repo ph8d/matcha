@@ -2,23 +2,19 @@ import React from 'react';
 import RegistrationForm from './RegistrationForm';
 import LoginForm from './LoginForm';
 import Notification from '../Notification'
+import { inject, observer } from 'mobx-react';
 
+
+@inject('AuthStore') @observer
 class SignedOutView extends React.Component {
 	constructor(props) {
 		super(props);
-
 		this.state = {
 			showLoginForm: true,
-			registrationSuccess: false
 		}
 
 		this.switchForm = this.switchForm.bind(this);
-		this.onSuccess = this.onSuccess.bind(this);
-	}
-
-	onSuccess() {
-		console.log('registration success');
-		this.setState({ registrationSuccess: true });
+		this.closeNotification = this.closeNotification.bind(this);
 	}
 
 	switchForm(e) {
@@ -52,11 +48,19 @@ class SignedOutView extends React.Component {
 		);
 	}
 
+	closeNotification() {
+		this.setState({
+			showLoginForm: true,
+		});
+		this.props.AuthStore.setRegistrationSuccess(false);
+	}
+
 	renderSuccessMsg() {
 		return (
 			<Notification
 				heading="Registration successful!"
-				msg="Please, check your email."
+				msg="Please, check your email. We've sent you the link to verify your account."
+				closeNotification={this.closeNotification}
 			/>
 		);
 	}
@@ -72,7 +76,7 @@ class SignedOutView extends React.Component {
 						</div>
 						<div className="column is-4">
 							{
-								this.state.registrationSuccess ?
+								this.props.AuthStore.registrationSuccess ?
 								this.renderSuccessMsg() :
 								this.renderLoginOrRegistrationForm()
 							}

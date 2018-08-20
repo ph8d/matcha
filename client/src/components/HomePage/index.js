@@ -1,13 +1,14 @@
 import React from 'react';
-import { observer, inject } from 'mobx-react';
 import SignedInView from './SignedInView';
 import SignedOutView from './SignedOutView';
+import { observer, inject } from 'mobx-react';
 
-@inject('user') @observer
+
+@inject('UserStore') @observer
 export default class extends React.Component {
 	render() {
 		return (
-			this.props.user.signedIn ?
+			this.props.UserStore.currentUser ?
 			<SignedInView /> :
 			<SignedOutView />
 		);

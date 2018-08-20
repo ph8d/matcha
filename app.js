@@ -1,12 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const session = require('express-session');
-const passport = require('passport');
 const mailer = require('express-mailer')
 const path = require('path');
 const db = require('./services/db');
-const MySQLStore = require('express-mysql-session')(session);
-const home = require('./controllers/home');
+
+
+const user = require('./controllers/user');
 const users = require('./controllers/users');
 const interests = require('./controllers/interests');
 const pictures = require('./controllers/pictures');
@@ -23,16 +22,6 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 db.connect();
 
-app.use(session({
-	secret: 'potato cat',
-	resave: false,
-	saveUninitialized: false,
-	store: new MySQLStore({}, db.getPool()),
-	cookie: {
-		maxAge: 1000 * 60 * 60 * 24 // 24h
-	}
-}));
-
 mailer.extend(app, require('./config/mailer'));
 
 app.use(require('connect-flash')());
@@ -41,14 +30,7 @@ app.use(function (req, res, next) {
 	next();
 });
 
-//Passport config
-require('./config/passport')(passport);
-
-//Passport Middleware
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.use('/', home);
+app.use('/user', user);
 app.use('/users', users);
 app.use('/interests', interests);
 app.use('/pictures', pictures);

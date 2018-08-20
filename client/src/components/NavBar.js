@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../App.css'
+import { inject, observer } from 'mobx-react';
 
+@inject('AuthStore') @observer
 class NavBar extends React.Component {
 	constructor(props) {
 		super(props);
@@ -9,6 +11,12 @@ class NavBar extends React.Component {
 		this.state = {
 			isActive: false
 		}
+
+		this.logout = this.logout.bind(this);
+	}
+
+	logout() {
+		this.props.AuthStore.logout();
 	}
 
 	expandMenu(e) {
@@ -40,7 +48,11 @@ class NavBar extends React.Component {
 						</div>
 
 						<div className="navbar-end">
-							
+							<div className="navbar-item">
+								<p className="control">
+									<button onClick={this.logout} className="button is-white">Logout</button>
+								</p>
+							</div>
 						</div>
 					</div>
 				</div>

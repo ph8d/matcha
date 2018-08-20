@@ -1,108 +1,97 @@
 import React from 'react';
 import BaseInputField from '../BaseInputField';
-import axios from 'axios';
+import { observer, inject } from 'mobx-react';
 
+
+@inject('AuthStore') @observer
 class RegistrationForm extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			isValidating: false,
-			errors: {
-				first_name: '',
-				last_name: '',
-				login: '',
-				email: '',
-				password: '',
-				password_confirm: '',
-			}
-		}
 
 		this.onSubmit = this.onSubmit.bind(this);
+		this.handleInput = this.handleInput.bind(this);
 	}
 
 	onSubmit(e) {
 		e.preventDefault();
-
 		let formData = new FormData(this.formElem);
-		let newState = { ...this.state, isValidating: true };
-		this.setState(newState);
-		axios.post('/users/', formData)
-			.then(response => {
-				Object.keys(newState.errors).forEach(field => {
-					newState.errors[field] = '';
-				})
-				if (response.status === 200) {
-					this.props.onSuccess();
-				} else {
-					console.log('handling errors')
-					let errors = response.data;
-					for (let field in errors) {
-						newState.errors[field] = errors[field];
-					}
-					newState.isValidating = false;
-					this.setState(newState);
-				}
-				console.log(this.state);
-			})
-			.catch(error => console.error);
+		this.props.AuthStore.register(formData);
 	}
 
-	renderForm() {
-		let btnStatus = this.state.isValidating ? 'disabled' : '';
+	handleInput(e) {
+		this.props.AuthStore.setFieldValue(e.target.name, e.target.value);
+	}
+
+	componentWillUnmount() {
+		this.props.AuthStore.clearValues();
+		this.props.AuthStore.clearErrors();
+	}
+
+	render() {
+		const { values, errors, isLoading } = this.props.AuthStore;
+
+		let btnStatus = isLoading ? 'disabled' : '';
+		let btnLoadingClass = isLoading ? 'is-loading' : '';
 
 		return (
 			<form ref={form => this.formElem = form} onSubmit={this.onSubmit}>
 				<BaseInputField
+					value={values.first_name}
 					name="first_name"
 					labelText="First Name"
 					type="text"
-					error={this.state.errors.first_name}
+					error={errors.first_name}
+					onChange={this.handleInput}
 				/>
 
 				<BaseInputField
+					value={values.last_name}
 					name="last_name"
 					labelText="Last Name"
 					type="text"
-					error={this.state.errors.last_name}
+					error={errors.last_name}
+					onChange={this.handleInput}
 				/>
 
 				<BaseInputField
+					value={values.login}
 					name="login"
 					labelText="Login"
 					type="text"
-					error={this.state.errors.login}
+					error={errors.login}
+					onChange={this.handleInput}
 				/>
 
 				<BaseInputField
+					value={values.email}
 					name="email"
 					labelText="Email"
 					type="email"
-					error={this.state.errors.email}
+					error={errors.email}
+					onChange={this.handleInput}
 				/>
 
 				<BaseInputField
+					value={values.password}
 					name="password"
 					labelText="Password"
 					type="password"
-					error={this.state.errors.password}
+					error={errors.password}
+					onChange={this.handleInput}
 				/>
 
 				<BaseInputField
+					value={values.password_confirm}
 					name="password_confirm"
 					labelText="Confirm password"
 					type="password"
-					error={this.state.errors.password_confirm}
+					error={errors.password_confirm}
+					onChange={this.handleInput}
 				/>
 				<hr/>
-				<button disabled={btnStatus} id="submit" className="button is-outlined is-medium is-fullwidth" type="submit" name="submit" value="OK">Register</button>
+				<button disabled={btnStatus} id="submit" className={`button is-outlined is-medium is-fullwidth ${btnLoadingClass}`} type="submit" name="submit" value="OK">Register</button>
 			</form>
 		);
-	}
-
-	render() {
-		return (
-			this.renderForm()
-		)
 	}
 }
 

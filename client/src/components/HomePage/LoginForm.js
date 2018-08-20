@@ -1,48 +1,44 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import BaseInputField from '../BaseInputField';
-import { observer, inject } from 'mobx-react';
+import { inject, observer } from 'mobx-react';
 
-@inject('user') @observer
+@inject('AuthStore') @observer
 class LoginForm extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			login: '',
-			password: '',
-			isLoading: false,
-		}
 
 		this.handleInput = this.handleInput.bind(this);
 		this.onSubmit = this.onSubmit.bind(this);
 	}
 
 	handleInput(e) {
-		this.setState({ [e.target.name]: e.target.value });
+		this.props.AuthStore.setFieldValue(e.target.name, e.target.value);
 	}
 
 	onSubmit(e) {
 		e.preventDefault();
-		this.setState({ isLoading: true });
-		this.props.user.createSession(this.state.login, this.state.password)
-			.then(response => {
-				if (response.status !== 200) {
-					// Need to display error msg
-				}
-				this.setState({ isLoading: false });
-			});
+		this.props.AuthStore.login();
 	}
 
-	renderForm() {
-		let btnStatus = this.state.isValidating ? 'disabled' : '';
+	componentWillUnmount() {
+		this.props.AuthStore.clearValues();
+		this.props.AuthStore.clearErrors();
+	}
+
+	render() {
+		const { values, isLoading } = this.props.AuthStore;
+
+		let btnStatus = isLoading ? 'disabled' : '';
+		let btnLoadingClass = isLoading ? 'is-loading' : '';
 
 		return (
 			<form ref={form => this.formElem = form} onSubmit={this.onSubmit}>
 				<BaseInputField
-					name="login"
-					labelText="Login"
-					type="text"
-					value={this.state.login}
+					name="email"
+					labelText="Email"
+					type="email"
+					value={values.email}
 					onChange={this.handleInput}
 				/>
 
@@ -50,19 +46,13 @@ class LoginForm extends React.Component {
 					name="password"
 					labelText="Password"
 					type="password"
-					value={this.state.password}
+					value={values.password}
 					onChange={this.handleInput}
 				/>
 				<Link className="is-size-7 has-text-link" to="/users/reset">Forgot your password?</Link>
 				<hr/>
-				<button disabled={btnStatus} id="submit" className="button is-outlined is-medium is-fullwidth" type="submit" name="submit" value="OK">Login</button>
+				<button disabled={btnStatus} id="submit" className={`button is-outlined is-medium is-fullwidth ${btnLoadingClass}`} type="submit" name="submit" value="OK">Login</button>
 			</form>
-		);
-	}
-
-	render() {
-		return (
-			this.renderForm()
 		);
 	}
 }

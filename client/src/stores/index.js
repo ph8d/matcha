@@ -1,7 +1,13 @@
-import user from './models/User'
+import CommonStore from './CommonStore';
+import AuthStore from './AuthStore';
+import ProfileStore from './ProfileStore';
+import UserStore from './UserStore';
 
 const stores = {
-	user,
+	CommonStore,
+	AuthStore,
+	ProfileStore,
+	UserStore,
 };
 
 export default stores;

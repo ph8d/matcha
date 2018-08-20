@@ -8,15 +8,12 @@ const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const upload = multer(require('../config/multer'));
 const requiresAuth = require('../lib/requiresAuth');
+
 const User = require('../models/user');
 const Interests = require('../models/interests');
 const Picture = require('../models/picture');
 
-router.get('/register', (req, res) => {
-	res.render('register');
-});
-
-router.post('/', upload.none(), (req, res) => {
+router.post('/register', upload.none(), (req, res) => {
 	console.log('REGISTER ROUTE!');
 	let form = {
 		login: req.body.login, // This needs to be converted to lowercase
@@ -51,32 +48,23 @@ router.post('/', upload.none(), (req, res) => {
 						// So he can register with his email and username again
 
 						if (error) throw error;
-						req.flash('success', 'Registration successful! Please, check your email.');
-						res.status(200).end();
+						// req.flash('success', 'Registration successful! Please, check your email.');
+						res.sendStatus(200);
 					});
 				})
 				.catch(error => {
 					console.error(error);
-					res.status(500).end();
+					res.sendStatus(500);
 				});
 		})
 		.catch(error => {
 			console.error(error);
-			res.status(500).end();
+			res.sendStatus(500);
 		});
 });
 
-router.get('/login', (req, res) => {
-	if (req.isAuthenticated()) {
-		req.flash('info', 'You are already logged in.');
-		res.redirect('/');
-	} else {
-		res.render('login');
-	}
-});
-
 router.post('/login', (req, res, next) => {
-	User.findOne({ login: req.body.login })
+	User.findOne({ email: req.body.email })
 		.then(user => {
 			if (!user || user.is_verified === 0) {
 				return res.sendStatus(401);
@@ -106,11 +94,6 @@ router.post('/login', (req, res, next) => {
 		});
 });
 
-router.all('/logout', (req, res) => {
-	req.logout();
-	res.redirect('/');
-});
-
 router.get('/verify/:hash', (req, res) => {
 	User.findOne({verification_hash:req.params.hash})
 		.then(user => {
@@ -119,12 +102,12 @@ router.get('/verify/:hash', (req, res) => {
 			}
 			User.update({id:user.id}, { is_verified: 1 })
 				.then(result => {
-					req.flash('success', 'Your email is now verified, you may login in.')
+					// req.flash('success', 'Your email is now verified, you may login in.')
 					res.redirect('/users/login');
 				})
 				.catch(error => {
 					console.error(error);
-					req.flash('danger', 'Some server side error occured, please try again.')
+					// req.flash('danger', 'Some server side error occured, please try again.')
 					res.redirect('/');
 				})
 		})
@@ -144,11 +127,11 @@ router.all('/reset/:hash', (req, res) => {
 				let password_confirm = req.body.password_confirm;
 
 				if (!validator.isValidPassword(password)) {
-					req.flash('danger', 'Password should be 8-24 symbols long, must contain at least one uppercase letter and a number.');
+					// req.flash('danger', 'Password should be 8-24 symbols long, must contain at least one uppercase letter and a number.');
 					return res.render('reset');
 				}
 				if (password !== password_confirm) {
-					req.flash('danger', 'Passwords does not match.');
+					// req.flash('danger', 'Passwords does not match.');
 					return res.render('reset');
 				}
 				bcrypt.hash(password, 12)
@@ -159,12 +142,12 @@ router.all('/reset/:hash', (req, res) => {
 						return User.delAllRecoveryRequestsByUserId(recoveryRequest.user_id);
 					})
 					.then(result => {
-						req.flash('success', 'Your password was successfuly changed, you may log in now.');
+						// req.flash('success', 'Your password was successfuly changed, you may log in now.');
 						res.redirect('/users/login');
 					})
 					.catch(error => {
 						console.error(error);
-						req.flash('danger', 'Some server side error occured, please try again.');
+						// req.flash('danger', 'Some server side error occured, please try again.');
 						res.render('reset');
 					});
 			} else {
@@ -173,7 +156,7 @@ router.all('/reset/:hash', (req, res) => {
 		})
 		.catch(error => {
 			console.error(error);
-			req.flash('danger', 'Some server side error occured, please try again.');
+			// req.flash('danger', 'Some server side error occured, please try again.');
 			res.render('reset');
 		});
 });
@@ -185,13 +168,13 @@ router.all('/recovery', (req, res) => {
 	if (req.method === 'POST' && req.body.submit === 'OK') {
 		email = req.body.email;
 		if (!validator.isValidEmail(email)) {
-			req.flash('danger', 'Email is invalid.');
+			// req.flash('danger', 'Email is invalid.');
 			return res.render('recovery', {email:email});
 		}
 		User.findOne({email:email})
 			.then(user => {
 				if (!user) {
-					req.flash('success', 'We have sent instructions on how to reset your password to your email. If letter is not arriving check your spam folder and make sure you entered correct email adress.');
+					// req.flash('success', 'We have sent instructions on how to reset your password to your email. If letter is not arriving check your spam folder and make sure you entered correct email adress.');
 					return res.render('recovery', {email:email});
 				}
 				User.delAllRecoveryRequestsByUserId(user.id)
@@ -206,19 +189,19 @@ router.all('/recovery', (req, res) => {
 							hash: hash
 						}, error => {
 							if (error) throw error;
-							req.flash('success', 'We have sent instructions on how to reset your password to your email. If letter is not arriving check your spam folder and make sure you entered correct email adress.');
+							// req.flash('success', 'We have sent instructions on how to reset your password to your email. If letter is not arriving check your spam folder and make sure you entered correct email adress.');
 							res.render('recovery', {email:email});
 						});
 					})
 					.catch(error => {
 						console.error(error);
-						req.flash('danger', 'Some server side error occured, please try again.');
+						// req.flash('danger', 'Some server side error occured, please try again.');
 						res.render('recovery', {email:email});
 					});
 			})
 			.catch(error => {
 				console.error(error);
-				req.flash('danger', 'Some server side error occured, please try again.');
+				// req.flash('danger', 'Some server side error occured, please try again.');
 				res.render('recovery', {email:email});
 			});
 	} else {
@@ -235,6 +218,10 @@ router.get('/', (req, res) => {
 			console.error(error);
 			res.status(500).end();
 	});
+});
+
+router.get('/login', (req, res) => {
+	res.sendStatus(200);
 });
 
 router.get('/:id/pictures', (req, res) => {
@@ -258,7 +245,7 @@ router.get('/:id/interests', (req, res) => {
 			if (interests.length < 1) {
 				res.sendStatus(404);
 			} else {
-				res.json(interests);				
+				res.json(interests);
 			}
 		})
 		.catch(error => {

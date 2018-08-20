@@ -9,7 +9,7 @@ module.exports = {
 		filename: function (req, file, next) {
 			console.log(file);
 			let rand = crypto.randomBytes(20).toString('hex');
-			let extension = file.mimetype.split('/')[1];			
+			let extension = file.mimetype.split('/')[1];
 			next(null, `${rand}-${Date.now()}.${extension}`);
 		}
 	}),
