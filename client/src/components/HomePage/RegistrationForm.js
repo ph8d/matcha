@@ -14,8 +14,7 @@ class RegistrationForm extends React.Component {
 
 	onSubmit(e) {
 		e.preventDefault();
-		let formData = new FormData(this.formElem);
-		this.props.AuthStore.register(formData);
+		this.props.AuthStore.register();
 	}
 
 	handleInput(e) {
@@ -34,7 +33,7 @@ class RegistrationForm extends React.Component {
 		let btnLoadingClass = isLoading ? 'is-loading' : '';
 
 		return (
-			<form ref={form => this.formElem = form} onSubmit={this.onSubmit}>
+			<form onSubmit={this.onSubmit}>
 				<BaseInputField
 					value={values.first_name}
 					name="first_name"
@@ -89,7 +88,7 @@ class RegistrationForm extends React.Component {
 					onChange={this.handleInput}
 				/>
 				<hr/>
-				<button disabled={btnStatus} id="submit" className={`button is-outlined is-medium is-fullwidth ${btnLoadingClass}`} type="submit" name="submit" value="OK">Register</button>
+				<button disabled={btnStatus} id="submit" className={`button is-radiusless is-dark is-medium is-fullwidth ${btnLoadingClass}`} type="submit" name="submit" value="OK">Register</button>
 			</form>
 		);
 	}

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import BaseInputField from '../BaseInputField';
 import { inject, observer } from 'mobx-react';
+
 
 @inject('AuthStore') @observer
 class LoginForm extends React.Component {
@@ -10,6 +10,11 @@ class LoginForm extends React.Component {
 
 		this.handleInput = this.handleInput.bind(this);
 		this.onSubmit = this.onSubmit.bind(this);
+		this.triggerAccountRecovery = this.triggerAccountRecovery.bind(this);
+	}
+
+	triggerAccountRecovery(e) {
+		this.props.AuthStore.accountRecovery()
 	}
 
 	handleInput(e) {
@@ -27,18 +32,19 @@ class LoginForm extends React.Component {
 	}
 
 	render() {
-		const { values, isLoading } = this.props.AuthStore;
+		const { values, errors, isLoading } = this.props.AuthStore;
 
 		let btnStatus = isLoading ? 'disabled' : '';
 		let btnLoadingClass = isLoading ? 'is-loading' : '';
 
 		return (
-			<form ref={form => this.formElem = form} onSubmit={this.onSubmit}>
+			<form onSubmit={this.onSubmit}>
 				<BaseInputField
 					name="email"
 					labelText="Email"
 					type="email"
 					value={values.email}
+					error={errors.email}
 					onChange={this.handleInput}
 				/>
 
@@ -47,11 +53,12 @@ class LoginForm extends React.Component {
 					labelText="Password"
 					type="password"
 					value={values.password}
+					error={errors.password}
 					onChange={this.handleInput}
 				/>
-				<Link className="is-size-7 has-text-link" to="/users/reset">Forgot your password?</Link>
+				<button disabled={btnStatus} onClick={this.triggerAccountRecovery} className="button is-small is-white is-text has-text-dark " type="button">Forgot your password?</button>
 				<hr/>
-				<button disabled={btnStatus} id="submit" className={`button is-outlined is-medium is-fullwidth ${btnLoadingClass}`} type="submit" name="submit" value="OK">Login</button>
+				<button disabled={btnStatus} id="submit" className={`button is-radiusless is-dark is-medium is-fullwidth ${btnLoadingClass}`} type="submit">Login</button>
 			</form>
 		);
 	}

@@ -3,10 +3,10 @@ import React from 'react';
 class BaseInputField extends React.Component {
 	render() {
 		let validity = this.props.error ? 'is-danger' : '';
-		let inputClasses = `${validity} input`
+		let inputClasses = `${validity} input is-radiusless is-shadowless`
 
 		return (
-			<div className={this.props.className}>
+			<div className="field">
 				<label className="label is-small has-text-grey" htmlFor={this.props.name}>{this.props.labelText}</label>
 				<div className="control"></div>
 				<input

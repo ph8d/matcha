@@ -10,6 +10,10 @@ class SignedInView extends React.Component {
 		}
 	}
 
+	componentWillUnmount() {
+		Api.utils.cancelLastRequest();
+	}
+
 	componentWillMount() {
 		Api.request('GET', '/users')
 			.then(response => {
@@ -47,7 +51,7 @@ class SignedInView extends React.Component {
 												<td>{user.email}</td>
 												<td>{user.joined}</td>
 											</tr>
-										)
+										);
 								})}
 						</tbody>
 					</table>

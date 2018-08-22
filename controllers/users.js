@@ -48,8 +48,7 @@ router.post('/register', upload.none(), (req, res) => {
 						// So he can register with his email and username again
 
 						if (error) throw error;
-						// req.flash('success', 'Registration successful! Please, check your email.');
-						res.sendStatus(200);
+						res.json({ message: "Please, check your email. We've sent you the link to verify your account." });
 					});
 				})
 				.catch(error => {
@@ -71,9 +70,7 @@ router.post('/login', (req, res, next) => {
 			}
 			bcrypt.compare(req.body.password, user.password)
 				.then(isMatch => {
-					if (!isMatch) {
-						return res.sendStatus(401);
-					}
+					if (!isMatch) return res.sendStatus(401);
 					jwt.sign({
 						userId: user.id,
 						login: user.login
@@ -94,119 +91,101 @@ router.post('/login', (req, res, next) => {
 		});
 });
 
-router.get('/verify/:hash', (req, res) => {
-	User.findOne({verification_hash:req.params.hash})
+router.post('/verify', (req, res) => {
+	let isHex = new RegExp(/^[0-9a-f]*$/i);
+	if (!isHex.test(req.body.hash)) return res.sendStatus(401);
+	User.findOne({ verification_hash: req.body.hash })
 		.then(user => {
 			if (!user || user.is_verified) {
-				return res.redirect('/');
+				return res.sendStatus(401);
 			}
 			User.update({id:user.id}, { is_verified: 1 })
 				.then(result => {
-					// req.flash('success', 'Your email is now verified, you may login in.')
-					res.redirect('/users/login');
+					res.json({ message: "Your account is now verified, you may log in." });
 				})
 				.catch(error => {
 					console.error(error);
-					// req.flash('danger', 'Some server side error occured, please try again.')
-					res.redirect('/');
+					res.sendStatus(500);
 				})
 		})
 		.catch(console.error);
 });
 
-/* This route can be split up in two smaller ones */
-router.all('/reset/:hash', (req, res) => {
-	let receivedHash = req.params.hash;
+router.get('/reset', (req, res) => {
+
+});
+
+router.post('/reset', (req, res) => {
+	let receivedHash = req.body.hash;
+	let password = req.body.password;
+
+	let isHex = new RegExp(/^[0-9a-f]*$/i);
+
+	if (!isHex.test(receivedHash) || !password) return res.sendStatus(401);
 	User.findRecoveryRequest(receivedHash)
 		.then(recoveryRequest => {
-			if (!recoveryRequest) {
-				return res.redirect('/');
+			if (!recoveryRequest) return res.sendStatus(401);
+			if (!validator.isValidPassword(password)) {
+				return res.status(202).json({ password: 'Password should be 8-24 symbols long, must contain at least one uppercase letter and a number.' });
 			}
-			if (req.method === 'POST' && req.body.submit === 'OK') {
-				let password = req.body.password;
-				let password_confirm = req.body.password_confirm;
+			bcrypt.hash(password, 12)
+				.then(hashedPassword => {
+					return User.update({ id:recoveryRequest.user_id }, { password:hashedPassword });
+				})
+				.then(responce => {
+					return User.delAllRecoveryRequestsByUserId(recoveryRequest.user_id);
+				})
+				.then(result => {
+					res.json({ message: 'Your password was successfuly changed, you may log in now.' });
+				})
+				.catch(error => {
+					console.error(error);
+					res.sendStatus(500);
+				});
+		})
+		.catch(error => {
+			console.error(error);
+			res.sendStatus(500);
+		});
+});
 
-				if (!validator.isValidPassword(password)) {
-					// req.flash('danger', 'Password should be 8-24 symbols long, must contain at least one uppercase letter and a number.');
-					return res.render('reset');
-				}
-				if (password !== password_confirm) {
-					// req.flash('danger', 'Passwords does not match.');
-					return res.render('reset');
-				}
-				bcrypt.hash(password, 12)
-					.then(hash => {
-						return User.update({id:recoveryRequest.user_id}, {password:hash});
-					})
-					.then(responce => {
-						return User.delAllRecoveryRequestsByUserId(recoveryRequest.user_id);
-					})
-					.then(result => {
-						// req.flash('success', 'Your password was successfuly changed, you may log in now.');
-						res.redirect('/users/login');
-					})
-					.catch(error => {
-						console.error(error);
-						// req.flash('danger', 'Some server side error occured, please try again.');
-						res.render('reset');
-					});
-			} else {
-				res.render('reset');
+
+router.post('/recovery', (req, res) => {
+	email = req.body.email;
+	if (!validator.isValidEmail(email)) {
+		return res.status(202).json({ email: 'Email is invalid.' });
+	}
+	User.findOne({ email })
+		.then(user => {
+			if (!user) {
+				return res.json({ message: "We have sent instructions on how to reset your password to your email. If letter is not arriving check your spam folder and make sure you entered correct email adress." });
 			}
+			User.delAllRecoveryRequestsByUserId(user.id)
+				.then(result => {
+					return User.genRecoveryRequest(user.id);
+				})
+				.then(hash => {
+					res.mailer.send('./emails/recovery', {
+						to: user.email,
+						subject: 'Matcha | Password recovery',
+						user: user,
+						hash: hash
+					}, error => {
+						if (error) throw error;
+						return res.json({ message: "We have sent instructions on how to reset your password to your email. If letter is not arriving check your spam folder and make sure you entered correct email adress." });
+					});
+				})
+				.catch(error => {
+					console.error(error);
+					// req.flash('danger', 'Some server side error occured, please try again.');
+					res.sendStatus(500);
+				});
 		})
 		.catch(error => {
 			console.error(error);
 			// req.flash('danger', 'Some server side error occured, please try again.');
-			res.render('reset');
+			res.sendStatus(500);
 		});
-});
-
-/* This route can be split up in two smaller ones */
-router.all('/recovery', (req, res) => {
-	let email = '';
-
-	if (req.method === 'POST' && req.body.submit === 'OK') {
-		email = req.body.email;
-		if (!validator.isValidEmail(email)) {
-			// req.flash('danger', 'Email is invalid.');
-			return res.render('recovery', {email:email});
-		}
-		User.findOne({email:email})
-			.then(user => {
-				if (!user) {
-					// req.flash('success', 'We have sent instructions on how to reset your password to your email. If letter is not arriving check your spam folder and make sure you entered correct email adress.');
-					return res.render('recovery', {email:email});
-				}
-				User.delAllRecoveryRequestsByUserId(user.id)
-					.then(result => {
-						return User.genRecoveryRequest(user.id);
-					})
-					.then(hash => {
-						res.mailer.send('./emails/recovery', {
-							to: user.email,
-							subject: 'Matcha | Password recovery',
-							user: user,
-							hash: hash
-						}, error => {
-							if (error) throw error;
-							// req.flash('success', 'We have sent instructions on how to reset your password to your email. If letter is not arriving check your spam folder and make sure you entered correct email adress.');
-							res.render('recovery', {email:email});
-						});
-					})
-					.catch(error => {
-						console.error(error);
-						// req.flash('danger', 'Some server side error occured, please try again.');
-						res.render('recovery', {email:email});
-					});
-			})
-			.catch(error => {
-				console.error(error);
-				// req.flash('danger', 'Some server side error occured, please try again.');
-				res.render('recovery', {email:email});
-			});
-	} else {
-		return res.render('recovery', {email:email});
-	}
 });
 
 router.all('*', requiresAuth); // From this point all routes will require authentication
@@ -218,10 +197,6 @@ router.get('/', (req, res) => {
 			console.error(error);
 			res.status(500).end();
 	});
-});
-
-router.get('/login', (req, res) => {
-	res.sendStatus(200);
 });
 
 router.get('/:id/pictures', (req, res) => {

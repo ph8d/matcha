@@ -1,9 +1,8 @@
 import React from 'react';
 import RegistrationForm from './RegistrationForm';
 import LoginForm from './LoginForm';
-import Notification from '../Notification'
+import MessageBox from '../MessageBox'
 import { inject, observer } from 'mobx-react';
-
 
 @inject('AuthStore') @observer
 class SignedOutView extends React.Component {
@@ -14,18 +13,39 @@ class SignedOutView extends React.Component {
 		}
 
 		this.switchForm = this.switchForm.bind(this);
-		this.closeNotification = this.closeNotification.bind(this);
+		this.closeMessage = this.closeMessage.bind(this);
+	}
+
+	componentWillUnmount() {
+		this.props.AuthStore.setMessageVisible(false);
+		this.props.AuthStore.clearErrors();
 	}
 
 	switchForm(e) {
-		if (e.target.className === 'button is-active') return;
+		if (!e.target.className.includes('is-outlined')) return;
 		this.setState({ showLoginForm: !this.state.showLoginForm });
+	}
+
+	closeMessage() {
+		this.setState({ showLoginForm: true });
+		this.props.AuthStore.setMessageVisible(false);
+	}
+
+	renderMessageBox() {
+		let { message } = this.props.AuthStore;
+		return (
+			<MessageBox
+				heading={ message.heading }
+				text={ message.text }
+				onButtonClick={ this.closeMessage }
+			/>
+		);
 	}
 
 	renderLoginOrRegistrationForm() {
 		const currentForm = this.state.showLoginForm ? <LoginForm /> : <RegistrationForm onSuccess={this.onSuccess} />;
-		const btnActiveClass = 'button is-active';
-		const btnInactiveClass = 'button';
+		const btnActiveClass = 'button is-dark';
+		const btnInactiveClass = 'button is-outlined is-dark';
 
 		return (
 			<div className="card">
@@ -48,23 +68,6 @@ class SignedOutView extends React.Component {
 		);
 	}
 
-	closeNotification() {
-		this.setState({
-			showLoginForm: true,
-		});
-		this.props.AuthStore.setRegistrationSuccess(false);
-	}
-
-	renderSuccessMsg() {
-		return (
-			<Notification
-				heading="Registration successful!"
-				msg="Please, check your email. We've sent you the link to verify your account."
-				closeNotification={this.closeNotification}
-			/>
-		);
-	}
-
 	render() {
 		return (
 			<section className="hero is-medium is-bold is-white">
@@ -76,8 +79,8 @@ class SignedOutView extends React.Component {
 						</div>
 						<div className="column is-4">
 							{
-								this.props.AuthStore.registrationSuccess ?
-								this.renderSuccessMsg() :
+								this.props.AuthStore.messageVisible ?
+								this.renderMessageBox() :
 								this.renderLoginOrRegistrationForm()
 							}
 						</div>
