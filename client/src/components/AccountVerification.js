@@ -4,17 +4,22 @@ import SpinLoad from './SpinLoad';
 
 @inject('AuthStore') @observer
 class AccountVerification extends React.Component {
+
+	redirectToHomePage() {
+		this.props.history.replace("/");
+	}
+
 	componentDidMount() {
 		let isHex = new RegExp(/^[0-9a-f]*$/i);
 		let hash = this.props.match.params.hash;
 
 		if (!isHex.test(hash)) {
-			return this.setState({ redirect: true });
+			return this.redirectToHomePage();
 		}
 
 		this.props.AuthStore.accountVerification(hash)
 			.then(response => {
-				this.props.history.replace("/");
+				this.redirectToHomePage();
 			});
 	}
 

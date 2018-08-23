@@ -18,7 +18,6 @@ class SignedOutView extends React.Component {
 
 	componentWillUnmount() {
 		this.props.AuthStore.setMessageVisible(false);
-		this.props.AuthStore.clearErrors();
 	}
 
 	switchForm(e) {
