@@ -9,7 +9,8 @@ import './App.css';
 // import ProtectedRoutes from './components/ProtectedRoutes';
 import HomePage from './components/HomePage';
 import NavBar from './components/NavBar';
-import AccountVerification from './components/AccountVerification';
+import MobileBottomNavbar from './components/MobileBottomNavbar';
+import RegistrationPage from './components/RegistrationPage';
 import PasswordResetPage from './components/PasswordResetPage';
 import SpinLoad from './components/SpinLoad';
 
@@ -41,10 +42,11 @@ class App extends React.Component {
 						{/* <NotificationContainer /> */}
 						<Switch>
 							<Route path="/" exact component={HomePage} />
-							<Route path="/verify/:hash" component={AccountVerification} />
+							<Route path="/registration/:hash([0-9a-f]*)" component={RegistrationPage} />
 							<Route path="/reset/:hash" component={PasswordResetPage} />
 							<Redirect to="/" />
 						</Switch>
+						{/* <MobileBottomNavbar /> */}
 					</div>
 				</Router>
 			);

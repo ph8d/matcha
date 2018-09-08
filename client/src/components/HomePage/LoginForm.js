@@ -58,7 +58,9 @@ class LoginForm extends React.Component {
 				/>
 				<button disabled={btnStatus} onClick={this.triggerAccountRecovery} className="button is-small is-white is-text has-text-dark " type="button">Forgot your password?</button>
 				<hr/>
-				<button disabled={btnStatus} id="submit" className={`button is-radiusless is-dark is-medium is-fullwidth ${btnLoadingClass}`} type="submit">Login</button>
+				<button disabled={btnStatus} id="submit" className={`button is-radiusless is-dark is-medium is-fullwidth ${btnLoadingClass}`} type="submit">
+					<span>Login</span>
+				</button>
 			</form>
 		);
 	}

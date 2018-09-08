@@ -1,62 +1,30 @@
 import React from 'react';
-import Api from '../../helpers/api';
+import Tag from '../Tag';
+import { inject, observer } from 'mobx-react';
+import ProfileCard from '../ProfileCard';
+import NavigationBox from '../NavigationBox';
 
+
+@inject('UserStore') @observer
 class SignedInView extends React.Component {
-	constructor(props) {
-		super(props);
-
-		this.state = {
-			users: []
-		}
-	}
-
-	componentWillUnmount() {
-		Api.utils.cancelLastRequest();
-	}
-
-	componentWillMount() {
-		Api.request('GET', '/users')
-			.then(response => {
-				this.setState({ users: response.data });
-			})
-			.catch(error => {
-				// console.error(error);
-			})
-	}
-
 	render() {
+		const { currentUser } = this.props.UserStore;
 		return (
-			<section className="section">
+			<section className="section has-background-light">
 				<div className="container">
-					<table className="table is-bordered is-striped is-narrow is-hoverable">
-						<thead>
-							<tr>
-							<th><abbr title="ID">ID</abbr></th>
-								<th><abbr title="First Name">First Name</abbr></th>
-								<th><abbr title="Last Name">Last Name</abbr></th>
-								<th><abbr title="Login">Login</abbr></th>
-								<th><abbr title="Email">Email</abbr></th>
-								<th><abbr title="Joined">Joined</abbr></th>
-							</tr>
-						</thead>
-						<tbody>
-								{
-									this.state.users.map(user => {
-										return (
-											<tr key={user.id}>
-												<th>{user.id}</th>
-												<td>{user.first_name}</td>
-												<td>{user.last_name}</td>
-												<td>{user.login}</td>
-												<td>{user.email}</td>
-												<td>{user.joined}</td>
-											</tr>
-										);
-								})}
-						</tbody>
-					</table>
+					<div className="columns is-centered">
+						<div className="column is-2">
+							<NavigationBox />
+						</div>
+						<div className="column is-6">
+							<ProfileCard
+								user={currentUser}
+							/>
+						</div>
+					</div>
 				</div>
 			</section>
+			
 		);
 	}
 }

@@ -16,7 +16,7 @@ class UserStore {
 
 	@action pullUser() {
 		return new Promise((resolve, reject) => {
-			API.Auth.current()
+			API.Users.getSelf()
 				.then(response => {
 					if (response.status === 401) { // If token is invalid
 						AuthStore.logout();

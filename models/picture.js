@@ -36,7 +36,7 @@ exports.add = picture => {
 				return connection.query(sql, picture);
 			})
 			.then(result => {
-				resolve(result.insertId);
+				resolve(result);
 			})
 			.catch(reject);
 	});

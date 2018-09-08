@@ -4,10 +4,9 @@ const crypto = require('crypto');
 module.exports = {
 	storage: multer.diskStorage({
 		destination: function (req, file, next) {
-			next(null, './public/images/upload');
+			next(null, './public/uploaded/tmp');
 		},
 		filename: function (req, file, next) {
-			console.log(file);
 			let rand = crypto.randomBytes(20).toString('hex');
 			let extension = file.mimetype.split('/')[1];
 			next(null, `${rand}-${Date.now()}.${extension}`);

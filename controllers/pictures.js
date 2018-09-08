@@ -39,7 +39,7 @@ router.post('/', upload.single('image'), (req, res) => {
 		})
 		.catch(error => {
 			console.error(error);
-			res.status(500).end();	
+			res.status(500).end();
 		})
 });
 

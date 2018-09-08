@@ -10,21 +10,22 @@ const upload = multer(require('../config/multer'));
 const requiresAuth = require('../lib/requiresAuth');
 
 const User = require('../models/user');
-const Interests = require('../models/interests');
+const Profile = require('../models/profile');
+const Tags = require('../models/tags');
 const Picture = require('../models/picture');
+const Likes = require('../models/likes');
+const BlockList = require('../models/block_list');
+const ReportedUsers = require('../models/reported_users');
 
-router.post('/register', upload.none(), (req, res) => {
-	console.log('REGISTER ROUTE!');
+
+router.post('/register', (req, res) => {
 	let form = {
-		login: req.body.login, // This needs to be converted to lowercase
-		email: req.body.email, // And this too
-		first_name: req.body.first_name,
-		last_name: req.body.last_name,
+		email: req.body.email, // This needs to be converted to lowercase
 		password: req.body.password,
 		password_confirm: req.body.password_confirm
 	};
 
-	validator.registrationValidation(form)
+	validator.registrationValidation(form) // I can Validate through middleware
 		.then(errors => {
 			if (Object.keys(errors).length > 0 && errors.constructor === Object) {
 				return res.status(202).json(errors);
@@ -38,9 +39,9 @@ router.post('/register', upload.none(), (req, res) => {
 				})
 				.then(result => {
 					console.log('Inserted user ID: ', result.insertId);
-					res.mailer.send('./emails/verification', {
+					res.mailer.send('./emails/registration', {
 						to: form.email,
-						subject: 'Matcha | Verification',
+						subject: 'Matcha | Registration',
 						user: form
 					}, error => {
 
@@ -48,7 +49,8 @@ router.post('/register', upload.none(), (req, res) => {
 						// So he can register with his email and username again
 
 						if (error) throw error;
-						res.json({ message: "Please, check your email. We've sent you the link to verify your account." });
+						/* I can respond before sending email so user does not need to wait extra time */
+						res.json({ message: "Please, check your email and follow the instructions that we've sent to continue registration process." });
 					});
 				})
 				.catch(error => {
@@ -61,6 +63,7 @@ router.post('/register', upload.none(), (req, res) => {
 			res.sendStatus(500);
 		});
 });
+
 
 router.post('/login', (req, res, next) => {
 	User.findOne({ email: req.body.email })
@@ -89,30 +92,6 @@ router.post('/login', (req, res, next) => {
 			console.error(error);
 			res.sendStatus(401);
 		});
-});
-
-router.post('/verify', (req, res) => {
-	let isHex = new RegExp(/^[0-9a-f]*$/i);
-	if (!isHex.test(req.body.hash)) return res.sendStatus(401);
-	User.findOne({ verification_hash: req.body.hash })
-		.then(user => {
-			if (!user || user.is_verified) {
-				return res.sendStatus(401);
-			}
-			User.update({id:user.id}, { is_verified: 1 })
-				.then(result => {
-					res.json({ message: "Your account is now verified, you may log in." });
-				})
-				.catch(error => {
-					console.error(error);
-					res.sendStatus(500);
-				})
-		})
-		.catch(console.error);
-});
-
-router.get('/reset', (req, res) => {
-
 });
 
 router.post('/reset', (req, res) => {
@@ -157,7 +136,7 @@ router.post('/recovery', (req, res) => {
 	}
 	User.findOne({ email })
 		.then(user => {
-			if (!user) {
+			if (!user || !user.is_verified) {
 				return res.json({ message: "We have sent instructions on how to reset your password to your email. If letter is not arriving check your spam folder and make sure you entered correct email adress." });
 			}
 			User.delAllRecoveryRequestsByUserId(user.id)
@@ -177,30 +156,241 @@ router.post('/recovery', (req, res) => {
 				})
 				.catch(error => {
 					console.error(error);
-					// req.flash('danger', 'Some server side error occured, please try again.');
 					res.sendStatus(500);
 				});
 		})
 		.catch(error => {
 			console.error(error);
-			// req.flash('danger', 'Some server side error occured, please try again.');
 			res.sendStatus(500);
 		});
 });
 
-router.all('*', requiresAuth); // From this point all routes will require authentication
-
-router.get('/', (req, res) => {
-	User.getAll()
-		.then(users => res.json(users))
-		.catch(error => {
-			console.error(error);
-			res.status(500).end();
-	});
+router.get('/verify/:hash([0-9a-f]*)', (req, res) => {
+	User.findOne({ verification_hash: req.params.hash })
+		.then(user => {
+			if (!user) {
+				return res.json({ status: false });
+			}
+			return res.json({ status: !user.is_verified });
+		});
 });
 
-router.get('/:id/pictures', (req, res) => {
-	Picture.findAll({ user_id: req.params.id })
+router.get('/exists/:login', (req, res) => {
+	const login = req.params.login;
+	Profile.findOne({ login })
+		.then(profile => {
+			if (profile) {
+				res.json({ exists: true });
+			} else {
+				res.json({ exists: false });
+			}
+		})
+		.catch(error => {
+			console.log(error);
+			res.sendStatus(500);
+		});
+});
+
+
+const fs = require('fs');
+const Jimp = require('jimp');
+
+router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, res) => {
+	try {
+		const user = await User.findOne({ verification_hash: req.params.hash });
+		if (!user) {
+			return res.sendStatus(401);
+		}
+
+		const profileData = JSON.parse(req.body.profile);
+		const tags = req.body.tags;
+		const croppData = JSON.parse(req.body.croppData);
+		let pictureSrc = req.body.picture;
+		if (req.file) {
+			pictureSrc = `uploaded/images/${req.file.filename}`;
+		}
+
+		if (!profileData || !tags || (req.file && !croppData)) {
+			return res.sendStatus(400);
+		}
+
+		if (croppData) {
+			Object.keys(croppData).forEach(key => {
+				croppData[key] = parseInt(croppData[key], 10);
+			})
+		}
+
+		profileData.user_id = user.id;
+		profileData.picture = pictureSrc;
+		await Profile.create(profileData); 
+		await Tags.insertMultiple(user.id, tags);
+		await Picture.add({ user_id: user.id, src: pictureSrc });
+		await User.update({ id: user.id }, { is_verified: 1 });
+
+		res.json({ message: 'Registration successful! You may log in now.' });
+
+		if (req.file) {
+			const image = await Jimp.read(req.file.path)
+			let { x, y, width, height } = croppData;
+
+			fs.unlink(req.file.path, err => {
+				if (err) console.error(err);
+			});
+			const absolutePath = `./public/uploaded/images/${req.file.filename}`;
+			image.crop(x, y, width, height).writeAsync(absolutePath);
+		}
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+	}
+});
+
+router.all('*', requiresAuth); // From this point all routes will require authentication
+
+router.get('/self', async (req, res) => {
+	try {
+		const user_id = req.user.id;
+
+		const getProfile = Profile.findOne({ user_id });
+		const getPictures = Picture.findAll({ user_id });
+		const getTags = Tags.findAll({ user_id });
+		const getMatches = Likes.findAllMatchesByUserId(user_id);
+		const getBlockedUsers = BlockList.findAll({ user_id });
+
+		const user = {
+			profile: await getProfile,
+			pictures: await getPictures,
+			tags: await getTags,
+			matches: await getMatches,
+			blockedUsers: await getBlockedUsers
+		}
+		res.json(user);
+	} catch (e) {
+		console.error(error);
+		res.sendStatus(500);
+	}
+});
+
+router.get('/:login', (req, res) => {
+	const user_id = null;
+	const user = {}
+
+	Profile.findOne({ login: req.params.login })
+		.then(profile => {
+			user.profile = profile;
+			user_id = profile.user_id;
+			return Picture.findAll({ user_id });
+		})
+		.then(pictures => {
+			user.pictures = pictures;
+			return Tags.findAll({ user_id })
+		})
+		.then(tags => {
+			user.tags = tags;
+			if (!user.profile || !user.pictures || !user.tags) {
+				res.sendStatus(404);
+			} else {
+				res.json(user);
+			}
+		})
+		.catch(error => {
+			console.error(error);
+			res.sendStatus(500);
+		});
+
+});
+
+router.post('/:login/like', async (req, res) => {
+	const currentUser = req.user.id;
+	try {
+		const profile = await Profile.findOne({ login: req.params.login });
+		if (!profile) {
+			return res.status(404).json({ error: "User with this login doesn't exsist." });
+		}
+		const alreadyLiked = await Likes.findOne(currentUser, profile.user_id);
+		if (alreadyLiked) {
+			return res.json({ error: 'Already liked this user.' });
+		}
+		await Likes.add({ user_id: currentUser, liked_user_id: profile.user_id });
+		const isMatch = await Likes.isMatch(currentUser, profile.user_id);
+		console.log(isMatch);
+		return res.json({ isMatch, status: "Successfuly liked." });
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+	}
+});
+
+router.delete('/:login/unlike', async (req, res) => {
+	const user_id = req.user.id;
+	try {
+		const profile = await Profile.findOne({ login: req.params.login });
+		if (!profile) {
+			return res.status(404).json("User with this login doesn't exsist.");
+		}
+		await Likes.delete(user_id, profile.user_id);
+		return res.json({ status: "Successfuly removed like." });
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+	}
+});
+
+router.post('/:login/block', async (req, res) => {
+	try {
+		const user_id = req.user.id;
+		const profile = await Profile.findOne({ login: req.params.login });
+		if (!profile) {
+			return res.status(404).json("User with this login doesn't exsist.");
+		}
+		const isAlreadyBlocked = await BlockList.findOne(user_id, profile.user_id);
+		if (isAlreadyBlocked) {
+			return res.json({ error: 'This user is already blocked.' });
+		}
+		await BlockList.add({ user_id, blocked_id: profile.user_id });
+		return res.json({ status: "User was added to your block list." });
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+	}
+});
+
+router.delete('/:login/unblock', async (req, res) => {
+	try {
+		const user_id = req.user.id;
+		const profile = await Profile.findOne({ login: req.params.login });
+		if (!profile) {
+			return res.status(404).json({ error: "User with this login doesn't exsist." });
+		}
+		await BlockList.delete(user_id, profile.user_id);
+		res.json({ status: "User was removed from your block list." });
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+	}
+})
+
+router.post('/:login/report', async (req, res) => {
+	try {
+		const reason = req.body.reason;
+		const profile = await Profile.findOne({ login: req.params.login });
+		if (!profile) {
+			return res.status(404).json({ error: "User with this login doesn't exsist." });
+		}
+		await ReportedUsers.add({
+			report_from_id: req.user.id,
+			reported_id: profile.user_id,
+			reason
+		});
+		res.json({ status: "User was reported." });
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+	}
+});
+
+router.get('/:login/pictures', (req, res) => {
+	Picture.findAll({ user_id: req.params.login })
 		.then(pictures => {
 			if (!pictures) {
 				res.sendStatus(404);
@@ -214,13 +404,18 @@ router.get('/:id/pictures', (req, res) => {
 		})
 });
 
-router.get('/:id/interests', (req, res) => {
-	Interests.findAll({ user_id: req.params.id })
-		.then(interests => {
-			if (interests.length < 1) {
+router.get('/:login/profile', (req, res) => {
+	// Return user profile
+});
+
+
+router.get('/:login/tags', (req, res) => {
+	Tags.findAll({ user_id: req.params.id })
+		.then(tags => {
+			if (tags.length < 1) {
 				res.sendStatus(404);
 			} else {
-				res.json(interests);
+				res.json(tags);
 			}
 		})
 		.catch(error => {
@@ -229,13 +424,13 @@ router.get('/:id/interests', (req, res) => {
 		});
 });
 
-router.get('/:id', (req, res) => {
-	User.findOne({ id: req.params.id })
+router.get('/:login', (req, res) => {
+	User.findOne({ login: req.params.login })
 		.then(user => {
 			if (!user) {
 				res.sendStatus(404)
 			} else {
-				res.json(user);				
+				res.json(user);
 			}
 		})
 		.catch(error => {

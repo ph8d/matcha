@@ -7,18 +7,12 @@ class AuthStore {
 	@observable isLoading = false;
 
 	@observable values = { // I can implement client side validation here
-		first_name: '',
-		last_name: '',
-		login: '',
 		email: '',
 		password: '',
 		password_confirm: '',
 	};
 
 	@observable errors = {
-		first_name: '',
-		last_name: '',
-		login: '',
 		email: '',
 		password: '',
 		password_confirm: '',
@@ -44,18 +38,12 @@ class AuthStore {
 	}
 
 	@action clearErrors() {
-		this.errors.first_name = '';
-		this.errors.last_name = '';
-		this.errors.login = '';
 		this.errors.email = '';
 		this.errors.password = '';
 		this.errors.password_confirm = '';
 	}
 
 	@action clearValues() {
-		this.values.first_name = '';
-		this.values.last_name = '';
-		this.values.login = '';
 		this.values.email = '';
 		this.values.password = '';
 		this.values.password_confirm = '';
@@ -95,7 +83,7 @@ class AuthStore {
 					this.displayErrors(response.data);
 				} else {
 					this.message = {
-						heading: "Registration successful!",
+						heading: "Success!",
 						text: response.data.message,
 					}
 					this.setMessageVisible(true);
@@ -103,25 +91,6 @@ class AuthStore {
 			})
 			.catch(console.error)
 			.then(() => this.setIsLoading(false));
-	}
-
-	@action accountVerification(hash) {
-		this.setIsLoading(true);
-		return API.Auth.verify(hash).then(response => {
-			if (response.status === 200) {
-				this.message = {
-					heading: "Account verification",
-					text: response.data.message,
-				};
-				this.setMessageVisible(true);
-			}
-			return response;
-		})
-		.catch(console.error)
-		.then(response => {
-			this.setIsLoading(false);
-			return response;
-		})
 	}
 
 	@action accountRecovery() {

@@ -35,33 +35,6 @@ class RegistrationForm extends React.Component {
 		return (
 			<form onSubmit={this.onSubmit}>
 				<BaseInputField
-					value={values.first_name}
-					name="first_name"
-					labelText="First Name"
-					type="text"
-					error={errors.first_name}
-					onChange={this.handleInput}
-				/>
-
-				<BaseInputField
-					value={values.last_name}
-					name="last_name"
-					labelText="Last Name"
-					type="text"
-					error={errors.last_name}
-					onChange={this.handleInput}
-				/>
-
-				<BaseInputField
-					value={values.login}
-					name="login"
-					labelText="Login"
-					type="text"
-					error={errors.login}
-					onChange={this.handleInput}
-				/>
-
-				<BaseInputField
 					value={values.email}
 					name="email"
 					labelText="Email"
@@ -88,7 +61,9 @@ class RegistrationForm extends React.Component {
 					onChange={this.handleInput}
 				/>
 				<hr/>
-				<button disabled={btnStatus} id="submit" className={`button is-radiusless is-dark is-medium is-fullwidth ${btnLoadingClass}`} type="submit" name="submit" value="OK">Register</button>
+				<button disabled={btnStatus} id="submit" className={`button is-radiusless is-dark is-medium is-fullwidth ${btnLoadingClass}`} type="submit" name="submit" value="OK">
+					<span>Register</span>
+				</button>
 			</form>
 		);
 	}

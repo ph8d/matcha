@@ -10,17 +10,16 @@ class AccountVerification extends React.Component {
 	}
 
 	componentDidMount() {
-		let isHex = new RegExp(/^[0-9a-f]*$/i);
 		let hash = this.props.match.params.hash;
 
-		if (!isHex.test(hash)) {
-			return this.redirectToHomePage();
-		}
+		// if (!isHex.test(hash)) {
+		// 	return this.redirectToHomePage();
+		// }
 
-		this.props.AuthStore.accountVerification(hash)
-			.then(response => {
-				this.redirectToHomePage();
-			});
+		// this.props.AuthStore.accountVerification(hash)
+		// 	.then(response => {
+		// 		this.redirectToHomePage();
+		// 	});
 	}
 
 	render() {

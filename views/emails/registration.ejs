@@ -24,24 +24,20 @@
 				cursor: pointer;
 				background-color: rgb(35, 35, 35);
 			}
-
-			.btn-container {
-				margin-top: 40px;
-			}
 		</style>
 	</head>
 	<body>
 		<div>
 			<h1>Hey!</h1>
 			<p>
-				Someone triggered password recovery procedure on your <strong>Matcha</strong> &copy; account.
-				If it was you, click the button below to set a new password.
-				Or if you think that this letter was sent to you by a mistake - just ingore it, you're safe.
+				Your email adress <strong><%= user.email %></strong> was used to initiate registration process on our site <strong>Matcha</strong> &copy;.
+				To continue registration click the link below.
+				Or if you think that this letter was sent to you by a mistake - just ingore it.
 			</p>
 			<h3>Have a grate day!</h3>
 			<p>
-				<a role="button" href="http://localhost:3000/reset/<%= hash %>">
-					<button>Set new password</button>
+				<a role="button" href="http://localhost:3000/registration/<%= user.verification_hash %>">
+					<button>Continue registration</button>
 				</a>
 			<p>
 		</div>

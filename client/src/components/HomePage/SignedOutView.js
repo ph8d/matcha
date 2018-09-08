@@ -1,7 +1,7 @@
 import React from 'react';
 import RegistrationForm from './RegistrationForm';
 import LoginForm from './LoginForm';
-import MessageBox from '../MessageBox'
+import MessageWindow from '../MessageWindow'
 import { inject, observer } from 'mobx-react';
 
 @inject('AuthStore') @observer
@@ -12,17 +12,23 @@ class SignedOutView extends React.Component {
 			showLoginForm: true,
 		}
 
-		this.switchForm = this.switchForm.bind(this);
 		this.closeMessage = this.closeMessage.bind(this);
+		this.showLoginForm = this.showLoginForm.bind(this);
+		this.showRegisterForm = this.showRegisterForm.bind(this);
 	}
 
 	componentWillUnmount() {
 		this.props.AuthStore.setMessageVisible(false);
 	}
 
-	switchForm(e) {
-		if (!e.target.className.includes('is-outlined')) return;
-		this.setState({ showLoginForm: !this.state.showLoginForm });
+	showLoginForm(e) {
+		if (this.state.showLoginForm) return;
+		this.setState({ showLoginForm: true });
+	}
+
+	showRegisterForm(e) {
+		if (!this.state.showLoginForm) return;
+		this.setState({ showLoginForm: false });
 	}
 
 	closeMessage() {
@@ -30,10 +36,10 @@ class SignedOutView extends React.Component {
 		this.props.AuthStore.setMessageVisible(false);
 	}
 
-	renderMessageBox() {
+	renderMessageWindow() {
 		let { message } = this.props.AuthStore;
 		return (
-			<MessageBox
+			<MessageWindow
 				heading={ message.heading }
 				text={ message.text }
 				onButtonClick={ this.closeMessage }
@@ -43,23 +49,25 @@ class SignedOutView extends React.Component {
 
 	renderLoginOrRegistrationForm() {
 		const currentForm = this.state.showLoginForm ? <LoginForm /> : <RegistrationForm onSuccess={this.onSuccess} />;
-		const btnActiveClass = 'button is-dark';
-		const btnInactiveClass = 'button is-outlined is-dark';
+		const btnActiveClass = 'button is-dark is-radiusless active';
+		const btnInactiveClass = 'button is-outlined is-dark is-radiusless';
 
 		return (
 			<div className="card">
 				<div className="card-content">
-					<div className="field has-addons content">
-						<p className="control">
-							<button className={this.state.showLoginForm ? btnInactiveClass : btnActiveClass} onClick={this.switchForm}>
-								Register
-							</button>
-						</p>
-						<p className="control">
-							<button className={this.state.showLoginForm ? btnActiveClass : btnInactiveClass} onClick={this.switchForm}>
-								Login
-							</button>
-						</p>
+					<div className="buttons has-addons is-centered">
+						<button className={this.state.showLoginForm ? btnInactiveClass : btnActiveClass} onClick={this.showRegisterForm}>
+							<span className="icon is-size-7">
+								<i className="fas fa-user-plus"></i>
+							</span>
+							<span>Register</span>
+						</button>
+						<button className={this.state.showLoginForm ? btnActiveClass : btnInactiveClass} onClick={this.showLoginForm}>
+							<span className="icon is-size-7">
+								<i className="fas fa-sign-in-alt"></i>
+							</span>
+							<span>Login</span>
+						</button>
 					</div>
 					{currentForm}
 				</div>
@@ -79,7 +87,7 @@ class SignedOutView extends React.Component {
 						<div className="column is-4">
 							{
 								this.props.AuthStore.messageVisible ?
-								this.renderMessageBox() :
+								this.renderMessageWindow() :
 								this.renderLoginOrRegistrationForm()
 							}
 						</div>

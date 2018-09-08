@@ -7,7 +7,7 @@ class MessageWindow extends React.Component {
 		return (
 			<div className="card">
 				<header className="card-header">
-					<p className="card-header-title">{ heading }</p>
+					<p className="card-header-title is-centered">{ heading }</p>
 				</header>
 				<div className="card-content">
 					<div className="content">

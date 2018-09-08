@@ -5,9 +5,8 @@ const path = require('path');
 const db = require('./services/db');
 
 
-const user = require('./controllers/user');
 const users = require('./controllers/users');
-const interests = require('./controllers/interests');
+const tags = require('./controllers/tags');
 const pictures = require('./controllers/pictures');
 
 const app = express();
@@ -30,9 +29,8 @@ app.use(function (req, res, next) {
 	next();
 });
 
-app.use('/user', user);
 app.use('/users', users);
-app.use('/interests', interests);
+app.use('/tags', tags);
 app.use('/pictures', pictures);
 
 app.listen(config.port, () => {

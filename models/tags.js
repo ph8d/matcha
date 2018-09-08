@@ -4,7 +4,7 @@ exports.findAll = data => {
 	return new Promise((resolve, reject) => {
 		db.get()
 			.then(connection => {
-				let sql = 'SELECT * FROM interests WHERE ?'
+				let sql = 'SELECT * FROM tags WHERE ?'
 				return connection.query(sql, data);
 			})
 			.then(rows => {
@@ -18,7 +18,7 @@ exports.findOne = data => {
 	return new Promise((resolve, reject) => {
 		db.get()
 			.then(connection => {
-				let sql = 'SELECT * FROM interests WHERE ?'
+				let sql = 'SELECT * FROM tags WHERE ?'
 				return connection.query(sql, data);
 			})
 			.then(rows => {
@@ -28,12 +28,12 @@ exports.findOne = data => {
 	});
 }
 
-exports.add = interest => {
+exports.add = tag => {
 	return new Promise((resolve, reject) => {
 		db.get()
 			.then(connection => {
-				let sql = 'INSERT INTO interests SET ?';
-				return connection.query(sql, interest);
+				let sql = 'INSERT INTO tags SET ?';
+				return connection.query(sql, tag);
 			})
 			.then(result => {
 				resolve(result);
@@ -42,11 +42,29 @@ exports.add = interest => {
 	});
 };
 
+exports.insertMultiple = (user_id, tags) => {
+	return new Promise((resolve, reject) => {
+		db.get()
+			.then(connection => {
+				const sql = 'INSERT INTO tags (user_id, value) VALUES ?';
+				const values = [];
+				tags.forEach(value => {
+					values.push([ user_id, value ]);
+				});
+				return connection.query(sql, [values]);
+			})
+			.then(result => {
+				resolve(result);
+			})
+			.catch(reject);
+	})
+}
+
 exports.delete = data => {
 	return new Promise((resolve, reject) => {
 		db.get()
 			.then(connection => {
-				let sql = 'DELETE FROM interests WHERE ?';
+				let sql = 'DELETE FROM tags WHERE ?';
 				return connection.query(sql, data);
 			})
 			.then(result => {
