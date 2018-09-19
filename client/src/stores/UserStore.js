@@ -1,6 +1,7 @@
-import { observable, action } from 'mobx';
+import { observable, action, computed } from 'mobx';
 import API from '../helpers/api';
 import AuthStore from './AuthStore';
+import SocketStore from './SocketStore';
 
 class UserStore {
 	@observable isLoading = false;
@@ -14,24 +15,52 @@ class UserStore {
 		this.currentUser = user;
 	}
 
-	@action pullUser() {
-		return new Promise((resolve, reject) => {
-			API.Users.getSelf()
-				.then(response => {
-					if (response.status === 401) { // If token is invalid
-						AuthStore.logout();
-					} else {
-						let user = response.data;
-						this.setCurrentUser(user);
-						resolve(user);
-					}
-				})
-				.catch(console.error);
+	@action setNotificationsSeen() {
+		const len = this.currentUser.notifications.length;
+		for (let i = 0; i < len; i++) {
+			this.currentUser.notifications[i].seen = 1;
+		}
+		SocketStore.emit('notifications seen', this.user_id);
+	}
+
+	@action pushNewNotification(notification){
+		console.log(notification);
+		this.currentUser.notifications.unshift(notification);
+	}
+
+	@computed get user_id() {
+		return this.currentUser.profile.user_id;
+	}
+
+	@computed get unseenNotificationsCount() {
+		let unseen = 0;
+		const { notifications } = this.currentUser;
+		notifications.forEach(notification => {
+			if (notification.seen === 0){
+				unseen++;
+			}
 		});
+		return unseen;
+	}
+
+	async pullUser() {
+		try {
+			const response = await API.User.getSelf();
+			if (response.status === 401) { // If token is invalid
+				AuthStore.logout();
+			} else {
+				let user = response.data;
+				this.setCurrentUser(user);
+				SocketStore.connect(user.profile.user_id);
+			}
+		} catch (e) {
+			console.error(e);
+		}
 	}
 
 	@action forgetUser() {
 		this.currentUser = undefined;
+		SocketStore.disconnect();
 	}
 
 }

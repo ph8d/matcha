@@ -6,30 +6,30 @@ import './App.css';
 // import { NotificationContainer } from 'react-notifications';
 // import 'react-notifications/lib/notifications.css';
 
-// import ProtectedRoutes from './components/ProtectedRoutes';
-import HomePage from './components/HomePage';
 import NavBar from './components/NavBar';
-import MobileBottomNavbar from './components/MobileBottomNavbar';
+import HomePage from './components/HomePage';
 import RegistrationPage from './components/RegistrationPage';
+import ProtectedRoutes from './components/ProtectedRoutes';
+import ProfilePage from './components/ProfilePage';
+import ConversationsPage from './components/ConversationsPage';
+import notificationPage from './components/NotificationPage';
 import PasswordResetPage from './components/PasswordResetPage';
 import SpinLoad from './components/SpinLoad';
 
 
-@inject('UserStore', 'CommonStore') @observer
+@inject('CommonStore', 'UserStore', 'ConversationStore', 'SocketStore') @observer
 class App extends React.Component {
 
-	componentWillMount() {
-		if (!this.props.CommonStore.token) {
-			this.props.CommonStore.setAppLoaded(true);
-		}
-	}
+	addNotification
 
-	componentDidMount() {
-		if (this.props.CommonStore.token) {
-			this.props.UserStore.pullUser()
-				.then(user => {
-					this.props.CommonStore.setAppLoaded(true);
-				})
+	async componentDidMount() {
+		const { CommonStore, UserStore, ConversationStore, SocketStore } = this.props;
+
+		if (CommonStore.token) {
+			await UserStore.pullUser();
+			CommonStore.setAppLoaded(true);
+		} else {
+			CommonStore.setAppLoaded(true);
 		}
 	}
 
@@ -39,14 +39,19 @@ class App extends React.Component {
 				<Router>
 					<div>
 						<NavBar />
-						{/* <NotificationContainer /> */}
 						<Switch>
 							<Route path="/" exact component={HomePage} />
 							<Route path="/registration/:hash([0-9a-f]*)" component={RegistrationPage} />
-							<Route path="/reset/:hash" component={PasswordResetPage} />
+							<Route path="/reset/:hash([0-9a-f]*)" component={PasswordResetPage} />
+							<ProtectedRoutes>
+								<Switch>
+									<Route path="/profile/:login([A-Za-z0-9_]{4,24})" component={ProfilePage} />
+									<Route path="/chats" component={ConversationsPage} />
+									<Route path="/notifications" component={notificationPage} />
+								</Switch>
+							</ProtectedRoutes>
 							<Redirect to="/" />
 						</Switch>
-						{/* <MobileBottomNavbar /> */}
 					</div>
 				</Router>
 			);

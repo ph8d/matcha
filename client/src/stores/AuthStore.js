@@ -2,6 +2,7 @@ import { observable, action } from "mobx";
 import API from '../helpers/api';
 import CommonStore from './CommonStore';
 import UserStore from './UserStore';
+import ConversationStore from './ConversationStore';
 
 class AuthStore {
 	@observable isLoading = false;
@@ -65,7 +66,9 @@ class AuthStore {
 			.then(response => {
 				if (response.status === 200) {
 					CommonStore.setToken(response.data.token);
-					return UserStore.pullUser();
+					UserStore.pullUser();
+					ConversationStore.pullConversations();
+					return;
 				}
 				// I need to add global error handling
 			})
@@ -145,6 +148,7 @@ class AuthStore {
 	@action logout() {
 		CommonStore.setToken(undefined);
 		UserStore.forgetUser();
+		ConversationStore.clearConversations();
 	}
 }
 

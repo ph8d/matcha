@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
 const validator = require('../lib/validator');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
@@ -14,6 +13,9 @@ const Profile = require('../models/profile');
 const Tags = require('../models/tags');
 const Picture = require('../models/picture');
 const Likes = require('../models/likes');
+const Messages = require('../models/messages');
+const Conversations = require('../models/conversations');
+const Notifications = require('../models/notifications');
 const BlockList = require('../models/block_list');
 const ReportedUsers = require('../models/reported_users');
 
@@ -49,7 +51,7 @@ router.post('/register', (req, res) => {
 						// So he can register with his email and username again
 
 						if (error) throw error;
-						/* I can respond before sending email so user does not need to wait extra time */
+						/* I can respond before sending email, user does not need to wait extra time */
 						res.json({ message: "Please, check your email and follow the instructions that we've sent to continue registration process." });
 					});
 				})
@@ -207,7 +209,7 @@ router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, r
 		const croppData = JSON.parse(req.body.croppData);
 		let pictureSrc = req.body.picture;
 		if (req.file) {
-			pictureSrc = `uploaded/images/${req.file.filename}`;
+			pictureSrc = `/uploaded/images/${req.file.filename}`;
 		}
 
 		if (!profileData || !tags || (req.file && !croppData)) {
@@ -254,16 +256,19 @@ router.get('/self', async (req, res) => {
 		const getProfile = Profile.findOne({ user_id });
 		const getPictures = Picture.findAll({ user_id });
 		const getTags = Tags.findAll({ user_id });
-		const getMatches = Likes.findAllMatchesByUserId(user_id);
+		// const getMatches = Likes.findAllMatchesForUserId(user_id);
 		const getBlockedUsers = BlockList.findAll({ user_id });
+		const getNotifications = Notifications.getAllByUserId(user_id);
 
 		const user = {
 			profile: await getProfile,
 			pictures: await getPictures,
 			tags: await getTags,
-			matches: await getMatches,
-			blockedUsers: await getBlockedUsers
-		}
+			// matches: await getMatches,
+			blockedUsers: await getBlockedUsers,
+			notifications: await getNotifications
+		};
+
 		res.json(user);
 	} catch (e) {
 		console.error(error);
@@ -271,37 +276,41 @@ router.get('/self', async (req, res) => {
 	}
 });
 
-router.get('/:login', (req, res) => {
-	const user_id = null;
-	const user = {}
+router.get('/:login', async (req, res) => {
+	try {
+		const profile = await Profile.findOne({ login: req.params.login });
 
-	Profile.findOne({ login: req.params.login })
-		.then(profile => {
-			user.profile = profile;
-			user_id = profile.user_id;
-			return Picture.findAll({ user_id });
-		})
-		.then(pictures => {
-			user.pictures = pictures;
-			return Tags.findAll({ user_id })
-		})
-		.then(tags => {
-			user.tags = tags;
-			if (!user.profile || !user.pictures || !user.tags) {
-				res.sendStatus(404);
-			} else {
-				res.json(user);
-			}
-		})
-		.catch(error => {
-			console.error(error);
-			res.sendStatus(500);
-		});
+		if (!profile) {
+			return res.status(404).json({ error: "User with this login doesn't exsist." });
+		}
 
+		const getPictures = Picture.findAll({ user_id: profile.user_id });
+		const getTags = Tags.findAll({ user_id: profile.user_id });
+		const getBlockedStatus = BlockList.isBlocked(req.user.id, profile.user_id);
+		const getLikeStatus = Likes.isLiked(req.user.id, profile.user_id);
+		const getMatchStatus = Likes.isMatch(req.user.id, profile.user_id);
+
+		const user = {
+			status: {
+				isBlocked: await getBlockedStatus,
+				isLiked: await getLikeStatus,
+				isMatch: await getMatchStatus,
+			},
+			profile,
+			pictures: await getPictures,
+			tags: await getTags
+		};
+
+		res.json(user);
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+	}
 });
 
 router.post('/:login/like', async (req, res) => {
 	const currentUser = req.user.id;
+	let notificationText = 'Liked you';
 	try {
 		const profile = await Profile.findOne({ login: req.params.login });
 		if (!profile) {
@@ -312,23 +321,35 @@ router.post('/:login/like', async (req, res) => {
 			return res.json({ error: 'Already liked this user.' });
 		}
 		await Likes.add({ user_id: currentUser, liked_user_id: profile.user_id });
-		const isMatch = await Likes.isMatch(currentUser, profile.user_id);
-		console.log(isMatch);
-		return res.json({ isMatch, status: "Successfuly liked." });
+		const match = await Likes.isMatch(currentUser, profile.user_id);
+		if (match) {
+			await Conversations.create(currentUser, profile.user_id);
+			notificationText = 'Matched with you';
+		}
+		await Notifications.add(profile.user_id, currentUser, notificationText);
+		return res.json({ status: "Successfuly liked." });
 	} catch (e) {
 		console.error(e);
 		res.sendStatus(500);
 	}
 });
 
-router.delete('/:login/unlike', async (req, res) => {
-	const user_id = req.user.id;
+router.delete('/:login/like', async (req, res) => {
+	const currentUser = req.user.id;
 	try {
 		const profile = await Profile.findOne({ login: req.params.login });
 		if (!profile) {
 			return res.status(404).json("User with this login doesn't exsist.");
 		}
-		await Likes.delete(user_id, profile.user_id);
+		const alreadyLiked = await Likes.findOne(currentUser, profile.user_id);
+		if (alreadyLiked) {
+			await Likes.delete(currentUser, profile.user_id);
+			const conversationId = await Conversations.findIdByUsers(currentUser, profile.user_id);
+			if (conversationId) {
+				await Conversations.deleteById(conversationId);
+			}
+		}
+		await Notifications.add(profile.user_id, currentUser, 'Unliked you');
 		return res.json({ status: "Successfuly removed like." });
 	} catch (e) {
 		console.error(e);
@@ -343,7 +364,7 @@ router.post('/:login/block', async (req, res) => {
 		if (!profile) {
 			return res.status(404).json("User with this login doesn't exsist.");
 		}
-		const isAlreadyBlocked = await BlockList.findOne(user_id, profile.user_id);
+		const isAlreadyBlocked = await BlockList.isBlocked(user_id, profile.user_id);
 		if (isAlreadyBlocked) {
 			return res.json({ error: 'This user is already blocked.' });
 		}
@@ -355,7 +376,7 @@ router.post('/:login/block', async (req, res) => {
 	}
 });
 
-router.delete('/:login/unblock', async (req, res) => {
+router.delete('/:login/block', async (req, res) => {
 	try {
 		const user_id = req.user.id;
 		const profile = await Profile.findOne({ login: req.params.login });
@@ -389,25 +410,6 @@ router.post('/:login/report', async (req, res) => {
 	}
 });
 
-router.get('/:login/pictures', (req, res) => {
-	Picture.findAll({ user_id: req.params.login })
-		.then(pictures => {
-			if (!pictures) {
-				res.sendStatus(404);
-			} else {
-				res.json(pictures);
-			}
-		})
-		.catch(error => {
-			console.error(error);
-			res.sendStatus(500);
-		})
-});
-
-router.get('/:login/profile', (req, res) => {
-	// Return user profile
-});
-
 
 router.get('/:login/tags', (req, res) => {
 	Tags.findAll({ user_id: req.params.id })
@@ -422,21 +424,6 @@ router.get('/:login/tags', (req, res) => {
 			console.error(error);
 			res.sendStatus(500);
 		});
-});
-
-router.get('/:login', (req, res) => {
-	User.findOne({ login: req.params.login })
-		.then(user => {
-			if (!user) {
-				res.sendStatus(404)
-			} else {
-				res.json(user);
-			}
-		})
-		.catch(error => {
-			console.error(error);
-			res.status(500).end();
-	});
 });
 
 module.exports = router;

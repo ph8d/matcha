@@ -10,7 +10,6 @@ var cancelRequest;
 const authHeader = () => {
 	const token = localStorage.getItem('jwt');
 	if (token) {
-		console.log('setting token');
 		const headers = {
 			'Authorization': `bearer ${token}`
 		};
@@ -49,15 +48,42 @@ const Auth = {
 	}
 };
 
-const Users = {
+const User = {
+	getSelf: () => {
+		return request('GET', '/users/self');
+	},
 	exists: (login) => {
 		return request('GET', `/users/exists/${login}`);
 	},
 	createProfile: (hash, data) => {
 		return request('POST', `/users/profile/${hash}`, data);
 	},
-	getSelf: () => {
-		return request('GET', '/users/self');
+	get: login => {
+		return request('GET', `/users/${login}`); 
+	},
+	like: login => {
+		return request('POST', `/users/${login}/like`);
+	},
+	unlike: login => {
+		return request('DELETE', `/users/${login}/like`);
+	},
+	block: login => {
+		return request('POST', `/users/${login}/block`);
+	},
+	unblock: login => {
+		return request('DELETE', `/users/${login}/block`);
+	},
+	report: (login, reason) => {
+		return request('POST', `/users/${login}/report`, { reason });
+	}
+}
+
+const Conversations = {
+	getPreviews: () => {
+		return request('GET', '/conversations');
+	},
+	get: (login) => {
+		return request('GET', `/conversations/${login}`);
 	}
 }
 
@@ -69,7 +95,8 @@ const utils = {
 
 export default {
 	Auth,
-	Users,
+	User,
+	Conversations,
 	request,
 	utils
 };

@@ -32,14 +32,15 @@ class ProfileCard extends React.Component {
 					</figure>
 				</div>
 				<div className="card-content">
+					<button className="button is-radiusless is-pulled-right">Edit profile</button>
 					<p>
 						<label className="has-text-weight-bold is-capitalized is-size-4">
-							{`${profile.first_name} ${profile.last_name}, `}
+							{`${profile.first_name} ${profile.last_name} `}
 						</label>
-						{/* I need to implement age */}
-						<label className="is-size-4">{age}</label>
 						<br/>
 						<label className="has-text-grey">
+							{age} years old
+							<br/>
 							{`${profile.gender}, looking for a ${profile.searching_for}`}
 							<br/>
 							0 kilometers away
