@@ -5,6 +5,7 @@ import RegistrationStore from './RegistrationStore';
 import ConversationStore from './ConversationStore';
 import ProfileStore from './ProfileStore';
 import UserStore from './UserStore';
+import ProfileEditStore from './ProfileEditStore';
 
 const stores = {
 	CommonStore,
@@ -14,6 +15,7 @@ const stores = {
 	ConversationStore,
 	ProfileStore,
 	UserStore,
+	ProfileEditStore
 };
 
 export default stores;

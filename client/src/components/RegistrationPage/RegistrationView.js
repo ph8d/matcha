@@ -20,24 +20,21 @@ class RegistrationView extends React.Component {
 		this.props.RegistrationStore.nextStep();
 	}
 
-	submitInfo() {
+	async submitInfo() {
 		const { RegistrationStore, AuthStore } = this.props;
-		RegistrationStore.submitInfo(this.props.hash)
-			.then(response => {
-				console.log(response);
-				if (response.status === 200) {
-					RegistrationStore.clearLocalStore();
-					AuthStore.message = {
-						heading: "Success!",
-						text: response.data.message
-					}
-					AuthStore.setMessageVisible(true);
-					this.props.redirectToHome();
-				}
-			})
-			.catch(error => {
-				console.error(error);
-			})
+		const response = await RegistrationStore.submitInfo(this.props.hash);
+		if (response.status === 200) {
+			RegistrationStore.clearLocalStore();
+			AuthStore.message = {
+				heading: "Success!",
+				text: response.data.message
+			}
+			AuthStore.setMessageVisible(true);
+			this.props.redirectToHome();
+		} else {
+			console.error('Some error occured while submiting user');
+			console.log(response);
+		}
 	}
 
 	renderRegistrationStep() {
@@ -90,8 +87,12 @@ class RegistrationView extends React.Component {
 	}
 
 	renderSubmitButton() {
+		const { isValidating } = this.props.RegistrationStore;
+		const status = (isValidating) && 'disabled';
+		const loadingClass = (isValidating) && 'is-loading';
+
 		return (
-			<button className="button is-radiusless is-success" onClick={this.submitInfo.bind(this)}>
+			<button disabled={status} className={`button ${loadingClass} is-radiusless is-success`} onClick={this.submitInfo.bind(this)}>
 				<span>Submit</span>
 			</button>
 		);

@@ -52,6 +52,9 @@ const User = {
 	getSelf: () => {
 		return request('GET', '/users/self');
 	},
+	update: (data) => {
+		return request('POST', '/users/update', data);
+	},
 	exists: (login) => {
 		return request('GET', `/users/exists/${login}`);
 	},
@@ -78,6 +81,15 @@ const User = {
 	}
 }
 
+const Pictures = {
+	upload: data => {
+		return request('POST', '/pictures/', data);
+	},
+	delete: id => {
+		return request('DELETE', `/pictures/${id}`)
+	}
+}
+
 const Conversations = {
 	getPreviews: () => {
 		return request('GET', '/conversations');
@@ -97,6 +109,7 @@ export default {
 	Auth,
 	User,
 	Conversations,
+	Pictures,
 	request,
 	utils
 };

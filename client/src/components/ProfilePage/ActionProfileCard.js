@@ -1,6 +1,9 @@
 import React from 'react';
 import Tag from '../Tag';
 import { observer, inject } from 'mobx-react';
+import ImageGallery from 'react-image-gallery';
+import "react-image-gallery/styles/css/image-gallery.css";
+import moment from 'moment';
 
 
 @inject('ProfileStore') @observer
@@ -49,10 +52,36 @@ class ActionProfileCard extends React.Component {
 		ProfileStore.report();
 	}
 
+	renderStatus(online, last_seen) {
+		let result = '';
+
+		if (online === 1) {
+			result = 'Online';
+		} else {
+			const currentDate = moment();
+			const lastSeen = moment(last_seen);
+
+			if (currentDate.diff(lastSeen, 'days') > 0) {
+				result = `last seen ${lastSeen.format('D MMM HH:mm')}`;
+			} else {
+				result = `last seen ${lastSeen.format('HH:mm')}`;
+			}
+		}
+		return (
+			<small className="has-text-grey">
+				{result}
+			</small>
+		);
+	}
+
 	render() {
 		const { status, profile, pictures, tags } = this.props.user;
 		const age = this.getAgeFromBirthDate(profile.birthdate);
+		const gallery = [];
 
+		pictures.forEach(pic => {
+			gallery.push({ original: pic.src });
+		});
 
 		return (
 			<div className="card">
@@ -62,15 +91,19 @@ class ActionProfileCard extends React.Component {
 							<i className="fas fa-fire"></i>
 						</span>
 						{profile.login}
+						&nbsp;
+						{ this.renderStatus(profile.online, profile.last_seen) }
 					</p>
 				</header>
 				<div className="card-image">
-					<figure className="image is-square">
-						<img
-							src={profile.picture}
-							alt="Avatar"
-						/>
-					</figure>
+					<ImageGallery
+						items={gallery}
+						disableSwipe={true}
+						infinite={false}
+						showThumbnails={false}
+						showFullscreenButton={false}
+						showPlayButton={false}
+					/>
 				</div>
 				<button onClick={this.handleLike} className="button is-danger is-radiusless is-fullwidth is-size-4">
 					<span className="icon">

@@ -4,6 +4,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import SpinLoad from '../SpinLoad';
 import './scrollbar.css';
 import { inject, observer } from 'mobx-react';
+import moment from 'moment';
 
 
 @inject('UserStore', 'ConversationStore', 'SocketStore') @observer
@@ -100,8 +101,30 @@ class ChatList extends React.Component {
 		);
 	}
 
+	renderStatus(online, last_seen) {
+		let result = '';
+
+		if (online === 1) {
+			result = 'Online';
+		} else {
+			const currentDate = moment();
+			const lastSeen = moment(last_seen);
+
+			if (currentDate.diff(lastSeen, 'days') > 0) {
+				result = `last seen ${lastSeen.format('D MMM HH:mm')}`;
+			} else {
+				result = `last seen ${lastSeen.format('HH:mm')}`;
+			}
+		}
+		return (
+			<small className="has-text-grey">
+				{result}
+			</small>
+		);
+	}
+
 	renderCardHeader(conversation) {
-		const { first_name, last_name } = conversation;
+		const { first_name, last_name, online, last_seen } = conversation;
 		return (
 			<header className="card-header">
 				<p onClick={this.unsetSelectedConversation.bind(this)} className="card-header-icon">
@@ -114,9 +137,7 @@ class ChatList extends React.Component {
 				<p className="card-header-title is-centered">
 					<span>{`${first_name} ${last_name}`}</span>
 					&nbsp;
-					<small className="has-text-grey">
-						last seen 16:55 PM
-					</small>
+					{ this.renderStatus(online, last_seen) }
 				</p>
 				<div className="card-header-icon">
 					{ this.renderDropDownMenu() }

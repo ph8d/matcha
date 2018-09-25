@@ -1,5 +1,7 @@
 const db = require('../services/db');
 
+const Messages = require('./messages');
+
 const toAscending = (x, y) => {
 	return x > y ? [y, x] : [x, y];
 }
@@ -46,7 +48,15 @@ exports.findAllByUserId = id => {
 		db.get()
 			.then(connection => {
 				let sql = `
-					SELECT conversation_id, profile.user_id, login, first_name, last_name, picture
+					SELECT
+						conversation_id,
+						profile.user_id,
+						login,
+						first_name,
+						last_name,
+						picture,
+						online,
+						last_seen
 					FROM user_conversations
 						INNER JOIN profile
 							ON profile.user_id = user_conversations.user_id

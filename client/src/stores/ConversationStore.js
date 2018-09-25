@@ -44,12 +44,27 @@ class ConversationStore {
 		this.joinConversation();
 	}
 
+	@action removeConvByUserId(id) {
+		const lenght = this.conversations.length;
+		
+		for (let i = 0; i < lenght; i++) {
+			if (this.conversations[i].user_id === id) {
+				if (this.selectedIndex === i) {
+					this.unsetSelectedConversation();
+				}
+				this.conversations.splice(i, 1);
+				return;
+			}
+		}
+	}
+
 	@action unsetSelectedConversation() {
 		this.leaveConversation();
 		this.selectedIndex = null;
 	}
 
 	@action pushMsgToCurrentConv(message) {
+		message.seen = 1;
 		this.selectedConversation.messages.push(message);
 	}
 
@@ -74,6 +89,18 @@ class ConversationStore {
 		this.conversations.push(dummyConversation);
 	}
 
+	@action updateUserStatus(status) {
+		if (this.selectedIndex === null) {
+			console.warn('Recieved status update but conversation is not selected!');
+			return;
+		}
+
+		const {online, last_seen} = status;
+		
+		this.selectedConversation.online = online;
+		this.selectedConversation.last_seen = last_seen;
+	}
+
 	async pullConversations() {
 		this.setIsLoading(true);
 		const response = await API.Conversations.getPreviews();
@@ -95,15 +122,14 @@ class ConversationStore {
 	}
 
 	joinConversation() {
-		const { user_id } = UserStore.currentUser.profile;
-		const { conversation_id } = this.selectedConversation;
-		SocketStore.emit('join conversation', {conversation_id, user_id});
+		const { conversation_id, user_id } = this.selectedConversation;
+		SocketStore.emit('join conversation', conversation_id, user_id);
 	}
 
 	leaveConversation() {
 		if (this.selectedIndex === null) return;
-		const { conversation_id } = this.selectedConversation;
-		SocketStore.emit('leave conversation', conversation_id);
+		const { conversation_id, user_id } = this.selectedConversation;
+		SocketStore.emit('leave conversation', conversation_id, user_id);
 	}
 
 	sendMessage(conversation_id, content) {

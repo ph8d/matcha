@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Tag from './Tag';
 
 
 class TagsInputCard extends React.Component {
@@ -14,14 +15,6 @@ class TagsInputCard extends React.Component {
 		this.props.addTag(e.target.value);
 	}
 
-	renderTags(tags) {
-		return (
-			<div className="tags">
-				{ tags }
-			</div>
-		);
-	}
-
 	renderPlaceholder() {
 		return <p className="has-text-centered has-text-grey-light">e.g. cats, game of thrones, coding...</p>;
 	}
@@ -32,11 +25,9 @@ class TagsInputCard extends React.Component {
 				<label className="label has-text-grey is-size-7">Interests / Tags</label>
 				<div className="card">
 					<div className="card-content">
-						{
-							this.props.children.length ?
-							this.renderTags(this.props.children) :
-							this.renderPlaceholder()
-						}
+						<div className="tags">
+							{this.props.children || this.renderPlaceholder()}
+						</div>
 					</div>
 					<footer className="card-footer">
 						<input
@@ -61,6 +52,7 @@ TagsInputCard.propTypes = {
 	tags: PropTypes.array,
 	handleInput: PropTypes.func.isRequired,
 	addTag: PropTypes.func.isRequired,
+	onTagDelete: PropTypes.func
 };
 
 export default TagsInputCard;

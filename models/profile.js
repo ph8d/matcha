@@ -28,6 +28,20 @@ exports.findOne = data => {
 	});
 };
 
+exports.isOnline = async (user_id) => {
+	console.log('user_id', user_id);
+	try {
+		const connection = await db.get();
+
+		const sql = 'SELECT online, last_seen FROM profile WHERE user_id = ?'
+		const result = await connection.query(sql, user_id);
+
+		return result[0];
+	} catch (e) {
+		throw e;
+	}
+}
+
 exports.update = (dataToFind, dataToUpdate) => {
 	return new Promise((resolve, reject) => {
 		db.get()

@@ -82,7 +82,7 @@ exports.setSeen = async (conversation_id, user_id) => {
 			UPDATE messages
 			SET seen = 1
 			WHERE conversation_id = ?
-			AND NOT author_id = ?
+			AND author_id = ?
 		`;
 		const result = await connection.query(sql, [conversation_id, user_id]);
 		return result;

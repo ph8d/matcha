@@ -1,5 +1,6 @@
 import { observable, action, computed } from 'mobx';
 import API from '../helpers/api';
+import SocketStore from './SocketStore';
 
 class ProfileStore {
 	@observable actionInProcess = false;
@@ -33,7 +34,7 @@ class ProfileStore {
 			console.error(response);
 		} else {
 			this.setUser(response.data);
-
+			SocketStore.emit('profile visit', this.user.profile.user_id);
 		}
 	}
 

@@ -9,10 +9,6 @@ class GeolocationForm extends React.Component {
 	constructor(props) {
 		super(props);
 
-		this.state = {
-			modalVisible: ''
-		};
-
 		this.handleClick = this.handleClick.bind(this);
 	}
 

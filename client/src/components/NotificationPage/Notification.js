@@ -14,9 +14,24 @@ class ContainerCard extends React.Component {
 		}
 	}
 
-	render() {
-		const { picture, first_name, last_name, login, text, date } = this.props.data;
+	renderText(type_id) {
+		let text = '';
+		if (type_id === 1) {
+			text = "Visited your profile";
+		} else if (type_id === 2) {
+			text = "Liked you";
+		} else if (type_id === 3) {
+			text = "Unliked you";
+		} else if (type_id === 4) {
+			text = "Matched with you";
+		} else {
+			text = "Unknown notification type id"
+		}
+		return <span>{text}</span>;
+	}
 
+	render() {
+		const { type_id, picture, first_name, last_name, login, date } = this.props.data;
 		return (
 			<Link to={`/profile/${login}`}>
 				<div className="box is-radiusless">
@@ -31,7 +46,7 @@ class ContainerCard extends React.Component {
 								<span className="has-text-weight-bold">
 									{`${first_name} ${last_name} `}
 								</span>
-								<span>{text}</span>
+								{ this.renderText(type_id) }
 							</p>
 							<p>
 								<span className="has-text-grey is-size-7">

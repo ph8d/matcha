@@ -4,10 +4,10 @@
 
 ::-webkit-scrollbar-track {
     border-radius: 2px;
-    background-color: white;
+    background-color: whitesmoke;
 }
 
 ::-webkit-scrollbar-thumb {
     border-radius: 2px;
-    background-color: whitesmoke;
+    background-color: #e1e1e1;
 }

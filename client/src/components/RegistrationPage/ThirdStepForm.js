@@ -32,16 +32,21 @@ class ThirdStepForm extends React.Component {
 		this.props.RegistrationStore.addTag(value);
 	}
 
-	removeTag(e) {
-		let tag = e.target.parentNode.children[0].innerHTML;
-		this.props.RegistrationStore.removeTag(tag);
+	removeTag(index) {
+		this.props.RegistrationStore.removeTag(index);
 	}
 
 	render() {
 		let { user, errors, tagInput } = this.props.RegistrationStore;
 
-		const tags = user.tags.map((tag, index) => 
-			<Tag key={index} className="is-light has-text-weight-bold" value={tag} handleClick={this.removeTag} />
+		const tags = user.tags.map((tag, index) =>
+			<Tag
+				className="is-light"
+				key={index}
+				index={index}
+				onDelete={this.removeTag}
+				value={tag}
+			/>
 		);
 
 		return (

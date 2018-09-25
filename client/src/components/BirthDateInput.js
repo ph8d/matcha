@@ -12,6 +12,7 @@ class BirthDateInput extends React.Component {
 
 	render() {
 		const { labelText, month, day, year, error } = this.props;
+		console.log('month', month);
 		return(
 			<div>
 				<p className="label is-small has-text-grey">{labelText}</p>
@@ -28,7 +29,7 @@ class BirthDateInput extends React.Component {
 								<option value="" disabled>Month</option>
 								{
 									this.state.monthsLong.map((month, index) => (
-										<option key={index} value={month}>{month}</option>
+										<option key={index} value={index + 1}>{month}</option>
 									))
 								}
 							</select>

@@ -4,12 +4,18 @@ import SignedInLayout from '../Layouts/SignedInLayout'
 import ActionProfileCard from './ActionProfileCard';
 import SpinLoad from '../SpinLoad';
 
-@inject('ProfileStore') @observer
+@inject('ProfileStore', 'UserStore') @observer
 export default class extends React.Component {
 
 	componentDidMount() {
 		const { login } = this.props.match.params;
-		this.props.ProfileStore.loadUser(login);
+		const currentUserLogin = this.props.UserStore.currentUser.profile.login;
+
+		if (currentUserLogin === login) {
+			this.props.history.replace('/')
+		} else {
+			this.props.ProfileStore.loadUser(login);
+		}
 	}
 
 	render() {

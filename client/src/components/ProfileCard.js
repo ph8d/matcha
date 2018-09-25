@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Tag from './Tag';
 
 class ProfileCard extends React.Component {
@@ -32,7 +33,9 @@ class ProfileCard extends React.Component {
 					</figure>
 				</div>
 				<div className="card-content">
-					<button className="button is-radiusless is-pulled-right">Edit profile</button>
+					<Link to="/edit-profile" className="button is-radiusless is-pulled-right">
+						Edit profile
+					</Link>
 					<p>
 						<label className="has-text-weight-bold is-capitalized is-size-4">
 							{`${profile.first_name} ${profile.last_name} `}

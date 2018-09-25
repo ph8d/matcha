@@ -1,32 +1,34 @@
 const db = require('../services/db');
 const socketServer = require('../lib/socketServer');
 
-exports.add = async (subject_user, actor_user, text) => {
+exports.add = async (type_id, subject_user, actor_user) => {
 	try {
 		const connection = await db.get();
 
 		let sql = 'INSERT INTO notifications SET ?';
 		const values = {
+			type_id,
 			subject_user,
-			actor_user,
-			text
+			actor_user
 		}
 		const result = await connection.query(sql, values);
 
 		sql = `
 			SELECT
 				notifications.id,
+				notifications.type_id,
+				notifications.actor_user,
 				picture,
 				first_name,
 				last_name,
 				login,
-				text,
 				seen,
 				notifications.date
 			FROM notifications
 				INNER JOIN profile
 					ON profile.user_id = notifications.actor_user
 			WHERE notifications.id = ?
+			ORDER BY notifications.id DESC
 		`;
 		const rows = await connection.query(sql, result.insertId);
 
@@ -44,11 +46,12 @@ exports.getAllByUserId = async user_id => {
 		sql = `
 			SELECT
 				notifications.id,
+				notifications.type_id,
+				notifications.actor_user,
 				picture,
 				first_name,
 				last_name,
 				login,
-				text,
 				seen,
 				notifications.date
 			FROM notifications

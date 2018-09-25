@@ -21,7 +21,6 @@ class ChatList extends React.Component {
 		const { ConversationStore, UserStore } = this.props;
 		const { isLoading, conversations } = ConversationStore;
 		const { user_id } = UserStore.currentUser.profile;
-		console.log('rendering list');
 
 		return (
 			<div className="card" style={{'minHeight': '800px'}}>

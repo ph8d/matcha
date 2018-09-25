@@ -1,5 +1,6 @@
 import { observable, action, computed } from 'mobx';
 import API from '../helpers/api';
+import moment from 'moment';
 
 class RegistrationStore {
 	@observable isValidating = false;
@@ -81,6 +82,7 @@ class RegistrationStore {
 				return;
 			}
 		}
+		console.log('month', value);
 		this.user.birthdate[field] = value;
 		this.errors.birthdate = '';
 	}
@@ -121,8 +123,7 @@ class RegistrationStore {
 		}
 	}
 
-	@action removeTag(tag) {
-		let index = this.user.tags.indexOf(tag);
+	@action removeTag(index) {
 		this.user.tags.splice(index, 1);
 	}
 
@@ -131,17 +132,15 @@ class RegistrationStore {
 		localStorage.setItem('registrationStep', this.step);
 	}
 
-	@action nextStep() {
-		this.validateCurrentStep()
-			.then(validationErrors => {
-				if (Object.keys(validationErrors).length > 0) {
-					this.setErrors(validationErrors);
-				} else {
-					this.step++;
-					localStorage.setItem('registrationStep', this.step);
-					this.saveDataToLocalStore();
-				}
-			})
+	@action async nextStep() {
+		const validationErrors = await this.validateCurrentStep();
+		if (Object.keys(validationErrors).length > 0) {
+			this.setErrors(validationErrors);
+		} else {
+			this.step++;
+			localStorage.setItem('registrationStep', this.step);
+			this.saveDataToLocalStore();
+		}
 	}
 
 	@action isValidTag() {
@@ -155,21 +154,15 @@ class RegistrationStore {
 		return true;
 	}
 
-	@computed get birthDateJSObj() {
-		const { birthdate } = this.user;
-		return new Date(`${birthdate.month} ${birthdate.day}, ${birthdate.year}`);
-	}
-
 	@computed get birthDateSQLString() {
-		const date = this.birthDateJSObj;
-		return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDay()}`;
+		const dateJSON = this.user.birthdate;
+		const date = moment(`${dateJSON.year}-${dateJSON.month}-${dateJSON.day}`, 'YYYY-M-D');
+		return date.format('YYYY-MM-DD');
 	}
 
-	isLoginAvalible() {
-		return API.Users.exists(this.user.login)
-			.then(response => {
-				return !response.data.exists;
-			});
+	async isLoginAvalible() {
+		const response = await API.User.exists(this.user.login);
+		return !response.data.exists;
 	}
 
 	clearLocalStore() {
@@ -219,54 +212,50 @@ class RegistrationStore {
 				return this.validateFirstStep();
 			case 3:
 				return this.validateThirdStep();
+			case 4:
+				return this.validateFourthStep();
 			default:
 				return Promise.resolve({});
 		}
 	}
 
-	validateFirstStep() { // This is an awful function
+	async validateFirstStep() { // This is an awful function
 		this.setIsValidating(true);
-		return new Promise((resolve, reject) => {
-			const { first_name, last_name, login, birthdate } = this.user;
-			const errors = {};
-	
-			const isValidLogin = new RegExp(/^[A-Za-z0-9_]{4,24}$/);
-			const isValidName = new RegExp(/^[A-Za-z- ]{1,32}$/);
-			const isValidDay = RegExp(/^([1-9]|[12][0-9]|3[01])$/);
-			const isValidYear = RegExp(/^(19[0-9][0-9])|(20[0-1][0-8])$/);
-	
-			if (!isValidName.test(first_name)) {
-				errors.first_name = 'Names should be 1-32 characters long and can contain only letters and dashes.';
-			}
-			if (!isValidName.test(last_name)) {
-				errors.last_name = 'Names should be 1-32 characters long and can contain only letters and dashes.';
-			}
-			if (!isValidLogin.test(login)) {
-				errors.login = 'Login should be 4-24 symbols long and can contain only letters, numbers or a underline.';
-			}
-	
-			if (!birthdate.month || birthdate.month === "0") {
-				errors.birthdate = "Please, enter a valid month";
-			} else if (!isValidDay.test(birthdate.day)) {
-				errors.birthdate = "Please, enter a valid day";
-			} else if (!isValidYear.test(birthdate.year)) {
-				errors.birthdate = "Please, enter a valid year";
-			}
+		const { first_name, last_name, login, birthdate } = this.user;
+		const errors = {};
 
-			if (!errors.login) {
-				this.isLoginAvalible()
-					.then(status => {
-						if (status === false) {
-							errors.login = 'This login is already taken.';
-						}
-						this.setIsValidating(false);
-						resolve(errors);
-					})
-			} else {
-				this.setIsValidating(false);
-				resolve(errors);
+		const isValidLogin = new RegExp(/^[A-Za-z0-9_]{4,24}$/);
+		const isValidName = new RegExp(/^[A-Za-z- ]{1,32}$/);
+		const isValidDay = RegExp(/^([1-9]|[12][0-9]|3[01])$/);
+		const isValidYear = RegExp(/^(19[0-9][0-9])|(20[0-1][0-8])$/);
+
+		if (!isValidName.test(first_name)) {
+			errors.first_name = 'Names should be 1-32 characters long and can contain only letters and dashes.';
+		}
+		if (!isValidName.test(last_name)) {
+			errors.last_name = 'Names should be 1-32 characters long and can contain only letters and dashes.';
+		}
+		if (!isValidLogin.test(login)) {
+			errors.login = 'Login should be 4-24 symbols long and can contain only letters, numbers or a underline.';
+		}
+
+		if (!birthdate.month || birthdate.month === "0") {
+			errors.birthdate = "Please, enter a valid month";
+		} else if (!isValidDay.test(birthdate.day)) {
+			errors.birthdate = "Please, enter a valid day";
+		} else if (!isValidYear.test(birthdate.year)) {
+			errors.birthdate = "Please, enter a valid year";
+		}
+
+		if (!errors.login) {
+			const avalible = await this.isLoginAvalible();
+			if (!avalible) {
+				errors.login = 'This login is already taken.';
 			}
-		});
+		}
+
+		this.setIsValidating(false);
+		return errors;
 	}
 
 	validateThirdStep() {
@@ -285,14 +274,26 @@ class RegistrationStore {
 
 		return Promise.resolve(errors); // No-no-no-no-no, returning promise in sync function
 	}
+
+	validateFourthStep() {
+		const { file } = this.picture;
+		const errors = {};
+
+		if (!file) {
+			errors.picture = "Please select a profile picture"
+		}
+
+		return Promise.resolve(errors);
+	}
 	
 	verifyHash(hash) {
 		return API.Auth.verify(hash);
 	}
 
 	submitInfo(hash) {
+		this.setIsValidating(true);
+
 		const formData = new FormData();
-		
 		const profile = {
 			login: this.user.login,
 			first_name: this.user.first_name,
@@ -312,7 +313,7 @@ class RegistrationStore {
 		formData.append('picture', this.picture.file || this.picture.placeholder);
 		formData.append('croppData', JSON.stringify(this.picture.croppData));
 		
-		return API.Users.createProfile(hash, formData);
+		return API.User.createProfile(hash, formData);
 	}
 
 }

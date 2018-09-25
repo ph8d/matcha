@@ -6,6 +6,8 @@ import SocketStore from './SocketStore';
 class UserStore {
 	@observable isLoading = false;
 	@observable currentUser = undefined;
+	
+	@observable input = {}
 
 	@action setIsLoading(status) {
 		this.isLoading = status;
@@ -23,9 +25,12 @@ class UserStore {
 		SocketStore.emit('notifications seen', this.user_id);
 	}
 
-	@action pushNewNotification(notification){
-		console.log(notification);
+	@action pushNewNotification(notification) {
 		this.currentUser.notifications.unshift(notification);
+	}
+
+	@action pushNewPicture(picture) {
+		this.currentUser.pictures.push(picture);
 	}
 
 	@computed get user_id() {
@@ -55,6 +60,14 @@ class UserStore {
 			}
 		} catch (e) {
 			console.error(e);
+		}
+	}
+
+	async updateUser() {
+		try {
+			
+		} catch (e) {
+			
 		}
 	}
 

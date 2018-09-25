@@ -207,40 +207,30 @@ router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, r
 		const profileData = JSON.parse(req.body.profile);
 		const tags = req.body.tags;
 		const croppData = JSON.parse(req.body.croppData);
-		let pictureSrc = req.body.picture;
-		if (req.file) {
-			pictureSrc = `/uploaded/images/${req.file.filename}`;
-		}
-
-		if (!profileData || !tags || (req.file && !croppData)) {
+		
+		if (!profileData || !tags || !req.file) {
 			return res.sendStatus(400);
 		}
-
-		if (croppData) {
-			Object.keys(croppData).forEach(key => {
-				croppData[key] = parseInt(croppData[key], 10);
-			})
-		}
-
+		
+		const pictureSrc = `/uploaded/images/${req.file.filename}`;
+		const absolute_path = `./public/uploaded/images/${req.file.filename}`;
+		
+		const image = await Jimp.read(req.file.path)
+		let { x, y, width, height } = croppData;
+		await image.crop(x, y, width, height).writeAsync(absolute_path);
+		
 		profileData.user_id = user.id;
 		profileData.picture = pictureSrc;
 		await Profile.create(profileData); 
 		await Tags.insertMultiple(user.id, tags);
-		await Picture.add({ user_id: user.id, src: pictureSrc });
+		await Picture.add({ user_id: user.id, src: pictureSrc, absolute_path });
 		await User.update({ id: user.id }, { is_verified: 1 });
+		
+		fs.unlink(req.file.path, err => {
+			if (err) console.error(err);
+		});
 
 		res.json({ message: 'Registration successful! You may log in now.' });
-
-		if (req.file) {
-			const image = await Jimp.read(req.file.path)
-			let { x, y, width, height } = croppData;
-
-			fs.unlink(req.file.path, err => {
-				if (err) console.error(err);
-			});
-			const absolutePath = `./public/uploaded/images/${req.file.filename}`;
-			image.crop(x, y, width, height).writeAsync(absolutePath);
-		}
 	} catch (e) {
 		console.error(e);
 		res.sendStatus(500);
@@ -249,6 +239,27 @@ router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, r
 
 router.all('*', requiresAuth); // From this point all routes will require authentication
 
+router.post('/update', async (req, res) => {
+	console.log(req.body);
+
+	try {
+		const { profile, tags } = req.body;
+		if (profile) {
+			await Profile.update({ user_id: req.user.id }, profile);
+		}
+
+		if (tags) {
+			await Tags.delete({ user_id: req.user.id });
+			await Tags.insertMultiple(req.user.id, tags);
+		}
+
+		res.sendStatus(200);
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);	
+	}
+})
+
 router.get('/self', async (req, res) => {
 	try {
 		const user_id = req.user.id;
@@ -256,7 +267,6 @@ router.get('/self', async (req, res) => {
 		const getProfile = Profile.findOne({ user_id });
 		const getPictures = Picture.findAll({ user_id });
 		const getTags = Tags.findAll({ user_id });
-		// const getMatches = Likes.findAllMatchesForUserId(user_id);
 		const getBlockedUsers = BlockList.findAll({ user_id });
 		const getNotifications = Notifications.getAllByUserId(user_id);
 
@@ -271,7 +281,7 @@ router.get('/self', async (req, res) => {
 
 		res.json(user);
 	} catch (e) {
-		console.error(error);
+		console.error(e);
 		res.sendStatus(500);
 	}
 });
@@ -310,7 +320,7 @@ router.get('/:login', async (req, res) => {
 
 router.post('/:login/like', async (req, res) => {
 	const currentUser = req.user.id;
-	let notificationText = 'Liked you';
+	let notificationType = 2;
 	try {
 		const profile = await Profile.findOne({ login: req.params.login });
 		if (!profile) {
@@ -324,9 +334,10 @@ router.post('/:login/like', async (req, res) => {
 		const match = await Likes.isMatch(currentUser, profile.user_id);
 		if (match) {
 			await Conversations.create(currentUser, profile.user_id);
-			notificationText = 'Matched with you';
+			notificationType = 4;
+			await Notifications.add(notificationType, currentUser, profile.user_id)
 		}
-		await Notifications.add(profile.user_id, currentUser, notificationText);
+		await Notifications.add(notificationType, profile.user_id, currentUser);
 		return res.json({ status: "Successfuly liked." });
 	} catch (e) {
 		console.error(e);
@@ -349,7 +360,7 @@ router.delete('/:login/like', async (req, res) => {
 				await Conversations.deleteById(conversationId);
 			}
 		}
-		await Notifications.add(profile.user_id, currentUser, 'Unliked you');
+		await Notifications.add(3, profile.user_id, currentUser);
 		return res.json({ status: "Successfuly removed like." });
 	} catch (e) {
 		console.error(e);
