@@ -18,7 +18,7 @@ exports.add = async (type_id, subject_user, actor_user) => {
 				notifications.id,
 				notifications.type_id,
 				notifications.actor_user,
-				picture,
+				pictures.src AS picture,
 				first_name,
 				last_name,
 				login,
@@ -27,6 +27,8 @@ exports.add = async (type_id, subject_user, actor_user) => {
 			FROM notifications
 				INNER JOIN profile
 					ON profile.user_id = notifications.actor_user
+				LEFT JOIN pictures
+					ON pictures.id = profile.picture_id
 			WHERE notifications.id = ?
 			ORDER BY notifications.id DESC
 		`;
@@ -48,7 +50,7 @@ exports.getAllByUserId = async user_id => {
 				notifications.id,
 				notifications.type_id,
 				notifications.actor_user,
-				picture,
+				pictures.src AS picture,
 				first_name,
 				last_name,
 				login,
@@ -57,6 +59,8 @@ exports.getAllByUserId = async user_id => {
 			FROM notifications
 				INNER JOIN profile
 					ON profile.user_id = notifications.actor_user
+				LEFT JOIN pictures
+					ON pictures.id = profile.picture_id
 			WHERE subject_user = ?
 			ORDER BY notifications.id DESC
 		`;

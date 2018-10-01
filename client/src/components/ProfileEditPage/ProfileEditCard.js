@@ -6,7 +6,7 @@ import TagsInputCard from '../TagsInputCard';
 import Tag from '../Tag';
 import SelectInputField from '../SelectInputField';
 import BirthDateInput from '../BirthDateInput';
-import DeletablePicture from './DeletablePicture';
+import InteractivePicture from './InteractivePicture';
 import { inject, observer } from 'mobx-react';
 import './style.css';
 
@@ -25,6 +25,7 @@ class ProfileEditCard extends React.Component {
 		}
 
 		this.onFileChange = this.onFileChange.bind(this);
+		this.changeProfilePicture = this.changeProfilePicture.bind(this);
 		this.deletePicture = this.deletePicture.bind(this);
 		this.saveImage = this.saveImage.bind(this);
 		this.closeModal = this.closeModal.bind(this);
@@ -116,6 +117,11 @@ class ProfileEditCard extends React.Component {
 		this.closeModal();
 	}
 
+	changeProfilePicture(index) {
+		const { ProfileEditStore } = this.props;
+		ProfileEditStore.changeProfilePicture(index);
+	}
+
 	deletePicture(index) {
 		const { ProfileEditStore } = this.props;
 		ProfileEditStore.deletePicture(index);
@@ -154,22 +160,24 @@ class ProfileEditCard extends React.Component {
 	renderPictures(pictures) {
 		if (pictures.length > 0) {
 			return pictures.map((picture, index) =>
-				<DeletablePicture
+				<InteractivePicture
 					key={index}
 					src={picture.src}
 					index={index}
+					showButtons={index !== 0}
 					onDeleteClick={this.deletePicture}
+					onPrimaryAction={this.changeProfilePicture}
 				/>
 			);
 		} else {
-			return <div className="box is-shadowless">
-				<small className="has-text-grey">You have no pictures...</small>
-			</div>
+			return
 		}
 	}
 
 	renderUserPictureManager(pictures, numberOfPictures, errors) {
-		const status = numberOfPictures >= 5 ? true : false;
+		const status = numberOfPictures >= 5;
+		// const profilePicture = pictures[0];
+		console.log(pictures);
 
 		return (
 			<div className="field">
@@ -177,14 +185,24 @@ class ProfileEditCard extends React.Component {
 					Pictures
 				</label>
 				<div className="has-text-centered">
+					{/*  <div className="box is-inline-flex is-shadowless">
+						<figure className="image">
+							<img src={profilePicture.src} alt=""/>
+						</figure>
+					</div> */}
 					{ this.renderPictures(pictures) }
 				</div>
 				<div className="field help has-text-centered is-danger">
 					{errors.pictures}
 				</div>
 				<input disabled={status} onChange={this.onFileChange} ref={this.fileInput} className="file-input" type="file" accept="image/*" />
-				<button disabled={status} onClick={() => {this.fileInput.current.click()}} className="button is-fullwidth ">
-					Add picture
+				<button disabled={status} onClick={() => { this.fileInput.current.click() }} className="button is-fullwidth">
+					<span className="icon">
+						<i className="fas fa-upload"></i>
+					</span>
+					<span>
+						Upload a picture
+					</span>
 				</button>
 			</div>
 		);
@@ -278,7 +296,10 @@ class ProfileEditCard extends React.Component {
 					className="button is-fullwidth"
 					onClick={this.updateProfile}
 				>
-					Save changes
+					<span className="icon">
+						<i className="fas fa-save"></i>
+					</span>
+					<span>Save changes</span>
 				</button>
 			</div>
 		);
@@ -291,7 +312,7 @@ class ProfileEditCard extends React.Component {
 				key={index}
 				index={index}
 				onDelete={this.handleTagDelete}
-				value={tag.value}
+				value={tag}
 			/>
 		);
 	}

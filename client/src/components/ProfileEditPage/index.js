@@ -13,7 +13,8 @@ export default class extends React.Component {
 
 	componentWillUnmount() {
 		const { ProfileEditStore } = this.props;
-		ProfileEditStore.clearStore();
+		ProfileEditStore.resetStore();
+		ProfileEditStore.unsetUser();
 	}
 
 	render() {

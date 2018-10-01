@@ -12,7 +12,7 @@ class BirthDateInput extends React.Component {
 
 	render() {
 		const { labelText, month, day, year, error } = this.props;
-		console.log('month', month);
+
 		return(
 			<div>
 				<p className="label is-small has-text-grey">{labelText}</p>

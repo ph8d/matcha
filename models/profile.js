@@ -18,7 +18,7 @@ exports.findOne = data => {
 	return new Promise((resolve, reject) => {
 		db.get()
 			.then(connection => {
-				let sql = 'SELECT * FROM profile WHERE ?';
+				let sql = 'SELECT * FROM profile WHERE profile.?';
 				return connection.query(sql, data);
 			})
 			.then(rows => {
@@ -27,6 +27,25 @@ exports.findOne = data => {
 			.catch(reject);
 	});
 };
+
+exports.findOneWithPicture = async (data) => {
+	try {
+		const connection = await db.get();
+		const sql = `
+			SELECT
+				profile.*,
+				pictures.src AS picture
+			FROM profile
+				LEFT JOIN pictures
+					ON pictures.id = profile.picture_id
+			WHERE profile.?
+		`;
+		const rows = await connection.query(sql, data);
+		return rows[0];
+	} catch (e) {
+		throw e;
+	}
+}
 
 exports.isOnline = async (user_id) => {
 	console.log('user_id', user_id);

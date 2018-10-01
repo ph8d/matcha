@@ -40,6 +40,9 @@ const Auth = {
 	verify: (hash) => {
 		return request('GET', `/users/verify/${hash}`);
 	},
+	verifyRecoveryReq: (hash) => {
+		return request('GET', `/users/reset/${hash}`);
+	},
 	recovery: (email) => {
 		return request('POST', '/users/recovery', { email });
 	},

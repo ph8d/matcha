@@ -1,21 +1,12 @@
 import React from 'react';
 import Tag from '../Tag';
-import { observer, inject } from 'mobx-react';
 import ImageGallery from 'react-image-gallery';
 import "react-image-gallery/styles/css/image-gallery.css";
 import moment from 'moment';
-
+import { observer, inject } from 'mobx-react';
 
 @inject('ProfileStore') @observer
 class ActionProfileCard extends React.Component {
-	constructor(props) {
-		super(props);
-
-		this.handleLike = this.handleLike.bind(this);
-		this.handleBlock = this.handleBlock.bind(this);
-		this.handleReport = this.handleReport.bind(this);
-	}
-
 	getAgeFromBirthDate(dateString) {
 		const today = new Date();
 		const birthDate = new Date(dateString);
@@ -25,31 +16,6 @@ class ActionProfileCard extends React.Component {
 			age--;
 		}
 		return age;
-	}
-
-	handleLike(e) {
-		const { ProfileStore } = this.props;
-		const { user } = ProfileStore;
-		if (user.status.isLiked) {
-			ProfileStore.unlike();
-		} else {
-			ProfileStore.like();
-		}
-	}
-
-	handleBlock(e) {
-		const { ProfileStore } = this.props;
-		const { user } = ProfileStore;
-		if (user.status.isBlocked) {
-			ProfileStore.unblock();
-		} else {
-			ProfileStore.block();
-		}
-	}
-
-	handleReport() {
-		const { ProfileStore } = this.props;
-		ProfileStore.report();
 	}
 
 	renderStatus(online, last_seen) {
@@ -74,73 +40,98 @@ class ActionProfileCard extends React.Component {
 		);
 	}
 
-	render() {
-		const { status, profile, pictures, tags } = this.props.user;
-		const age = this.getAgeFromBirthDate(profile.birthdate);
-		const gallery = [];
+	renderCardHeader(profile) {
+		return (
+			<header className="card-header">
+				<p className="card-header-title is-centered">
+					<span className="icon has-text-danger">
+						<i className="fas fa-fire"></i>
+					</span>
+					{profile.login}
+					&nbsp;
+					{ this.renderStatus(profile.online, profile.last_seen) }
+				</p>
+			</header>
+		);
+	}
 
+	renderCardImageSection(pictures) {
+		const gallery = [];
 		pictures.forEach(pic => {
 			gallery.push({ original: pic.src });
 		});
 
 		return (
-			<div className="card">
-				<header className="card-header">
-					<p className="card-header-title is-centered">
-						<span className="icon has-text-danger">
-							<i className="fas fa-fire"></i>
+			<div className="card-image">
+				<ImageGallery
+					items={gallery}
+					disableSwipe={true}
+					infinite={false}
+					showBullets={true}
+					showThumbnails={false}
+					showFullscreenButton={false}
+					showPlayButton={false}
+				/>
+			</div>
+		);
+	}
+
+	renderMainActionButton(status) {
+		return (
+			<button onClick={this.props.handleMainAction} className="button is-danger is-radiusless is-fullwidth is-size-4">
+				<span className="icon">
+					<i className="fas fa-heart"></i>
+				</span>
+				<span className="has-text-weight-bold">
+				{
+					status.isLiked ?
+					"Unlike" :
+					"Like"
+				}
+				</span>
+			</button>
+		);
+	}
+
+	renderDropDown(status) {
+		return (
+			<div className="dropdown is-hoverable is-right is-pulled-right">
+				<div className="dropdown-trigger">
+					<button className="button is-light" aria-haspopup="true" aria-controls="dropdown-menu6">
+						<span className="icon">
+							<i className="fas fa-caret-down"></i>
 						</span>
-						{profile.login}
-						&nbsp;
-						{ this.renderStatus(profile.online, profile.last_seen) }
-					</p>
-				</header>
-				<div className="card-image">
-					<ImageGallery
-						items={gallery}
-						disableSwipe={true}
-						infinite={false}
-						showThumbnails={false}
-						showFullscreenButton={false}
-						showPlayButton={false}
-					/>
+					</button>
 				</div>
-				<button onClick={this.handleLike} className="button is-danger is-radiusless is-fullwidth is-size-4">
-					<span className="icon">
-						<i className="fas fa-heart"></i>
-					</span>
-					<span className="has-text-weight-bold">
-					{
-						status.isLiked ?
-						"Unlike" :
-						"Like"
-					}
-					</span>
-				</button>
-				<div className="card-content">
-					<div className="dropdown is-hoverable is-right is-pulled-right">
-						<div className="dropdown-trigger">
-							<button className="button is-light" aria-haspopup="true" aria-controls="dropdown-menu6">
-								<span className="icon">
-									<i className="fas fa-caret-down"></i>
-								</span>
-							</button>
-						</div>
-						<div className="dropdown-menu" id="dropdown-menu6" role="menu">
-							<div className="dropdown-content">
-								<a onClick={this.handleBlock} className="dropdown-item">
-									{
-										status.isBlocked ?
-										"Unblock" :
-										"Block"
-									}
-								</a>
-								<a onClick={this.handleReport} className="dropdown-item">
-									Report
-								</a>
-							</div>
-						</div>
+				<div className="dropdown-menu" id="dropdown-menu6" role="menu">
+					<div className="dropdown-content">
+						<a onClick={this.props.handleBlock} className="dropdown-item">
+							{
+								status.isBlocked ?
+								"Unblock" :
+								"Block"
+							}
+						</a>
+						<a onClick={this.props.handleReport} className="dropdown-item">
+							Report
+						</a>
 					</div>
+				</div>
+			</div>
+		);
+	}
+
+	render() {
+		const { status, profile, pictures, tags } = this.props.user;
+		const age = this.getAgeFromBirthDate(profile.birthdate);
+
+		return (
+			<div className="card">
+				{ this.renderCardHeader(profile) }
+				{ this.renderCardImageSection(pictures) }
+				{ this.renderMainActionButton(status) }
+				<div className="card-content">
+					{ this.renderDropDown(status) }
 					<p>
 						<label className="has-text-weight-bold is-capitalized is-size-4">
 							{`${profile.first_name} ${profile.last_name} `}

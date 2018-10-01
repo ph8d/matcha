@@ -6,7 +6,6 @@ import SpinLoad from '../SpinLoad';
 
 @inject('ProfileStore', 'UserStore') @observer
 export default class extends React.Component {
-
 	componentDidMount() {
 		const { login } = this.props.match.params;
 		const currentUserLogin = this.props.UserStore.currentUser.profile.login;
@@ -18,8 +17,34 @@ export default class extends React.Component {
 		}
 	}
 
+	handleLike(e) {
+		const { ProfileStore } = this.props;
+		const { user } = ProfileStore;
+		if (user.status.isLiked) {
+			ProfileStore.unlike();
+		} else {
+			ProfileStore.like();
+		}
+	}
+
+	handleBlock(e) {
+		const { ProfileStore } = this.props;
+		const { user } = ProfileStore;
+		if (user.status.isBlocked) {
+			ProfileStore.unblock();
+		} else {
+			ProfileStore.block();
+		}
+	}
+
+	handleReport() {
+		const { ProfileStore } = this.props;
+		ProfileStore.report();
+	}
+
 	render() {
 		const { user } = this.props.ProfileStore;
+
 		if (!user) {
 			return <SpinLoad />;
 		} else {
@@ -27,6 +52,9 @@ export default class extends React.Component {
 				<SignedInLayout>
 					<ActionProfileCard
 						user={user}
+						handleMainAction={this.handleLike.bind(this)}
+						handleBlock={this.handleBlock.bind(this)}
+						handleReport={this.handleReport.bind(this)}
 					/>
 				</SignedInLayout>
 			);

@@ -1,7 +1,7 @@
 import React from 'react';
 import { inject, observer } from 'mobx-react';
 import SignedInLayout from '../Layouts/SignedInLayout'
-import ProfileCard from '../ProfileCard';
+import ProfileCard from './ProfileCard';
 
 
 @inject('UserStore') @observer

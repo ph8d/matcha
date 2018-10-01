@@ -10,11 +10,6 @@ class PasswordResetView extends React.Component {
 		this.onSubmit = this.onSubmit.bind(this);
 	}
 
-	componentDidMount() {
-		// I need to check if password reset token (hash) is valid
-		// and if it's not i should redirect to the home page
-	}
-
 	handleInput(e) {
 		this.props.AuthStore.setFieldValue(e.target.name, e.target.value);
 	}
@@ -22,7 +17,7 @@ class PasswordResetView extends React.Component {
 	onSubmit(e) {
 		e.preventDefault();
 		let hash = this.props.hash;
-		this.props.AuthStore.passwordReset(hash)	
+		this.props.AuthStore.passwordReset(hash)
 			.then(response => {
 				if (response.status === 200) {
 					this.props.redirectToHomePage();

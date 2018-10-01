@@ -51,6 +51,7 @@ class ChatList extends React.Component {
 
 	handleInput(e) {
 		const { value } = e.target;
+		if (value.length > 500) return;
 		this.setState({ value });
 	}
 
@@ -60,7 +61,6 @@ class ChatList extends React.Component {
 	}
 
 	scrollToBottom() {
-		console.log('Scrolling!!')
 		this.messagesEnd.scrollIntoView();
 	}
 

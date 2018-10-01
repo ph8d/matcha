@@ -12,6 +12,14 @@ export default class extends React.Component {
 		this.redirectToHomePage = this.redirectToHomePage.bind(this);
 	}
 
+	async componentDidMount() {
+		const { hash } = this.props.match.params;
+		const valid = await this.props.AuthStore.verifyHash(hash);
+		if (!valid) {
+			this.redirectToHomePage();
+		}
+	}
+
 	componentWillUnmount() {
 		this.props.AuthStore.clearValues();
 		this.props.AuthStore.clearErrors();

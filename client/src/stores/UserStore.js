@@ -1,4 +1,4 @@
-import { observable, action, computed } from 'mobx';
+import { observable, action, computed, toJS } from 'mobx';
 import API from '../helpers/api';
 import AuthStore from './AuthStore';
 import SocketStore from './SocketStore';
@@ -17,6 +17,10 @@ class UserStore {
 		this.currentUser = user;
 	}
 
+	@action setPictures(pictures) {
+		this.currentUser.pictures = pictures;
+	}
+
 	@action setNotificationsSeen() {
 		const len = this.currentUser.notifications.length;
 		for (let i = 0; i < len; i++) {
@@ -27,10 +31,6 @@ class UserStore {
 
 	@action pushNewNotification(notification) {
 		this.currentUser.notifications.unshift(notification);
-	}
-
-	@action pushNewPicture(picture) {
-		this.currentUser.pictures.push(picture);
 	}
 
 	@computed get user_id() {
@@ -48,6 +48,24 @@ class UserStore {
 		return unseen;
 	}
 
+	@action updateUser(updatedUser) {
+		const { profile, tags } = updatedUser;
+	
+		if (tags) {
+			this.currentUser.tags = tags;
+		}
+	
+		if (profile) {
+			Object.keys(profile).forEach(filed => {
+				this.currentUser.profile[filed] = profile[filed];
+			});
+		}
+	}
+
+	@action splicePicture(index) {
+		this.currentUser.pictures.splice(index, 1);
+	}
+
 	async pullUser() {
 		try {
 			const response = await API.User.getSelf();
@@ -63,13 +81,6 @@ class UserStore {
 		}
 	}
 
-	async updateUser() {
-		try {
-			
-		} catch (e) {
-			
-		}
-	}
 
 	@action forgetUser() {
 		this.currentUser = undefined;

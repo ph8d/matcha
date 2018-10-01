@@ -33,9 +33,16 @@ class ProfileEditStore {
 		this.errors.birthdate = '';
 	}
 
+	@action setProfilePicture(index) {
+		const picture = this.user.pictures.splice(index, 1);
+		this.user.pictures.unshift(picture[0]);
+		const updatedPictures = toJS(this.user.pictures);
+		UserStore.setPictures(updatedPictures);
+	}
+
 	@action pushNewPicture(picture) {
 		this.user.pictures.push(picture);
-		UserStore.pushNewPicture(picture);
+		UserStore.setPictures(toJS(this.user.pictures));
 	}
 
 	@action splicePicture(index) {
@@ -55,7 +62,7 @@ class ProfileEditStore {
 
 	@action addTag() {
 		if (this._isValidTag()) {
-			const tag = { value: this.tagInput.trim() }
+			const tag = this.tagInput.trim();
 			this.user.tags.push(tag);
 			this.tagInput = '';
 			this._tagsChanged = true;
@@ -77,11 +84,23 @@ class ProfileEditStore {
 		const currentUser = toJS(UserStore.currentUser);
 		let { profile, tags, pictures } = currentUser;
 		profile.birthdate = this._birthDateToJSON(profile.birthdate);
+		tags.forEach((tag, index) => {
+			tags[index] = tag.value;
+		});
 		this.user = {
 			profile,
 			tags,
 			pictures
 		};
+	}
+	
+	async changeProfilePicture(index) {
+		const newProfilePicture = this.user.pictures[index];
+		const profile = { picture_id: newProfilePicture.id }
+		const response = await API.User.update({ profile });
+		if (response.status === 200) {
+			this.setProfilePicture(index);
+		}
 	}
 
 	async uploadPicture(file, croppData) {
@@ -96,43 +115,41 @@ class ProfileEditStore {
 			console.log(response);
 		}
 	}
-
+	
 	async deletePicture(index) {
 		const pictureToDelete = this.user.pictures[index];
 		const response = await API.Pictures.delete(pictureToDelete.id);
 		if (response.status === 200) {
 			this.splicePicture(index);
+			UserStore.splicePicture(index);
 		} else {
 			this.setErrors({ pictures: 'Some server side error occured' });
 			console.log(response);
 		}
 	}
-
+	
 	async updateProfile() {
 		const valid = await this.isValidProfileFields();
-
+		
 		if (valid) {
 			const body = {};
 			const fieldsToSend = this._getChangedFields();
-
+			
 			if (Object.keys(fieldsToSend).length > 0) {
 				body.profile = fieldsToSend;
 			}
-
+			
 			if (this._tagsChanged) {
-				const tags = [];
-				this.user.tags.forEach(tag => {
-					tags.push(tag.value);
-				});
-				body.tags = tags;
+				body.tags = this.user.tags;
 			}
-
+			
 			if (Object.keys(body).length > 0) {
 				const response = await API.User.update(body);
-				console.log(response);
+				const updatedUser = response.data;
+				UserStore.updateUser(updatedUser);
+				this.resetStore();
 				return;
 			}
-			console.log('nothing changed!!');
 		}
 	}
 	
@@ -143,6 +160,17 @@ class ProfileEditStore {
 			return false;
 		}
 		return true;
+	}
+	
+	unsetUser() {
+		this.user = null;
+	}
+
+	resetStore() {
+		this.errors = {};
+		this.tagInput = '';
+		this._editedFields = {};
+		this._tagsChanged = false;
 	}
 
 	locateWithNavigator() {
@@ -158,10 +186,6 @@ class ProfileEditStore {
 		}
 	}
 	
-	clearStore() {
-		this.user = null;
-	}
-
 	_getChangedFields() {
 		const currentUserProfile = UserStore.currentUser.profile;
 		const editedFields = this._editedFields;
@@ -183,7 +207,6 @@ class ProfileEditStore {
 
 		return result;
 	}
-
 
 	_birthDateToJSON(birthdateString) {
 		const birthDateFull = moment(birthdateString);

@@ -96,6 +96,21 @@ router.post('/login', (req, res, next) => {
 		});
 });
 
+router.get('/reset/:hash([0-9a-f]*)', async (req, res) => {
+	try {
+		const { hash } = req.params;
+		const request = await User.findRecoveryRequest(hash);
+		if (!request) {
+			res.json({ status: false });
+		} else {
+			res.json({ status: true });
+		}
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+	}
+})
+
 router.post('/reset', (req, res) => {
 	let receivedHash = req.body.hash;
 	let password = req.body.password;
@@ -219,18 +234,23 @@ router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, r
 		let { x, y, width, height } = croppData;
 		await image.crop(x, y, width, height).writeAsync(absolute_path);
 		
+		const picResult = await Picture.add({
+			user_id: user.id,
+			src: pictureSrc,
+			absolute_path
+		});
+		
 		profileData.user_id = user.id;
-		profileData.picture = pictureSrc;
-		await Profile.create(profileData); 
+		profileData.picture_id = picResult.insertId;
+
+		await Profile.create(profileData);
 		await Tags.insertMultiple(user.id, tags);
-		await Picture.add({ user_id: user.id, src: pictureSrc, absolute_path });
 		await User.update({ id: user.id }, { is_verified: 1 });
 		
 		fs.unlink(req.file.path, err => {
-			if (err) console.error(err);
+			if (err) throw err;
+			res.json({ message: 'Registration successful! You may log in now.' });
 		});
-
-		res.json({ message: 'Registration successful! You may log in now.' });
 	} catch (e) {
 		console.error(e);
 		res.sendStatus(500);
@@ -244,19 +264,22 @@ router.post('/update', async (req, res) => {
 
 	try {
 		const { profile, tags } = req.body;
+		const response = {};
 		if (profile) {
 			await Profile.update({ user_id: req.user.id }, profile);
+			response.profile = profile;
 		}
 
 		if (tags) {
 			await Tags.delete({ user_id: req.user.id });
 			await Tags.insertMultiple(req.user.id, tags);
+			response.tags = await Tags.findAll({ user_id: req.user.id });
 		}
 
-		res.sendStatus(200);
+		res.json(response);
 	} catch (e) {
 		console.error(e);
-		res.sendStatus(500);	
+		res.sendStatus(500);
 	}
 })
 
@@ -265,7 +288,7 @@ router.get('/self', async (req, res) => {
 		const user_id = req.user.id;
 
 		const getProfile = Profile.findOne({ user_id });
-		const getPictures = Picture.findAll({ user_id });
+		const getPictures = Picture.findAllByUserIdArranged(user_id);
 		const getTags = Tags.findAll({ user_id });
 		const getBlockedUsers = BlockList.findAll({ user_id });
 		const getNotifications = Notifications.getAllByUserId(user_id);
@@ -274,7 +297,6 @@ router.get('/self', async (req, res) => {
 			profile: await getProfile,
 			pictures: await getPictures,
 			tags: await getTags,
-			// matches: await getMatches,
 			blockedUsers: await getBlockedUsers,
 			notifications: await getNotifications
 		};
@@ -294,7 +316,7 @@ router.get('/:login', async (req, res) => {
 			return res.status(404).json({ error: "User with this login doesn't exsist." });
 		}
 
-		const getPictures = Picture.findAll({ user_id: profile.user_id });
+		const getPictures = Picture.findAllByUserIdArranged(profile.user_id);
 		const getTags = Tags.findAll({ user_id: profile.user_id });
 		const getBlockedStatus = BlockList.isBlocked(req.user.id, profile.user_id);
 		const getLikeStatus = Likes.isLiked(req.user.id, profile.user_id);

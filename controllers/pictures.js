@@ -4,26 +4,11 @@ const multer = require('multer');
 const upload = multer(require('../config/multer')); // Error handling https://github.com/expressjs/multer#error-handling
 const requiresAuth = require('../lib/requiresAuth');
 const Picture = require('../models/picture');
+
 const fs = require('fs');
 const Jimp = require('jimp');
 
-
 router.use('*', requiresAuth);
-
-router.get('/:id', (req, res) => {
-	Picture.findOne({ id: req.params.id })
-		.then(picture => {
-			if (!picture) {
-				res.sendStatus(404);
-			} else {
-				res.json(picture);
-			}
-		})
-		.catch(error => {
-			console.error(error);
-			res.sendStatus(500);
-		})
-});
 
 router.post('/', upload.single('picture'), async (req, res) => {
 	try {
@@ -66,7 +51,6 @@ router.delete('/:id', async (req, res) => {
 
 		fs.unlink(picture.absolute_path, async err => {
 			if (err) throw err;
-
 			await Picture.delete({ id: req.params.id });
 			res.sendStatus(200);
 		});

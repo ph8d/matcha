@@ -54,12 +54,14 @@ exports.findAllByUserId = id => {
 						login,
 						first_name,
 						last_name,
-						picture,
+						pictures.src AS picture,
 						online,
 						last_seen
 					FROM user_conversations
 						INNER JOIN profile
 							ON profile.user_id = user_conversations.user_id
+						LEFT JOIN pictures
+							ON pictures.id = profile.picture_id
 					WHERE conversation_id IN (
 						SELECT conversation_id
 						FROM user_conversations

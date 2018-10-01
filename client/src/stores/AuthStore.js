@@ -145,6 +145,15 @@ class AuthStore {
 			})
 	}
 
+	async verifyHash(hash) {
+		const response = await API.Auth.verifyRecoveryReq(hash);
+		if (response.status !== 200) {
+			console.error(response);
+			return false;
+		}
+		return response.data.status;
+	}
+
 	@action logout() {
 		CommonStore.setToken(undefined);
 		UserStore.forgetUser();

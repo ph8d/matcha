@@ -1,5 +1,32 @@
-.delete-icon {
+
+.file-input {
+	display: none;
+}
+
+.is-256x256 {
+	width: 256px;
+	height: 256px;
+}
+
+.set-as-profile-pic-btn {
+	display: none !important; 
 	position: absolute;
-	right: 1%;
-	top: 2%;
+	left: 0%;
+	bottom: 0%;
+	background-color: rgba(0, 0, 0, 0.4) !important ;
+}
+
+.delete-icon {
+	display: none;
+	position: absolute;
+	right: 0%;
+	top: 0%;
+}
+
+.img-container:hover .delete-icon{
+	display: block;
+}
+
+.img-container:hover .set-as-profile-pic-btn {
+	display: block !important;
 }
