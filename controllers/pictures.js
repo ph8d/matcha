@@ -22,7 +22,10 @@ router.post('/', upload.single('picture'), async (req, res) => {
 		const originalPicture = await Jimp.read(req.file.path);
 		const { x, y, width, height } = croppData;
 	
-		await originalPicture.crop(x, y, width, height).writeAsync(absolute_path);
+		await originalPicture
+			.crop(x, y, width, height)
+			.quality(75)
+			.writeAsync(absolute_path);
 
 		fs.unlink(req.file.path, err => {
 			if (err) throw err;

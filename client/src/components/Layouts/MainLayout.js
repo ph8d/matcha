@@ -1,7 +1,7 @@
 import React from 'react';
 import NavigationCard from '../NavigationCard';
 
-class ProfileView extends React.Component {
+class MainLayout extends React.Component {
 	render() {
 		return (
 			<div className="columns is-gapless">
@@ -9,15 +9,11 @@ class ProfileView extends React.Component {
 					<NavigationCard />
 				</div>
 				<div className="column">
-					<div className="columns is-centered is-gapless">
-						<div className="column is-8 is-5-widescreen">
-							{ this.props.children }
-						</div>
-					</div>
+					{ this.props.children }
 				</div>
 			</div>
 		);
 	}
 }
 
-export default ProfileView;
+export default MainLayout;

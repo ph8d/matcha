@@ -142,7 +142,7 @@ class ActionProfileCard extends React.Component {
 							<br/>
 							{`${profile.gender}, looking for a ${profile.searching_for}`}
 							<br/>
-							0 kilometers away
+							{profile.distance} km away
 						</label>
 					</p>
 					<hr/>

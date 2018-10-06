@@ -59,46 +59,41 @@ class NavigationCard extends React.Component {
 		const { unreadConversationsCount } = this.props.ConversationStore;
 
 		return (
-			<div className="card">
-				<div className="card-content">
-					<aside className="menu">
-						<p className="menu-label">Navigation</p>
-						<ul className="menu-list">
-							<li>
-								<Link to="/">
-									<span className="icon is-size-7">
-										<i className="fas fa-home"></i>
-									</span>
-									<span> My Profile</span>
-								</Link>
-							</li>
-							<li>
-								<Link to="/">
-									<span className="icon is-size-7">
-										<i className="fas fa-search"></i>
-									</span>
-									<span> Browse</span>
-								</Link>
-							</li>
-							<li>
-								{this.renderChatLink(unreadConversationsCount)}
-							</li>
-							<li>
-								{ this.renderNotificationsLink(unseenNotificationsCount) }
-							</li>
-							<hr className="navbar-divider" />
-							<li>
-								<Link to="/">
-									<span className="icon is-size-7">
-										<i className="fas fa-sign-out-alt"></i>
-									</span>
-									<span> Logout</span>
-								</Link>
-							</li>
-						</ul>
-					</aside>
-				</div>
-			</div>
+			<aside className="menu box is-shadowless">
+				<ul className="menu-list">
+					<li>
+						<Link to="/">
+							<span className="icon is-size-7">
+								<i className="fas fa-home"></i>
+							</span>
+							<span> My Profile</span>
+						</Link>
+					</li>
+					<li>
+						<Link to="/discover">
+							<span className="icon is-size-7">
+								<i className="fas fa-search"></i>
+							</span>
+							<span> Discover</span>
+						</Link>
+					</li>
+					<li>
+						{this.renderChatLink(unreadConversationsCount)}
+					</li>
+					<li>
+						{ this.renderNotificationsLink(unseenNotificationsCount) }
+					</li>
+					<hr className="navbar-divider" />
+					<li>
+						<Link to="/">
+							<span className="icon is-size-7">
+								<i className="fas fa-sign-out-alt"></i>
+							</span>
+							<span> Logout</span>
+						</Link>
+					</li>
+				</ul>
+			</aside>
 		);
 	}
 }

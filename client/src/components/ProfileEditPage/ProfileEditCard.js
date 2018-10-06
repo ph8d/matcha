@@ -36,7 +36,8 @@ class ProfileEditCard extends React.Component {
 		this.handleTagDelete = this.handleTagDelete.bind(this);
 		this.updateProfile = this.updateProfile.bind(this);
 		this.handleBirthdateInput = this.handleBirthdateInput.bind(this);
-		this.updateUserLocation = this.updateUserLocation.bind(this);
+		this.locateUserWithNavigator = this.locateUserWithNavigator.bind(this);
+		this.setUserLocation = this.setUserLocation.bind(this);
 		this.fileInput = React.createRef();
 	}
 
@@ -65,9 +66,18 @@ class ProfileEditCard extends React.Component {
 		ProfileEditStore.deleteTag(index);
 	}
 
-	updateUserLocation(e) {
+	locateUserWithNavigator(e) {
 		const { ProfileEditStore } = this.props;
 		ProfileEditStore.locateWithNavigator();
+	}
+
+	setUserLocation(data) {
+		const { ProfileEditStore } = this.props;
+		const lat = data.latLng.lat();
+		const lng = data.latLng.lng();
+
+		ProfileEditStore.setFieldValue('lat', lat);
+		ProfileEditStore.setFieldValue('lng', lng);
 	}
 
 	updateProfile(e) {
@@ -176,8 +186,6 @@ class ProfileEditCard extends React.Component {
 
 	renderUserPictureManager(pictures, numberOfPictures, errors) {
 		const status = numberOfPictures >= 5;
-		// const profilePicture = pictures[0];
-		console.log(pictures);
 
 		return (
 			<div className="field">
@@ -185,11 +193,6 @@ class ProfileEditCard extends React.Component {
 					Pictures
 				</label>
 				<div className="has-text-centered">
-					{/*  <div className="box is-inline-flex is-shadowless">
-						<figure className="image">
-							<img src={profilePicture.src} alt=""/>
-						</figure>
-					</div> */}
 					{ this.renderPictures(pictures) }
 				</div>
 				<div className="field help has-text-centered is-danger">
@@ -283,24 +286,15 @@ class ProfileEditCard extends React.Component {
 				/>
 
 				<TagsInputCard
-					tags={tags}
 					addTag={this.addTag}
 					inputValue={tagInput}
 					handleInput={this.handleTagInput}
+					error={errors.tags}
 				>
 					{ this.renderTags(tags) }
 				</ TagsInputCard>
-				{ errors.tags && <div className="help is-danger">{errors.tags}</div> }
 
-				<button
-					className="button is-fullwidth"
-					onClick={this.updateProfile}
-				>
-					<span className="icon">
-						<i className="fas fa-save"></i>
-					</span>
-					<span>Save changes</span>
-				</button>
+				{ this.renderMap(profile, errors) }
 			</div>
 		);
 	}
@@ -316,7 +310,7 @@ class ProfileEditCard extends React.Component {
 			/>
 		);
 	}
-
+	
 	renderMap(profile, errors) {
 		const { lat, lng } = profile;
 		const userLocation = {lat, lng}
@@ -329,6 +323,7 @@ class ProfileEditCard extends React.Component {
 					</label>
 					<MyGoogleMap
 						googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyBj7XDClRGcxA9xTV3KPIwyijuHODynh4w&v=3.exp&libraries=geometry,drawing,places"
+						onMapClick={this.setUserLocation}
 						loadingElement={<SpinLoad/>}
 						center={ userLocation }
 						showMarker="true"
@@ -337,8 +332,11 @@ class ProfileEditCard extends React.Component {
 						mapElement={<div style={{ height: `100%` }} />}
 					/>
 				</div>
-				<button onClick={this.updateUserLocation} type="button" className="button is-fullwidth ">
-					Update my location
+				<button onClick={this.locateUserWithNavigator} type="button" className="button is-fullwidth ">
+					<span className="icon">
+						<i className="fas fa-map-marked-alt"></i>
+					</span>
+					<span>Find my location</span>
 				</button>
 				<div className="field help has-text-centered is-danger">
 					{errors.geolocation}
@@ -367,10 +365,16 @@ class ProfileEditCard extends React.Component {
 					<hr/>
 
 					{this.renderBasicInfoFields(profile, tags, tagInput, errors)}
-
-					<hr/>
-
-					{this.renderMap(profile, errors)}
+					<hr />
+					<button
+						className="button is-dark is-fullwidth"
+						onClick={this.updateProfile}
+					>
+						<span className="icon">
+							<i className="fas fa-save"></i>
+						</span>
+						<span>Save changes</span>
+					</button>
 				</div>
 			</div>
 		);

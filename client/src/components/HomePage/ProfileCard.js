@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Tag from '../Tag';
 import ImageGallery from 'react-image-gallery';
 
+const maxWidth500 = { 'maxWidth': 'auto' }
 
 class ProfileCard extends React.Component {
 	getAgeFromBirthDate(dateString) {
@@ -67,7 +68,7 @@ class ProfileCard extends React.Component {
 		const age = this.getAgeFromBirthDate(profile.birthdate);
 
 		return (
-			<div className="card">
+			<div className="card" style={maxWidth500}>
 				{ this.renderCardHeader(profile) }
 				{ this.renderCardImageSection(profile.picture_id, pictures) }
 				{ this.renderMainActionButton(profile, status) }
@@ -82,7 +83,6 @@ class ProfileCard extends React.Component {
 							<br/>
 							{`${profile.gender}, looking for a ${profile.searching_for}`}
 							<br/>
-							0 kilometers away
 						</label>
 					</p>
 					<hr/>

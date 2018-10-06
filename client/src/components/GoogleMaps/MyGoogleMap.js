@@ -9,8 +9,9 @@ const MyGoogleMap = withScriptjs(withGoogleMap(props =>
 		defaultCenter={{ lat: -34.397, lng: 150.644 }}
 		center={ props.center }
 		defaultOptions={{ disableDefaultUI: true, styles: styles.wy }}
+		onClick={props.onMapClick}
 	>
-		{ props.showMarker && <Marker title="HIHIHI" position={ props.markerPos } /> }
+		{ props.showMarker && <Marker title="Current location" position={ props.markerPos } /> }
 	</GoogleMap>
 ));
 

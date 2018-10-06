@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import { observer, inject } from 'mobx-react';
-import './App.css';
 
 // import { NotificationContainer } from 'react-notifications';
 // import 'react-notifications/lib/notifications.css';
@@ -15,6 +14,7 @@ import ProfileEditPage from './components/ProfileEditPage';
 import ConversationsPage from './components/ConversationsPage';
 import notificationPage from './components/NotificationPage';
 import PasswordResetPage from './components/PasswordResetPage';
+import DiscoverPage from './components/DiscoverPage';
 import SpinLoad from './components/SpinLoad';
 
 import 'izitoast/dist/css/iziToast.min.css';
@@ -49,6 +49,7 @@ class App extends React.Component {
 									<Route path="/chats" component={ConversationsPage} />
 									<Route path="/notifications" component={notificationPage} />
 									<Route path="/profile/:login([A-Za-z0-9_]{4,24})" component={ProfilePage} />
+									<Route path="/discover" component={DiscoverPage} />
 								</Switch>
 							</ProtectedRoutes>
 							<Redirect to="/" />

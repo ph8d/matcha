@@ -21,14 +21,12 @@ class ProfileEditStore {
 	}
 
 	@action setFieldValue(fieldName, value) {
-		console.log(`Changing ${fieldName} to ${value}`);
 		this.user.profile[fieldName] = value;
 		this.errors[fieldName] = '';
 		this._editedFields[fieldName] = value;
 	}
 
 	@action setBirthDate(fieldName, value) {
-		console.log(`changing ${fieldName} to ${value}`);
 		this.user.profile.birthdate[fieldName] = value;
 		this.errors.birthdate = '';
 	}
@@ -112,7 +110,6 @@ class ProfileEditStore {
 			this.pushNewPicture(response.data);
 		} else {
 			this.setErrors({ pictures: 'Some server side error occured' });
-			console.log(response);
 		}
 	}
 	
@@ -124,7 +121,6 @@ class ProfileEditStore {
 			UserStore.splicePicture(index);
 		} else {
 			this.setErrors({ pictures: 'Some server side error occured' });
-			console.log(response);
 		}
 	}
 	
@@ -244,6 +240,7 @@ class ProfileEditStore {
 		const isValidBio = new RegExp(/^[^>]{0,500}$/);
 
 		const { first_name, last_name, login, birthdate, bio } = this.user.profile;
+		const { tags } = this.user;
 		const errors = {};
 
 		if (!isValidName.test(first_name)) {
@@ -272,6 +269,9 @@ class ProfileEditStore {
 			if (!logingIsAvalible) {
 				errors.login = 'This login is already taken.';
 			}
+		}
+		if (tags.length < 3) {
+			errors.tags = "You need at leest 3 tags.";
 		}
 
 		return errors;

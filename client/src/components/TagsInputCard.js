@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Tag from './Tag';
 
 
 class TagsInputCard extends React.Component {
@@ -43,13 +42,13 @@ class TagsInputCard extends React.Component {
 						</button>
 					</footer>
 				</div>
+				{ this.props.error && <div className="help is-danger">{this.props.error}</div> }
 			</div>
 		);
 	}
 }
 
 TagsInputCard.propTypes = {
-	tags: PropTypes.array,
 	handleInput: PropTypes.func.isRequired,
 	addTag: PropTypes.func.isRequired,
 	onTagDelete: PropTypes.func

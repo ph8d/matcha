@@ -48,11 +48,9 @@ class NavBar extends React.Component {
 						</div>
 
 						<div className="navbar-end">
-							<div className="navbar-item">
-								<p className="control">
-									<button onClick={this.logout} className="button is-white">Logout</button>
-								</p>
-							</div>
+							<a onClick={this.logout} className="navbar-item">
+								<span>Logout</span>
+							</a>
 						</div>
 					</div>
 				</div>

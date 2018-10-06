@@ -18,12 +18,13 @@ const authHeader = () => {
 	return null;
 }
 
-const request = (method, url, body = null) => {
+const request = (method, url, body = null, params = null) => {
 	return axios.request({
 		url: url,
 		method: method,
 		headers: authHeader(),
 		data: body,
+		params: params,
 		cancelToken: new CancelToken(function executor(c) {
 			cancelRequest = c;
 		})
@@ -102,6 +103,15 @@ const Conversations = {
 	}
 }
 
+const Profiles = {
+	get: filters => {
+		return request('GET', '/profiles', null, filters);
+	},
+	getRecommended: filters => {
+		return request('GET', '/profiles/recommended', null, filters);
+	}
+}
+
 const utils = {
 	cancelLastRequest: () => {
 		return cancelRequest();
@@ -113,6 +123,7 @@ export default {
 	User,
 	Conversations,
 	Pictures,
+	Profiles,
 	request,
 	utils
 };

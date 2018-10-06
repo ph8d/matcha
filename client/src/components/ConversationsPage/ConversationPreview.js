@@ -68,7 +68,7 @@ class ConversationPreview extends React.Component {
 
 		const noWrap = {"whiteSpace": "nowrap", "overflow": "hidden", "textOverflow": "ellipsis"}
 		return (
-			<div onClick={this.selectConversation} className="box is-radiusless">
+			<div onClick={this.selectConversation} className="box is-radiusless is-marginless">
 				<article className="media">
 					<div className="media-left">
 						<figure className="image is-48x48">

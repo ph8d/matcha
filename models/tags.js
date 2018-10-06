@@ -40,7 +40,7 @@ exports.add = tag => {
 			})
 			.catch(reject);
 	});
-};
+}
 
 exports.insertMultiple = (user_id, tags) => {
 	return new Promise((resolve, reject) => {

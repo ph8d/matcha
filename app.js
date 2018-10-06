@@ -8,6 +8,7 @@ const users = require('./controllers/users');
 const tags = require('./controllers/tags');
 const pictures = require('./controllers/pictures');
 const conversations = require('./controllers/conversations');
+const profiles = require('./controllers/profiles');
 
 const app = express();
 const http = require('http').Server(app);
@@ -33,6 +34,7 @@ app.use('/users', users);
 app.use('/conversations', conversations);
 app.use('/tags', tags);
 app.use('/pictures', pictures);
+app.use('/profiles', profiles);
 
 socketServer.init(http);
 

@@ -7,13 +7,14 @@ const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const upload = multer(require('../config/multer'));
 const requiresAuth = require('../lib/requiresAuth');
+const fs = require('fs');
+const Jimp = require('jimp');
 
 const User = require('../models/user');
 const Profile = require('../models/profile');
 const Tags = require('../models/tags');
 const Picture = require('../models/picture');
 const Likes = require('../models/likes');
-const Messages = require('../models/messages');
 const Conversations = require('../models/conversations');
 const Notifications = require('../models/notifications');
 const BlockList = require('../models/block_list');
@@ -208,10 +209,6 @@ router.get('/exists/:login', (req, res) => {
 		});
 });
 
-
-const fs = require('fs');
-const Jimp = require('jimp');
-
 router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, res) => {
 	try {
 		const user = await User.findOne({ verification_hash: req.params.hash });
@@ -272,7 +269,9 @@ router.post('/update', async (req, res) => {
 
 		if (tags) {
 			await Tags.delete({ user_id: req.user.id });
-			await Tags.insertMultiple(req.user.id, tags);
+			if (tags.length > 0) {
+				await Tags.insertMultiple(req.user.id, tags);
+			}
 			response.tags = await Tags.findAll({ user_id: req.user.id });
 		}
 
@@ -310,7 +309,9 @@ router.get('/self', async (req, res) => {
 
 router.get('/:login', async (req, res) => {
 	try {
-		const profile = await Profile.findOne({ login: req.params.login });
+		const currentUser = await Profile.findOne({ user_id: req.user.id });
+		const { lat, lng } = currentUser;
+		const profile = await Profile.findOneAndComputeDistance({ login: req.params.login }, { lat, lng });
 
 		if (!profile) {
 			return res.status(404).json({ error: "User with this login doesn't exsist." });
