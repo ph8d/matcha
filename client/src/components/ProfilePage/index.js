@@ -17,6 +17,11 @@ export default class extends React.Component {
 		}
 	}
 
+	componentWillUnmount() {
+		const { ProfileStore } = this.props;
+		ProfileStore.setUser(undefined);
+	}
+
 	handleLike(e) {
 		const { ProfileStore } = this.props;
 		const { user } = ProfileStore;

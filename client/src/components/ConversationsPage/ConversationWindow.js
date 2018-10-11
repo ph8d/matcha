@@ -139,9 +139,6 @@ class ChatList extends React.Component {
 					&nbsp;
 					{ this.renderStatus(online, last_seen) }
 				</p>
-				<div className="card-header-icon">
-					{ this.renderDropDownMenu() }
-				</div>
 			</header>
 		);
 	}

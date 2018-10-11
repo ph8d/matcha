@@ -22,10 +22,10 @@ router.get('/', async (req, res) => {
 		conversations.forEach((conversation, i) => {
 			conversation.unread = 0;
 			conversation.messages = [];
-			if (unreadCounts[i]) {
+			if (unreadCounts[i]) { // And this
 				conversation.unread = unreadCounts[i].number;
 			}
-			if (lastMessages[i]) {
+			if (lastMessages[i]) { // Need to fix this mess!!
 				conversation.messages.push(lastMessages[i]);
 			}
 			conversations[i] = conversation;

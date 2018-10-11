@@ -1,6 +1,7 @@
 import { observable, action, computed } from 'mobx';
 import API from '../helpers/api';
 import SocketStore from './SocketStore';
+import ConversationStore from './ConversationStore';
 
 class ProfileStore {
 	@observable actionInProcess = false;
@@ -72,6 +73,7 @@ class ProfileStore {
 			this.setIsBlocked(true);
 		}
 		this.setActionInProcess(false);
+		ConversationStore.pullConversations();
 	}
 
 	async unblock() {
@@ -84,6 +86,7 @@ class ProfileStore {
 			this.setIsBlocked(false);
 		}
 		this.setActionInProcess(false);
+		ConversationStore.pullConversations();
 	}
 
 	async report(reason) {

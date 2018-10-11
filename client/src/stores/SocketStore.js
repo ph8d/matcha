@@ -35,7 +35,6 @@ class SocketStore {
 				title: `${notification.first_name} ${notification.last_name}`,
 				image: notification.picture
 			}
-
 			const { type_id } = notification;
 
 			if (type_id === 1) {

@@ -229,7 +229,10 @@ router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, r
 		
 		const image = await Jimp.read(req.file.path)
 		let { x, y, width, height } = croppData;
-		await image.crop(x, y, width, height).writeAsync(absolute_path);
+		await image
+			.crop(x, y, width, height)
+			.quality(75)
+			.writeAsync(absolute_path);
 		
 		const picResult = await Picture.add({
 			user_id: user.id,

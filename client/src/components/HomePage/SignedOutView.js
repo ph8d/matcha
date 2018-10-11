@@ -49,7 +49,7 @@ class SignedOutView extends React.Component {
 
 	renderLoginOrRegistrationForm() {
 		const currentForm = this.state.showLoginForm ? <LoginForm /> : <RegistrationForm onSuccess={this.onSuccess} />;
-		const btnActiveClass = 'button is-dark is-radiusless active';
+		const btnActiveClass = 'button is-dark is-radiusless';
 		const btnInactiveClass = 'button is-outlined is-dark is-radiusless';
 
 		return (

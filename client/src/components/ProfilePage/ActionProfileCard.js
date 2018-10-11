@@ -136,6 +136,7 @@ class ActionProfileCard extends React.Component {
 						<label className="has-text-weight-bold is-capitalized is-size-4">
 							{`${profile.first_name} ${profile.last_name} `}
 						</label>
+						<label className="has-text-grey is-size-4">(Match!)</label>
 						<br/>
 						<label className="has-text-grey">
 							{age} years old
@@ -161,6 +162,11 @@ class ActionProfileCard extends React.Component {
 					}	
 					</div>
 				</div>
+				<footer className="card-footer">
+					<p className="card-footer-item has-text-centered has-text-grey is-size-7">
+						Popularity {profile.fame}
+					</p>
+				</footer>
 			</div>
 		);
 	}

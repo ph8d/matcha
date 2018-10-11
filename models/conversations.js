@@ -62,13 +62,20 @@ exports.findAllByUserId = id => {
 							ON profile.user_id = user_conversations.user_id
 						LEFT JOIN pictures
 							ON pictures.id = profile.picture_id
-					WHERE conversation_id IN (
-						SELECT conversation_id
-						FROM user_conversations
-						WHERE user_id = ?
-					) AND NOT user_conversations.user_id = ?
+					WHERE
+						conversation_id IN (
+							SELECT conversation_id
+							FROM user_conversations
+							WHERE user_id = ?
+						) 
+						AND NOT user_conversations.user_id = ?
+						AND NOT user_conversations.user_id IN (
+							SELECT blocked_id
+							FROM block_list
+							WHERE user_id = ?
+						)
 				`;
-				return connection.query(sql, [id, id]);
+				return connection.query(sql, [id, id, id]);
 			})
 			.then(rows => {
 				resolve(rows);

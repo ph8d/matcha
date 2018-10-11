@@ -3,7 +3,13 @@ import PropTypes from 'prop-types';
 
 class SelectInputField extends React.Component {
 	render() {
-		const { defaultValue, onChangeHandler, labelText, name} = this.props;
+		const {
+			isDisabled,
+			defaultValue,
+			onChangeHandler,
+			labelText,
+			name
+		} = this.props;
 
 		return(
 			<div className="field">
@@ -13,7 +19,8 @@ class SelectInputField extends React.Component {
 						onChange={onChangeHandler}
 						name={name}
 						className="is-radiusless"
-						defaultValue={defaultValue}
+						value={defaultValue}
+						disabled={!!isDisabled}
 						required
 					>
 						{this.props.children}
@@ -26,6 +33,7 @@ class SelectInputField extends React.Component {
 
 SelectInputField.propTypes = {
 	labelText: PropTypes.string,
+	isDisabled: PropTypes.bool,
 	defaultValue: PropTypes.string.isRequired,
 	name: PropTypes.string.isRequired,
 	onChangeHandler: PropTypes.func.isRequired,

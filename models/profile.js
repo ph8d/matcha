@@ -1,5 +1,45 @@
 const db = require('../services/db');
 
+const sortSQL = {
+	distance: 'distance ASC',
+	tags: "matched_tags DESC",
+	fame: 'profile.fame DESC',
+	age: 'age ASC'
+}
+
+const getSearchedGenderSQL = (gender) => {
+	if (gender === "male") {
+		return "profile.gender = 'male'";
+	} else if (gender === "female") {
+		return "profile.gender = 'female'";
+	} else {
+		return "profile.gender = 'male' OR profile.gender = 'female'";
+	}
+}
+
+exports.recalculateFameRatingById = async (user_id) => {
+	try {
+		const connection = await db.get();
+		const sql = `
+			UPDATE profile
+			SET
+				fame = (
+					SELECT
+						SUM(type_id)
+					FROM notifications
+					WHERE
+						subject_user = ?
+						AND NOT type_id = 3
+				)
+			WHERE user_id = ?
+		`;
+		const result = await connection.query(sql, [user_id, user_id]);
+		return result;
+	} catch (e) {
+		console.error(e);
+	}
+}
+
 exports.create = profile => {
 	return new Promise((resolve, reject) => {
 		db.get()
@@ -48,13 +88,106 @@ exports.findOneWithPicture = async (data) => {
 }
 
 exports.findRecomendedForUser = async (currentUser, filters) => {
-	const sortSQL = {
-		distance: 'distance ASC',
-		tags: 'same_tags_count DESC',
-		fame: 'profile.fame DESC',
-		age: 'age ASC'
-	}
+	try {
+		const connection = await db.get();
+		const values = [];
+		let sql = `
+			SELECT
+				profile.user_id,
+				pictures.src AS picture,
+				first_name,
+				last_name,
+				login,
+				gender,
+				fame,
+				TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) AS age,
+				ST_Distance_Sphere (
+					point(?,?),
+					point(profile.lat, profile.lng)
+				) / 1000 AS distance,
+				COUNT( tags.user_id ) AS filter_tags
+			FROM (
+				SELECT
+					profile.user_id,
+					COUNT( tags.user_id ) as matched_tags
+				FROM profile
+					LEFT JOIN tags
+						ON tags.user_id = profile.user_id
+				WHERE 
+					((${getSearchedGenderSQL(currentUser.searching_for)})
+					AND (profile.searching_for = ? OR profile.searching_for = '*'))
+					AND tags.value IN (
+						SELECT tags.value
+						FROM tags
+						WHERE user_id = ?
+					)
+					AND NOT profile.user_id = ?
+					AND NOT profile.user_id IN (
+						SELECT blocked_id
+						FROM block_list
+						WHERE user_id = ?
+					)
+				GROUP BY profile.user_id
+			) AS recommended
+				LEFT JOIN profile
+					ON profile.user_id = recommended.user_id
+				LEFT JOIN pictures
+					ON pictures.id = profile.picture_id
+				LEFT JOIN tags
+					ON tags.user_id = recommended.user_id
+		`;
 
+		values.push(
+			currentUser.lat,
+			currentUser.lng,
+			currentUser.gender,
+			currentUser.user_id,
+			currentUser.user_id,
+			currentUser.user_id
+		);
+
+		if (filters.tags) {
+			sql += "WHERE tags.value IN ? ";
+			values.push([ filters.tags ]);
+		}
+
+		sql += `
+			GROUP BY
+				recommended.user_id
+			HAVING
+		`;
+
+		if (filters.tags) {
+			sql += 'filter_tags = ? AND';
+			values.push(filters.tags.length);
+		}
+
+		sql += `
+			distance BETWEEN ? AND ?
+			AND age BETWEEN ? AND ?
+			AND fame BETWEEN ? AND ?
+		`
+
+		values.push(
+			filters.distance[0],
+			filters.distance[1],
+			filters.age[0],
+			filters.age[1],
+			filters.fame[0],
+			filters.fame[1]
+		);
+
+
+		sql += `ORDER BY ${sortSQL[filters.sortBy]}`;
+
+		const rows = await connection.query(sql, values);
+		return rows;
+	} catch (e) {
+		throw e;
+	}
+}
+
+exports.findWithFilters = async (currentUser, filters) => {
 	try {
 		const connection = await db.get();
 		const values = [];
@@ -68,40 +201,62 @@ exports.findRecomendedForUser = async (currentUser, filters) => {
 				TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) AS age,
 				pictures.src AS picture,
 				ST_Distance_Sphere (
-					point(?, ?),
+					point(?,?),
 					point(profile.lat, profile.lng)
 				) / 1000 AS distance,
-				COUNT( tags.user_id ) AS same_tags_count
+				COUNT( tags.user_id ) AS matched_tags
 			FROM profile
 				LEFT JOIN tags
 					ON tags.user_id = profile.user_id
 				LEFT JOIN pictures
 					ON pictures.id = profile.picture_id
-			WHERE 
-				profile.gender = ?
-				AND profile.searching_for = ?
-				AND NOT profile.user_id = ?
-				AND fame BETWEEN ? AND ?
+			WHERE
+				(${getSearchedGenderSQL(filters.gender)})
 		`;
 
 		values.push(
 			currentUser.lat,
-			currentUser.lng,
-			currentUser.searching_for,
-			currentUser.gender,
-			currentUser.user_id,
-			filters.fame[0],
-			filters.fame[1],
-		)
+			currentUser.lng
+		);
+
+		if (filters.searching_for !== 'any') {
+			sql += `
+				AND profile.searching_for = ?
+			`
+			values.push(filters.searching_for);
+		}
+
+		sql += `
+				AND fame BETWEEN ? AND ?
+		`
+		values.push(filters.fame[0], filters.fame[1]);
 
 		if (filters.tags) {
-			sql += 'AND tags.value IN ?';
+			sql += `
+				AND tags.value IN ?
+			`;
 			values.push([ filters.tags ]);
 		}
 
 		sql += `
+				AND NOT profile.user_id = ?
+				AND NOT profile.user_id IN (
+					SELECT blocked_id
+					FROM block_list
+					WHERE user_id = ?
+				)
 			GROUP BY profile.user_id
 			HAVING
+		`;
+
+		values.push(currentUser.user_id, currentUser.user_id);
+
+		if (filters.tags) {
+			sql += 'matched_tags = ? AND';
+			values.push(filters.tags.length)
+		}
+
+		sql += `
 				distance BETWEEN ? AND ?
 				AND age BETWEEN ? AND ?
 			ORDER BY
@@ -114,15 +269,8 @@ exports.findRecomendedForUser = async (currentUser, filters) => {
 			filters.age[1]
 		);
 
-		// if (filters.sortBy !== "distance") {
-			sql += sortSQL[filters.sortBy];
-		// }
-
-		// sql += "distance ASC";
-
-		console.log(sql);
+		sql += sortSQL[filters.sortBy];
 		const rows = await connection.query(sql, values);
-		console.log(rows);
 		return rows;
 	} catch (e) {
 		throw e;
@@ -152,7 +300,6 @@ exports.findOneAndComputeDistance = async (data, position) => {
 }
 
 exports.isOnline = async (user_id) => {
-	console.log('user_id', user_id);
 	try {
 		const connection = await db.get();
 

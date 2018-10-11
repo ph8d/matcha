@@ -7,7 +7,7 @@ class ProfilePreview extends React.Component {
 
 		return (
 			<Link to={`/profile/${login}`}>
-				<div className="card" style={{'margin': '10px', 'maxWidth': '200px'}}>
+				<div className="card" style={{'margin': '10px', 'maxWidth': '256px'}}>
 					<figure className="image">
 						<img src={picture} alt="avatar" />
 						<p

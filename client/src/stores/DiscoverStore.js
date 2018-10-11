@@ -1,17 +1,19 @@
-import { observable, action, computed, toJS } from 'mobx'
+import { observable, action, computed, toJS } from 'mobx';
+import UserStore from './UserStore';
 import API from '../helpers/api';
 
 class DiscoverStore {
-	pullFromRecommendations = true;
+	@observable searchMode = 'recommended';
 	
 	@observable filters = {
-		distance: [0, 20],
+		gender: "female",
+		searching_for: "female",
+		distance: [0, 10],
 		age: [18, 24],
 		fame: [0, 500],
 		tags: [],
+		sortBy: "distance"
 	}
-	
-	@observable sortBy = "distance";
 
 	@observable isLoading = false;
 	@observable profiles = [];
@@ -26,11 +28,6 @@ class DiscoverStore {
 	
 	@action setFilter(name, value) {
 		this.filters[name] = value;
-	}
-
-	@action setSortBy(field) {
-		this.sortBy = field;
-		this.pullProfiles();
 	}
 
 	@action setProfiles(profiles) {
@@ -66,23 +63,39 @@ class DiscoverStore {
 		this.pullProfiles();
 	}
 
-	setPullFromRecommendations(status) {
-		this.pullFromRecommendations = status;
+	@action setSearchMode(mode) {
+		this.searchMode = mode;
+		if (mode === 'recommended') {
+			this.init();
+		}
+		this.pullProfiles();
 	}
 
+	@action init() {
+		const { gender, searching_for } = UserStore.currentUser.profile;
+		const filters = {
+			gender: searching_for,
+			searching_for: gender,
+			distance: [0, 25],
+			age: [18, 24],
+			fame: [0, 500],
+			tags: [],
+			sortBy: "distance",
+		}
+		console.log(filters);
+		this.filters = filters;
+	}
 
 	pullProfiles() {
-		const filters = this.filters;
-		filters.sortBy = this.sortBy;
-
-		if (this.pullFromRecommendations) {
-			this._pullRecomendedProfiles(filters);
+		if (this.searchMode === 'advanced') {
+			this._pullAllProfiles(this.filters);
 		} else {
-			this._pullAllProfiles(filters);
+			this._pullRecommendedProfiles(this.filters); 
 		}
 	}
 
-	async _pullRecomendedProfiles(filters) {
+
+	async _pullRecommendedProfiles(filters) {
 		this.setIsLoading(true);
 		const response = await API.Profiles.getRecommended(filters);
 		if (response.status === 200) {

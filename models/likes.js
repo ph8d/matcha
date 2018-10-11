@@ -72,12 +72,31 @@ exports.isLiked = async (currentUser, otherUser) => {
 	}
 }
 
+exports.getForTwoUsers = async (user1, user2) => {
+	try {
+		const connection = await db.get();
+		const users = [user1, user2, user1, user2];
+		const sql = `
+			SELECT *
+			FROM likes
+			WHERE
+				likes.user_id IN (?,?)
+				AND
+				likes.liked_user_id IN (?,?)
+		`
+		const rows = await connection.query(sql, users);
+		return rows;
+	} catch (e) {
+		throw e;
+	}
+}
+
 exports.isMatch = (user_one_id, user_two_id) => {
 	return new Promise((resolve, reject) => {
 		db.get()
 			.then(connection => {
 				let sql = `
-					SELECT COUNT(*) as count
+					SELECT COUNT(*) as isMatch
 					FROM likes
 						INNER JOIN likes AS liked_me
 							ON likes.user_id = liked_me.liked_user_id
@@ -87,7 +106,7 @@ exports.isMatch = (user_one_id, user_two_id) => {
 				return connection.query(sql, [user_one_id, user_two_id]);
 			})
 			.then(result => {
-				resolve(result[0].count);
+				resolve(result[0].isMatch);
 			})
 			.catch(reject);
 	});

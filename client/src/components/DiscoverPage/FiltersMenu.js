@@ -10,21 +10,29 @@ const Range = Slider.createSliderWithTooltip(Slider.Range);
 class FiltersMenu extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			tagInput: '',
-			tagError: ''
-		}
-
 		this.pullProfiles = this.pullProfiles.bind(this);
 		this.handleTagInput = this.handleTagInput.bind(this);
 		this.addTag = this.addTag.bind(this);
 		this.handleTagDelete = this.handleTagDelete.bind(this);
 		this.changeSortOrder = this.changeSortOrder.bind(this);
+		this.changeSearchMode = this.changeSearchMode.bind(this);
+		this.setFilterAndPullProfiles = this.setFilterAndPullProfiles.bind(this);
+	}
+
+	changeSearchMode(e) {
+		const { DiscoverStore } = this.props;
+		DiscoverStore.setSearchMode(e.target.value);
 	}
 
 	pullProfiles(e) {
 		const { DiscoverStore } = this.props;
 		DiscoverStore.pullProfiles();
+	}
+
+	setFilterAndPullProfiles(e) {
+		const { DiscoverStore } = this.props;
+		DiscoverStore.setFilter(e.target.name, e.target.value);
+		this.pullProfiles();
 	}
 
 	changeSortOrder(e) {
@@ -81,21 +89,57 @@ class FiltersMenu extends React.Component {
 	}
 
 	render() {
-		const { tagInput, filters, sortBy } = this.props.DiscoverStore;
+		const { searchMode, tagInput, filters } = this.props.DiscoverStore;
 
 		return(
 			<div className="card">
 				<div className="card-content">
+					<SelectInputField
+						name="searchMode"
+						labelText={'Show'}
+						defaultValue={searchMode}
+						onChangeHandler={this.changeSearchMode}
+					>
+						<option value={"recommended"}>Recomended profiles</option>
+						<option value={"advanced"}>All profiles</option>
+					</SelectInputField>
+					<SelectInputField
+						name="sortBy"
+						labelText={'Sort by'}
+						defaultValue={filters.sortBy}
+						onChangeHandler={this.setFilterAndPullProfiles}
+					>
+						<option value={"distance"}>Distance</option>
+						<option value={"tags"}>Matched tags</option>
+						<option value={"age"}>Age</option>
+						<option value={"fame"}>Fame</option>
+					</SelectInputField>
+					<hr/>
+					<SelectInputField
+						name="gender"
+						labelText={'Gender'}
+						defaultValue={filters.gender}
+						isDisabled={searchMode !== 'advanced'}
+						onChangeHandler={this.setFilterAndPullProfiles}
+					>
+						<option value={"male"}>Male</option>
+						<option value={"female"}>Female</option>
+						<option value={"*"}>Any</option>
+					</SelectInputField>
+					<SelectInputField
+						name="searching_for"
+						labelText={'Interested in'}
+						defaultValue={filters.searching_for}
+						isDisabled={searchMode !== 'advanced'}
+						onChangeHandler={this.setFilterAndPullProfiles}
+					>
+						<option value={"male"}>Male</option>
+						<option value={"female"}>Female</option>
+						<option value={"*"}>Male & Female</option>
+						<option value={"any"}>Any</option>
+					</SelectInputField>
 					<div className="field">
-						<button className="button is-white">
-							<span className="has-text-weight-bold">FILTERS</span>
-							<span className="icon">
-								<i className="fas fa-sliders-h"></i>
-							</span>
-						</button>
-					</div>
-					<div className="field">
-						<label className="label is-size-7">Distance</label>
+						<label className="label is-size-7 has-text-grey">Distance</label>
 						<div className="control">
 							<Range
 								min={0}
@@ -109,7 +153,7 @@ class FiltersMenu extends React.Component {
 						</div>
 					</div>
 					<div className="field">
-						<label className="label is-size-7">Age</label>
+						<label className="label is-size-7 has-text-grey">Age</label>
 						<div className="control">
 							<Range
 								min={18}
@@ -123,7 +167,7 @@ class FiltersMenu extends React.Component {
 						</div>
 					</div>
 					<div className="field">
-						<label className="label is-size-7">Fame</label>
+						<label className="label is-size-7 has-text-grey">Fame</label>
 						<div className="control">
 							<Range
 								min={0}
@@ -143,17 +187,6 @@ class FiltersMenu extends React.Component {
 					>
 						{ this.renderTags(filters.tags) }
 					</ TagsInputCard>
-					<SelectInputField
-						name="sortBy"
-						labelText={'Sort by'}
-						defaultValue={sortBy}
-						onChangeHandler={this.changeSortOrder}
-					>
-						<option value={"distance"}>Distance</option>
-						<option value={"tags"}>Maximum of common tags</option>
-						<option value={"age"}>Age</option>
-						<option value={"fame"}>Fame</option>
-					</SelectInputField>
 				</div>
 			</div>
 		);

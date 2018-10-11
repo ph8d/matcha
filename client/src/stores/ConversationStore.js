@@ -105,6 +105,7 @@ class ConversationStore {
 		this.setIsLoading(true);
 		const response = await API.Conversations.getPreviews();
 		if (response.status === 200) {
+			console.log(response.data);
 			this.setConversations(response.data);
 		}
 		this.setIsLoading(false);

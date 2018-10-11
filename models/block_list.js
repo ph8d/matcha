@@ -28,11 +28,11 @@ exports.delete = (user_id, blocked_id) => {
 	});
 }
 
-exports.isBlocked = async (currentUser, otherUser) => {
+exports.isBlocked = async (userId, blockedId) => {
 	try {
 		const connection = await db.get();
 		const sql = 'SELECT COUNT(*) as count FROM block_list WHERE user_id = ? AND blocked_id = ?';
-		const result = await connection.query(sql, [currentUser, otherUser]);
+		const result = await connection.query(sql, [userId, blockedId]);
 		return result[0].count;
 	} catch (e) {
 		throw e;

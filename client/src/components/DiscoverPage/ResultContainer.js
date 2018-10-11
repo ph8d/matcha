@@ -5,7 +5,7 @@ import SpinLoad from '../SpinLoad';
 
 const profileList = {
 	'flexWrap': 'wrap',
-	'justifyContent': 'flex-start'
+	'justifyContent': 'center'
 }
 
 class ResultContainer extends React.Component {

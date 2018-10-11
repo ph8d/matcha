@@ -30,6 +30,13 @@ class UserStore {
 	}
 
 	@action pushNewNotification(notification) {
+		const len = this.currentUser.notifications.length;
+		for (let i = 0; i < len; i++) {
+			if (this.currentUser.notifications[i].id === notification.id) {
+				this.currentUser.notifications.splice(i, 1);
+				break ;
+			}
+		}
 		this.currentUser.notifications.unshift(notification);
 	}
 

@@ -11,11 +11,10 @@ import './style.css';
 export default class extends React.Component {
 	componentDidMount() {
 		const { DiscoverStore } = this.props;
-		DiscoverStore.pullProfiles();
-	}
-
-	componentWillUnmount() {
-		
+		if (DiscoverStore.profiles.length === 0) {
+			DiscoverStore.init();
+			DiscoverStore.pullProfiles();
+		}
 	}
 
 	render() {
@@ -24,7 +23,7 @@ export default class extends React.Component {
 		return (
 			<MainLayout>
 				<div className="columns is-centered is-gapless">
-					<div className="column is-4">
+					<div className="column is-4 is-3-widescreen">
 						<FiltersMenu />
 					</div>
 					<div className="column">
