@@ -1,117 +1,49 @@
 const db = require('../services/db');
 const crypto = require('crypto');
 
-exports.logAll = () => {
-	db.get()
-		.then(connection => {
-			let sql = 'SELECT * FROM user';
-			return connection.query(sql);
-		})
-		.then(rows => {
-			console.log(rows);
-		})
-		.catch(console.error);
+exports.add = async (user) => {
+	const connection = await db.get();
+	const sql = 'INSERT INTO user SET ?';
+	const result = await connection.query(sql, user);
+	return result;
 };
 
-exports.getAll = () => {
-	return new Promise((resolve, reject) => {
-		db.get()
-			.then(connection => {
-				let sql = 'SELECT * FROM user';
-				return connection.query(sql);
-			})
-			.then(rows => {
-				resolve(rows);
-			})
-			.catch(reject);
-	});
+exports.findOne = async (data) => {
+	const connection = await db.get();
+	const sql = 'SELECT * FROM user WHERE ?';
+	const rows = await connection.query(sql, data);
+	return rows[0];
 };
 
-exports.add = (user) => {
-	return new Promise((resolve, reject) => {
-		db.get()
-			.then(connection => {
-				let sql = 'INSERT INTO user SET ?';
-				return connection.query(sql, user);
-			})
-			.then(result => {
-				resolve(result);
-			})
-			.catch(reject);
-	});
+exports.update = async (dataToFind, dataToUpdate) => {
+	const connection = await db.get();
+	const sql = 'UPDATE user SET ? WHERE ?';
+	const result = await connection.query(sql, [dataToUpdate, dataToFind]);
+	return result;
 };
 
-exports.findOne = data => {
-	return new Promise((resolve, reject) => {
-		db.get()
-			.then(connection => {
-				let sql = 'SELECT * FROM user WHERE ?';
-				return connection.query(sql, data);
-			})
-			.then(rows => {
-				resolve(rows[0]);
-			})
-			.catch(reject);
-	});
+exports.genRecoveryRequest = async (userId) => {
+	let hash = crypto.randomBytes(20).toString('hex');
+	const connection = await db.get();
+	let data = {
+		id: hash,
+		user_id: userId
+	}
+	const sql = 'INSERT recovery_requests SET ?';
+	const result = await connection.query(sql, data);
+	return hash;
 };
 
-exports.update = (dataToFind, dataToUpdate) => {
-	return new Promise((resolve, reject) => {
-		db.get()
-			.then(connection => {
-				let sql = 'UPDATE user SET ? WHERE ?';
-				return connection.query(sql, [dataToUpdate, dataToFind]);
-			})
-			.then(result => {
-				resolve(result);
-			})
-			.catch(reject);
-	});
+exports.findRecoveryRequest = async (hash) => {
+	const connection = await db.get()
+	const sql = 'SELECT * FROM recovery_requests WHERE id = ?';
+	const rows = await connection.query(sql, hash);
+	return rows[0];
 };
 
-exports.genRecoveryRequest = userId => {
-	return new Promise((resolve, reject) => {
-		let hash = crypto.randomBytes(20).toString('hex');
-		db.get()
-			.then(connection => {
-				let data = {
-					id: hash,
-					user_id: userId
-				}
-				let sql = 'INSERT recovery_requests SET ?';
-				return connection.query(sql, data);
-			})
-			.then(result => {
-				resolve(hash);
-			})
-			.catch(reject);
-	});
-};
-
-exports.findRecoveryRequest = hash => {
-	return new Promise((resolve, reject) => {
-		db.get()
-			.then(connection => {
-				let sql = 'SELECT * FROM recovery_requests WHERE id = ?';
-				return connection.query(sql, hash);
-			})
-			.then(rows => {
-				resolve(rows[0]);
-			})
-			.catch(reject);
-	});
-};
-
-exports.delAllRecoveryRequestsByUserId = userId => {
-	return new Promise((resolve, reject) => {
-		db.get()
-			.then(connection => {
-				let sql = 'DELETE FROM recovery_requests WHERE user_id = ?';
-				return connection.query(sql, userId);
-			})
-			.then(result => {
-				resolve(result);
-			})
-			.catch(reject);
-	});
+exports.delAllRecoveryRequestsByUserId = async (userId) => {
+	const connection = await db.get()
+	const sql = 'DELETE FROM recovery_requests WHERE user_id = ?';
+	const result = await connection.query(sql, userId);
+	return result;
 };
