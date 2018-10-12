@@ -29,6 +29,20 @@ class ProfileStore {
 		this.user.status.isMatch = status;
 	}
 
+	@computed get visibleStatus() {
+		const { isLiked, likesMe, isBlocked } = this.user.status;
+
+		if (isBlocked) {
+			return '(Blocked)';
+		} else if (isLiked && likesMe) {
+			return '(Match!)'
+		} else if (likesMe) {
+			return '(Likes you)';
+		} else {
+			return '';
+		}
+	}
+
 	async loadUser(login){
 		const response = await API.User.get(login);
 		if (response.status !== 200) {

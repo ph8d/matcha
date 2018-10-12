@@ -101,6 +101,11 @@ class ProfileCard extends React.Component {
 					}	
 					</div>
 				</div>
+				<footer className="card-footer">
+					<p className="card-footer-item has-text-centered has-text-grey is-size-7">
+						Popularity {profile.fame}
+					</p>
+				</footer>
 			</div>
 		);
 	}

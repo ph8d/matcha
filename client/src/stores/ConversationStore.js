@@ -68,27 +68,6 @@ class ConversationStore {
 		this.selectedConversation.messages.push(message);
 	}
 
-	@action pushMessage(message) {
-		const id = message.conversation_id;
-		const lenght = this.conversations.length;
-		
-		for (let i = 0; i < lenght; i++) {
-			if (this.conversations[i].conversation_id === id) {
-				this.conversations[i].messages.push(message);
-				this.conversations[i].unread++;
-				return;
-			}
-		}
-
-		const dummyConversation = {
-			conversation_id: id,
-			unread: 1,
-			messages: [message]
-		}
-
-		this.conversations.push(dummyConversation);
-	}
-
 	@action updateUserStatus(status) {
 		if (this.selectedIndex === null) {
 			console.warn('Recieved status update but conversation is not selected!');

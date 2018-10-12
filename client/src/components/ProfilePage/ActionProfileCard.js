@@ -78,7 +78,7 @@ class ActionProfileCard extends React.Component {
 
 	renderMainActionButton(status) {
 		return (
-			<button onClick={this.props.handleMainAction} className="button is-danger is-radiusless is-fullwidth is-size-4">
+			<button onClick={this.props.handleMainAction} className="button is-light is-radiusless is-fullwidth is-size-4">
 				<span className="icon">
 					<i className="fas fa-heart"></i>
 				</span>
@@ -123,6 +123,7 @@ class ActionProfileCard extends React.Component {
 
 	render() {
 		const { status, profile, pictures, tags } = this.props.user;
+		const { visibleStatus } = this.props.ProfileStore;
 		const age = this.getAgeFromBirthDate(profile.birthdate);
 
 		return (
@@ -136,7 +137,7 @@ class ActionProfileCard extends React.Component {
 						<label className="has-text-weight-bold is-capitalized is-size-4">
 							{`${profile.first_name} ${profile.last_name} `}
 						</label>
-						<label className="has-text-grey is-size-4">(Match!)</label>
+						<label className="has-text-grey is-size-5">{visibleStatus}</label>
 						<br/>
 						<label className="has-text-grey">
 							{age} years old

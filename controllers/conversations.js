@@ -10,6 +10,7 @@ router.all('*', requiresAuth);
 
 router.get('/', async (req, res) => {
 	const currentUser = req.user.id;
+
 	try {
 		const getConversations = Conversations.findAllByUserId(currentUser);
 		const getUnreadCounts = Messages.getUnreadCountPerConvForUser(currentUser);
@@ -30,6 +31,7 @@ router.get('/', async (req, res) => {
 			}
 			conversations[i] = conversation;
 		});
+
 		res.json(conversations);
 	} catch (e) {
 		console.error(e);
@@ -45,7 +47,7 @@ router.get('/:login', async (req, res) => {
 		}
 		const conversation = await Conversations.findIdByUsers(req.user.id, profile.user_id);
 		if (!conversation) {
-			res.status(404).json("You have no conversation with this user.")
+			res.status(404).json({ error: "You have no conversation with this user." });
 		}
 		const messages = await Messages.findAllByConvId(conversation.conversation_id);
 		res.json(messages);
