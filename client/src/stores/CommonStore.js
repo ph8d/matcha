@@ -17,15 +17,12 @@ class CommonStore {
 
 const store = new CommonStore();
 
-const saveTokenToStorage = reaction(
-	() => store.token,
-	token => {
-		if (token) {
-			window.localStorage.setItem('jwt', token);
-		} else {
-			window.localStorage.removeItem('jwt');
-		}
+reaction(() => store.token, token => {
+	if (token) {
+		window.localStorage.setItem('jwt', token);
+	} else {
+		window.localStorage.removeItem('jwt');
 	}
-);
+});
 
 export default store;

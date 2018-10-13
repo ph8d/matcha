@@ -67,7 +67,7 @@ exports.findAllByUserId = async (id) => {
 	return rows;
 };
 
-exports.deleteById = async id => {
+exports.deleteById = async (id) => {
 	const connection = await db.get();
 	const sql = 'DELETE FROM user_conversations WHERE ?';
 	const result = await connection.query(sql, id);

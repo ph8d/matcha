@@ -1,6 +1,5 @@
 import React from 'react';
 import MainLayout from '../Layouts/MainLayout';
-import SpinLoad from '../SpinLoad';
 import FiltersMenu from './FiltersMenu';
 import ResultContainer from './ResultContainer';
 import { observer, inject } from 'mobx-react';

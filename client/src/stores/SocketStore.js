@@ -1,4 +1,3 @@
-import { observable, action, reaction } from 'mobx'
 import io from 'socket.io-client';
 
 import iziToast from 'izitoast';

@@ -16,6 +16,8 @@ class ContainerCard extends React.Component {
 
 	renderText(type_id) {
 		let text = '';
+		if (!type_id) return
+
 		if (type_id === 1) {
 			text = "Visited your profile";
 		} else if (type_id === 2) {
@@ -24,8 +26,6 @@ class ContainerCard extends React.Component {
 			text = "Unliked you";
 		} else if (type_id === 4) {
 			text = "Matched with you";
-		} else {
-			text = "Unknown notification type id"
 		}
 		return <span>{text}</span>;
 	}

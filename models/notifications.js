@@ -13,7 +13,9 @@ exports.add = async (type_id, subject_user, actor_user) => {
 		INSERT INTO notifications
 		SET ?
 		ON DUPLICATE KEY
-			UPDATE seen = 0
+			UPDATE
+				seen = 0,
+				date = NOW()
 	`;
 
 	const values = {
@@ -73,6 +75,27 @@ exports.getAllByUserId = async user_id => {
 		ORDER BY notifications.date DESC
 	`;
 	const rows = await connection.query(sql, user_id);
+	return rows;
+}
+
+exports.getAllVisitsByUserId = async (user_id) => {
+	const connection = await db.get();
+	const sql = `
+		SELECT
+			pictures.src AS picture,
+			first_name,
+			last_name,
+			login,
+			notifications.date
+		FROM notifications
+			INNER JOIN profile
+				ON profile.user_id = notifications.subject_user
+			LEFT JOIN pictures
+				ON pictures.id = profile.picture_id
+		WHERE actor_user = ? AND type_id = 1
+		ORDER BY notifications.date DESC
+	`;
+	const rows = connection.query(sql, user_id);
 	return rows;
 }
 

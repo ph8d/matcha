@@ -56,6 +56,9 @@ const User = {
 	getSelf: () => {
 		return request('GET', '/users/self');
 	},
+	getVisitHistory: () => {
+		return request('GET', '/users/self/history');
+	},
 	update: (data) => {
 		return request('POST', '/users/update', data);
 	},

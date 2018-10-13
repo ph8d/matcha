@@ -183,7 +183,7 @@ router.get('/exists/:login', async (req, res) => {
 
 router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, res) => {
 	try {
-		const user = await User.findOne({ verification_hash: req.params.hash });
+		const user = await User.findOne({ verification_hash: req.params.hashs });
 		if (!user) {
 			return res.sendStatus(401);
 		}
@@ -229,7 +229,7 @@ router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, r
 	}
 });
 
-router.all('*', requiresAuth); // From this point all routes will require authentication
+router.all('*', requiresAuth);
 
 router.post('/update', async (req, res) => {
 	console.log(req.body);
@@ -274,6 +274,17 @@ router.get('/self', async (req, res) => {
 		};
 
 		res.json(user);
+	} catch (e) {
+		console.error(e);
+		res.sendStatus(500);
+	}
+});
+
+router.get('/self/history', async (req, res) => {
+	try {
+		const user_id = req.user.id;
+		const result = await Notifications.getAllVisitsByUserId(user_id);
+		res.json(result);
 	} catch (e) {
 		console.error(e);
 		res.sendStatus(500);

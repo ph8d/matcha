@@ -7,11 +7,6 @@ import { inject, observer } from 'mobx-react';
 
 @inject('ConversationStore') @observer
 export default class extends React.Component {
-	componentDidMount() {
-		const { ConversationStore } = this.props;
-		// ConversationStore.pullConversations();
-	}
-
 	render() {
 		const { selectedConversation } = this.props.ConversationStore;
 

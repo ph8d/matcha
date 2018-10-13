@@ -7,13 +7,14 @@ import SpinLoad from '../SpinLoad';
 @inject('ProfileStore', 'UserStore') @observer
 export default class extends React.Component {
 	componentDidMount() {
+		const { UserStore, ProfileStore } = this.props;
 		const { login } = this.props.match.params;
-		const currentUserLogin = this.props.UserStore.currentUser.profile.login;
+		const currentUserLogin = UserStore.currentUser.profile.login;
 
 		if (currentUserLogin === login) {
 			this.props.history.replace('/')
 		} else {
-			this.props.ProfileStore.loadUser(login);
+			ProfileStore.loadUser(login);
 		}
 	}
 

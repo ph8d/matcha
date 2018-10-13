@@ -6,7 +6,10 @@ import SocketStore from './SocketStore';
 class UserStore {
 	@observable isLoading = false;
 	@observable currentUser = undefined;
-	
+
+	@observable showVisitHistory = false;
+	@observable visitHistory = [];
+
 	@observable input = {}
 
 	@action setIsLoading(status) {
@@ -15,6 +18,14 @@ class UserStore {
 
 	@action setCurrentUser(user) {
 		this.currentUser = user;
+	}
+
+	@action setVisitHistory(history) {
+		this.visitHistory = history;
+	}
+
+	@action setShowVisitHistory(status) {
+		this.showVisitHistory = status;
 	}
 
 	@action setPictures(pictures) {
@@ -71,6 +82,17 @@ class UserStore {
 
 	@action splicePicture(index) {
 		this.currentUser.pictures.splice(index, 1);
+	}
+	
+	async pullVisitHistory() {
+		try {
+			const response = await API.User.getVisitHistory();
+			if (response.status === 200) {
+				this.setVisitHistory(response.data);
+			}
+		} catch (e) {
+			console.log(e);
+		}
 	}
 
 	async pullUser() {

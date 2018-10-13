@@ -44,7 +44,6 @@ class NavBar extends React.Component {
 					<div className={navMenuClass}>
 						<div className="navbar-start">
 							<Link className="navbar-item" to="/">Home</Link>
-							<Link className="navbar-item" to="/about">About</Link>
 						</div>
 
 						<div className="navbar-end">
