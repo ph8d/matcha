@@ -23,15 +23,18 @@ router.get('/', async (req, res) => {
 		conversations.forEach((conversation, i) => {
 			conversation.unread = 0;
 			conversation.messages = [];
-			if (unreadCounts[i]) { // And this
-				conversation.unread = unreadCounts[i].number;
-			}
-			if (lastMessages[i]) { // Need to fix this mess!!
-				conversation.messages.push(lastMessages[i]);
-			}
+			lastMessages.forEach(message => {
+				if (message.conversation_id === conversation.conversation_id) {
+					conversation.messages.push(message);
+				}
+			});
+			unreadCounts.forEach(count => {
+				if (count.conversation_id === conversation.conversation_id) {
+					conversation.unread = count.number;
+				}
+			});
 			conversations[i] = conversation;
 		});
-
 		res.json(conversations);
 	} catch (e) {
 		console.error(e);

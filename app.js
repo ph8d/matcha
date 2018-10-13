@@ -32,7 +32,6 @@ app.use('/pictures', pictures);
 app.use('/profiles', profiles);
 
 socketServer.init(http);
-
 http.listen(config.port, () => {
 	console.log('Server started at port ' + config.port);
 });

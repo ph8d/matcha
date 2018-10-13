@@ -1,7 +1,5 @@
 const db = require('../services/db');
 
-const Messages = require('./messages');
-
 const toAscending = (x, y) => {
 	return x > y ? [y, x] : [x, y];
 }

@@ -1,4 +1,4 @@
-import { observable, action, computed, toJS } from 'mobx';
+import { observable, action, computed } from 'mobx';
 import API from '../helpers/api';
 import AuthStore from './AuthStore';
 import SocketStore from './SocketStore';

@@ -48,7 +48,6 @@ exports.add = async (type_id, subject_user, actor_user) => {
 		await Profile.recalculateFameRatingById(subject_user);
 	}
 	socketServer.notifyUser(subject_user, rows[0]);
-
 	return result;
 }
 

@@ -48,12 +48,7 @@ router.post('/register', async (req, res) => {
 			subject: 'Matcha | Registration',
 			user: form
 		}, error => {
-	
-			// If error occures on this step of registration i need to do something like deleting user form database
-			// So he can register with his email and username again
-	
-			if (error) throw error;
-			/* I can respond before sending email, user does not need to wait extra time */
+			if (error) throw error;	
 			res.json({ message: "Please, check your email and follow the instructions that we've sent to continue registration process." });
 		});
 	} catch (e) {
@@ -63,7 +58,7 @@ router.post('/register', async (req, res) => {
 });
 
 
-router.post('/login', async (req, res, next) => {
+router.post('/login', async (req, res) => {
 	try {
 		const user = await User.findOne({ email: req.body.email })
 		if (!user || user.is_verified === 0) {
@@ -269,14 +264,12 @@ router.get('/self', async (req, res) => {
 		const getProfile = Profile.findOne({ user_id });
 		const getPictures = Picture.findAllByUserIdArranged(user_id);
 		const getTags = Tags.findAll({ user_id });
-		const getBlockedUsers = BlockList.findAll({ user_id });
 		const getNotifications = Notifications.getAllByUserId(user_id);
 
 		const user = {
 			profile: await getProfile,
 			pictures: await getPictures,
 			tags: await getTags,
-			blockedUsers: await getBlockedUsers,
 			notifications: await getNotifications
 		};
 
