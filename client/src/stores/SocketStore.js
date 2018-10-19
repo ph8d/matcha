@@ -7,10 +7,10 @@ import ConversationStore from './ConversationStore';
 
 iziToast.settings({
 	theme: 'dark',
-	position: 'topLeft',
+	position: 'bottomRight',
 	progressBarColor: 'white',
-	transitionIn: 'fadeInDown',
-	transitionInMobile: 'fadeInDown',
+	transitionIn: 'fadeInUp',
+	transitionInMobile: 'fadeInUp',
 	animateInside: false,
 	drag: false
 })

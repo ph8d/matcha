@@ -195,7 +195,7 @@ router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, r
 		if (!profileData || !tags || !req.file) {
 			return res.sendStatus(400);
 		}
-		
+		ƒ
 		const pictureSrc = `/uploaded/images/${req.file.filename}`;
 		const absolute_path = `./public/uploaded/images/${req.file.filename}`;
 		
@@ -256,6 +256,9 @@ router.post('/update', async (req, res) => {
 		res.sendStatus(500);
 	}
 })
+
+const userGenerator = require('../seedDB/userGenerator');
+const seeder = require('../seedDB/seeder');
 
 router.get('/self', async (req, res) => {
 	try {

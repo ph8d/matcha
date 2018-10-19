@@ -82,7 +82,6 @@ class DiscoverStore {
 			tags: [],
 			sortBy: "distance",
 		}
-		console.log(filters);
 		this.filters = filters;
 	}
 

@@ -2,7 +2,6 @@ import { observable, action, computed } from 'mobx';
 import API from '../helpers/api';
 import SocketStore from './SocketStore';
 import ConversationStore from './ConversationStore';
-import UserStore from './UserStore';
 
 class ProfileStore {
 	@observable actionInProcess = false;
