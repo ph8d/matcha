@@ -10,12 +10,20 @@ class BaseInputField extends React.Component {
 		this.renderTextArea = this.renderTextArea.bind(this);
 	}
 
-	renderLabel() {
-		return (
-			<label className="label is-small has-text-grey" htmlFor={this.props.name}>
-				{this.props.labelText}
-			</label>
-		);
+	renderLabel(isInvalid) {
+		if (isInvalid) {
+			return (
+				<label className="label is-small has-text-danger" htmlFor={this.props.name}>
+					{this.props.labelText}
+				</label>
+			);
+		} else {
+			return (
+				<label className="label is-small has-text-grey" htmlFor={this.props.name}>
+					{this.props.labelText}
+				</label>
+			);
+		}
 	}
 
 	renderTextArea(classes) {
@@ -55,7 +63,7 @@ class BaseInputField extends React.Component {
 			<div className="field">
 				{
 					this.props.labelText ?
-					this.renderLabel() :
+					this.renderLabel(!!this.props.error) :
 					''
 				}
 				{
