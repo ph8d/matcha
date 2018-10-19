@@ -21,40 +21,39 @@ const BlockList = require('../models/block_list');
 const ReportedUsers = require('../models/reported_users');
 
 
-router.post('/register', async (req, res) => {
+router.post('/register', validator.registrationValidation, async (req, res, next) => {
 	try {
-		let form = {
-			email: req.body.email, // This needs to be converted to lowercase
-			password: req.body.password,
-			password_confirm: req.body.password_confirm
-		};
-	
-		const errors = await validator.registrationValidation(form) // I can Validate through middleware
-		if (Object.keys(errors).length > 0 && errors.constructor === Object) {
-			return res.status(202).json(errors);
+		const { email, password } = req.body;
+		if (req.validationErrors.length > 0) {
+			return res.status(202).json(req.validationErrors);
 		}
-	
-		delete form.password_confirm;
-	
-		const hash = await bcrypt.hash(form.password, 12)
-		form.password = hash;
-		form.verification_hash = crypto.randomBytes(20).toString('hex');
-	
-		const result = await User.add(form);
-		console.log('Inserted user ID: ', result.insertId);
-	
-		res.mailer.send('./emails/registration', {
-			to: form.email,
-			subject: 'Matcha | Registration',
-			user: form
-		}, error => {
-			if (error) throw error;	
-			res.json({ message: "Please, check your email and follow the instructions that we've sent to continue registration process." });
-		});
+		req.body.verification_hash = await User.add(email, password);
+		next();
 	} catch (e) {
 		console.error(e);
 		res.sendStatus(500);
 	}
+}, (req, res) => {
+	const { email, verification_hash } = req.body;
+	console.log(email, verification_hash);
+	res.mailer.send('./emails/registration', {
+		to: email,
+		subject: 'Matcha | Registration',
+		email,
+		verification_hash
+	}, error => {
+		if (error) {
+			console.error(error);
+			res.sendStatus(500);
+		} else {
+			res.json({
+				message: `
+					Please, check your email and follow the instructions
+					that we've sent to continue registration process.
+				`
+			});
+		}
+	});
 });
 
 
@@ -257,25 +256,25 @@ router.post('/update', async (req, res) => {
 	}
 })
 
-const userGenerator = require('../seedDB/userGenerator');
-const seeder = require('../seedDB/seeder');
-
 router.get('/self', async (req, res) => {
 	try {
 		const user_id = req.user.id;
 
+		const getEmail = User.findOneGetColumns(['email', 'id'], { id: user_id });
 		const getProfile = Profile.findOne({ user_id });
 		const getPictures = Picture.findAllByUserIdArranged(user_id);
 		const getTags = Tags.findAll({ user_id });
 		const getNotifications = Notifications.getAllByUserId(user_id);
 
 		const user = {
+			email: await getEmail,
 			profile: await getProfile,
 			pictures: await getPictures,
 			tags: await getTags,
 			notifications: await getNotifications
 		};
 
+		console.log(user);
 		res.json(user);
 	} catch (e) {
 		console.error(e);

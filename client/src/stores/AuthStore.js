@@ -51,9 +51,9 @@ class AuthStore {
 	}
 
 	@action displayErrors(errors) {
-		for (let field in errors) {
-			this.errors[field] = errors[field];
-		}
+		errors.forEach(error => {
+			this.errors[error.fieldName] = error.msg
+		});
 	}
 
 	@action login() {

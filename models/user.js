@@ -1,11 +1,20 @@
-const db = require('../services/db');
+const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 
-exports.add = async (user) => {
+const db = require('../services/db');
+
+exports.add = async (email, password) => {
+	const newUser = {
+		email,
+		password: await bcrypt.hash(password, 12),
+		verification_hash: crypto.randomBytes(20).toString('hex')
+	}
+
 	const connection = await db.get();
 	const sql = 'INSERT INTO user SET ?';
-	const result = await connection.query(sql, user);
-	return result;
+	await connection.query(sql, newUser);
+
+	return newUser.verification_hash;
 };
 
 exports.findOne = async (data) => {
@@ -14,6 +23,13 @@ exports.findOne = async (data) => {
 	const rows = await connection.query(sql, data);
 	return rows[0];
 };
+
+exports.findOneGetColumns = async (columns, data) => {
+	const connection = await db.get();
+	const sql = 'SELECT ?? FROM user WHERE ?';
+	const rows = await connection.query(sql, [[columns], data]);
+	return rows[0];
+}
 
 exports.update = async (dataToFind, dataToUpdate) => {
 	const connection = await db.get();
