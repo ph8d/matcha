@@ -63,7 +63,6 @@ router.post('/login', async (req, res) => {
 		if (!user || user.is_verified === 0) {
 			return res.sendStatus(401);
 		}
-
 		const isMatch = await bcrypt.compare(req.body.password, user.password)
 		if (!isMatch) return res.sendStatus(401);
 
@@ -99,14 +98,12 @@ router.get('/reset/:hash([0-9a-f]*)', async (req, res) => {
 
 router.post('/reset', async (req, res) => {
 	try {
-		let receivedHash = req.body.hash;
-		let password = req.body.password;
-
-		let isHex = new RegExp(/^[0-9a-f]*$/i);
+		const { hash: receivedHash, password } = req.body;
+		const isHex = new RegExp(/^[0-9a-f]*$/i);
 
 		if (!isHex.test(receivedHash) || !password) return res.sendStatus(401);
 
-		const recoveryRequest = await User.findRecoveryRequest(receivedHash)
+		const recoveryRequest = await User.findRecoveryRequest(receivedHash);
 		if (!recoveryRequest) return res.sendStatus(401);
 		if (!validator.isValidPassword(password)) {
 			return res.status(202).json({ password: 'Password should be 8-24 symbols long, must contain at least one uppercase letter and a number.' });
@@ -169,63 +166,64 @@ router.get('/exists/:login', async (req, res) => {
 	try {
 		const login = req.params.login;
 		const profile = await Profile.findOne({ login });
-		if (profile) {
-			res.json({ exists: true });
-		} else {
-			res.json({ exists: false });
-		}	
+		res.json({ exists: !!profile });
 	} catch (e) {
 		console.log(error);
 		res.sendStatus(500);
 	}
 });
 
-router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, res) => {
-	try {
-		const user = await User.findOne({ verification_hash: req.params.hashs });
-		if (!user) {
-			return res.sendStatus(401);
-		}
+router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, res, next) => {
+	const user = await User.findOne({ verification_hash: req.params.hash });
+	if (!user) return res.sendStatus(401);
 
-		const profileData = JSON.parse(req.body.profile);
-		const tags = req.body.tags;
-		const croppData = JSON.parse(req.body.croppData);
-		
-		if (!profileData || !tags || !req.file) {
-			return res.sendStatus(400);
-		}
-		ƒ
-		const pictureSrc = `/uploaded/images/${req.file.filename}`;
-		const absolute_path = `./public/uploaded/images/${req.file.filename}`;
-		
-		const image = await Jimp.read(req.file.path)
-		let { x, y, width, height } = croppData;
-		await image
-			.crop(x, y, width, height)
-			.quality(75)
-			.writeAsync(absolute_path);
-		
+	const { profile, tags, croppData } = req.body;
+	if (!profile|| !tags || !req.file || !croppData) {
+		return res.sendStatus(400);
+	}
+
+	req.body.profile = JSON.parse(profile);
+	req.body.croppData = JSON.parse(req.body.croppData);
+	req.body.profile.user_id = user.id;
+
+	return next();
+}, async (req, res, next) => {
+	const { filename, path } = req.file;
+	const { x, y, width, height } = req.body.croppData;
+	
+	const absolute_path = `./public/uploaded/images/${filename}`;
+	const src = `/uploaded/images/${filename}`;
+
+	const image = await Jimp.read(path);
+	await image
+		.crop(x, y, width, height)
+		.quality(75)
+		.writeAsync(absolute_path);
+
+	fs.unlink(req.file.path, async (err) => {
+		if (err) {
+			console.error(err);
+			res.sendStatus(500);
+		};
+
+
 		const picResult = await Picture.add({
-			user_id: user.id,
-			src: pictureSrc,
+			user_id: req.body.profile.user_id,
+			src,
 			absolute_path
 		});
-		
-		profileData.user_id = user.id;
-		profileData.picture_id = picResult.insertId;
 
-		await Profile.create(profileData);
-		await Tags.insertMultiple(user.id, tags);
-		await User.update({ id: user.id }, { is_verified: 1 });
-		
-		fs.unlink(req.file.path, err => {
-			if (err) throw err;
-			res.json({ message: 'Registration successful! You may log in now.' });
-		});
-	} catch (e) {
-		console.error(e);
-		res.sendStatus(500);
-	}
+		req.body.profile.picture_id = picResult.insertId;
+		return next();
+	});
+}, async (req, res) => {
+	const { profile, tags } = req.body;
+
+	await Profile.create(profile);
+	await Tags.insertMultiple(profile.user_id, tags);
+	await User.update({ id: profile.user_id }, { is_verified: 1 });
+
+	res.json({ message: 'Registration successful! You may log in now.' });
 });
 
 router.all('*', requiresAuth);
@@ -260,21 +258,19 @@ router.get('/self', async (req, res) => {
 	try {
 		const user_id = req.user.id;
 
-		const getEmail = User.findOneGetColumns(['email', 'id'], { id: user_id });
 		const getProfile = Profile.findOne({ user_id });
 		const getPictures = Picture.findAllByUserIdArranged(user_id);
 		const getTags = Tags.findAll({ user_id });
 		const getNotifications = Notifications.getAllByUserId(user_id);
 
 		const user = {
-			email: await getEmail,
 			profile: await getProfile,
 			pictures: await getPictures,
 			tags: await getTags,
 			notifications: await getNotifications
 		};
 
-		console.log(user);
+		
 		res.json(user);
 	} catch (e) {
 		console.error(e);
@@ -297,8 +293,8 @@ router.get('/:login', async (req, res) => {
 	try {
 		const currentUser = await Profile.findOne({ user_id: req.user.id });
 		const { lat, lng } = currentUser;
-		const profile = await Profile.findOneAndComputeDistance({ login: req.params.login }, { lat, lng });
 
+		const profile = await Profile.findOneAndComputeDistance({ login: req.params.login }, { lat, lng });
 		if (!profile) {
 			return res.status(404).json({ error: "User with this login doesn't exsist." });
 		}
