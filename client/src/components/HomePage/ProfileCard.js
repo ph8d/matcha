@@ -48,7 +48,7 @@ class ProfileCard extends React.Component {
 		);
 	}
 
-	renderMainActionButton(profile, status) {
+	renderMainActionButton(profile) {
 		return (
 			<Link to="/edit-profile">
 				<button className="button is-dark is-radiusless is-fullwidth is-size-4">
@@ -63,15 +63,26 @@ class ProfileCard extends React.Component {
 		);
 	}
 
+	renderBio(bio) {
+		if (bio) {
+			return (
+				<React.Fragment>
+					<hr/>
+					<p style={{'whiteSpace': 'pre-line'}}>{bio}</p>
+				</React.Fragment>
+			);
+		}
+	}
+
 	render() {
-		const { status, profile, pictures, tags } = this.props.user;
+		const { profile, pictures, tags } = this.props.user;
 		const age = this.getAgeFromBirthDate(profile.birthdate);
 
 		return (
 			<div className="card" style={maxWidth500}>
 				{ this.renderCardHeader(profile) }
 				{ this.renderCardImageSection(profile.picture_id, pictures) }
-				{ this.renderMainActionButton(profile, status) }
+				{ this.renderMainActionButton(profile) }
 				<div className="card-content">
 					<p>
 						<label className="has-text-weight-bold is-capitalized is-size-4">
@@ -85,8 +96,7 @@ class ProfileCard extends React.Component {
 							<br/>
 						</label>
 					</p>
-					<hr/>
-					<p style={{'whiteSpace': 'pre-line'}}>{profile.bio}</p>
+					{ this.renderBio(profile.bio) }
 					<hr />
 					<div className="field is-grouped is-grouped-multiline">
 					{

@@ -10,7 +10,7 @@ class RegistrationStore {
 		login: '',
 		first_name: '',
 		last_name: '',
-		gender: 'not specified',
+		gender: 'male',
 		searching_for: '*',
 		bio: '',
 		tags: [],
@@ -82,7 +82,6 @@ class RegistrationStore {
 				return;
 			}
 		}
-		console.log('month', value);
 		this.user.birthdate[field] = value;
 		this.errors.birthdate = '';
 	}

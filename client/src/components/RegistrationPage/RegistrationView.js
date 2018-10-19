@@ -6,7 +6,6 @@ import SecondStepForm from './SecondStepForm';
 import ThirdStepForm from './ThirdStepForm';
 import FourthStepForm from './FourthStepForm';
 import GeolocationForm from './GeolocationForm';
-import ConfirmationStep from './ConfirmationStep';
 
 
 @inject('RegistrationStore', 'AuthStore', 'UserStore') @observer
@@ -52,8 +51,6 @@ class RegistrationView extends React.Component {
 				return <FourthStepForm />;
 			case 5:
 				return <GeolocationForm />;
-			case 6:
-				return <ConfirmationStep />;
 			default:
 				return <h1>Error, invalid registration step!</h1>;
 		}
@@ -113,7 +110,7 @@ class RegistrationView extends React.Component {
 					<div className="level-right">
 						<div className="level-item">
 							{
-								this.props.RegistrationStore.step === 6 ?
+								this.props.RegistrationStore.step === 5 ?
 								this.renderSubmitButton() :
 								this.renderContinueButton()
 							}

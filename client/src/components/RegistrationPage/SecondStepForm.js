@@ -20,38 +20,33 @@ class SecondStepForm extends React.Component {
 			<form>
 				<div className="field">
 					<label className="label is-small has-text-grey">Gender</label>
-					<div className="card">
-						<div className="select is-fullwidth">
-							<select
-								onChange={this.handleChange}
-								name="gender"
-								className="is-radiusless"
-								defaultValue={user.gender}
-								required
-							>
-								<option value="not specified">Not specified</option>
-								<option value="male">Male</option>
-								<option value="female">Female</option>
-							</select>
-						</div>
+					<div className="select is-fullwidth">
+						<select
+							onChange={this.handleChange}
+							name="gender"
+							className="is-radiusless"
+							defaultValue={user.gender}
+							required
+						>
+							<option value="male">Male</option>
+							<option value="female">Female</option>
+						</select>
 					</div>
 				</div>
 				<div className="field">
 					<label className="label is-small has-text-grey">Searching for...</label>
-					<div className="card">
-						<div className="select is-fullwidth">
-							<select
-								onChange={this.handleChange}
-								name="searching_for"
-								className="is-radiusless"
-								defaultValue={user.searching_for}
-								required
-							>
-								<option value="*">Male & Female</option>
-								<option value="male">Male</option>
-								<option value="female">Female</option>
-							</select>
-						</div>
+					<div className="select is-fullwidth">
+						<select
+							onChange={this.handleChange}
+							name="searching_for"
+							className="is-radiusless"
+							defaultValue={user.searching_for}
+							required
+						>
+							<option value="*">Male & Female</option>
+							<option value="male">Male</option>
+							<option value="female">Female</option>
+						</select>
 					</div>
 				</div>
 			</form>

@@ -10,10 +10,20 @@ class GeolocationForm extends React.Component {
 		super(props);
 
 		this.handleClick = this.handleClick.bind(this);
+		this.setUserLocation = this.setUserLocation.bind(this);
 	}
 
 	handleClick() {
 		this.props.RegistrationStore.getLocationWithNavigator();
+	}
+
+	setUserLocation(data) {
+		const { RegistrationStore } = this.props;
+		const location = {
+			lat: data.latLng.lat(),
+			lng: data.latLng.lng()
+		}
+		RegistrationStore.setGeolocation(location);
 	}
 	
 	render() {
@@ -27,6 +37,7 @@ class GeolocationForm extends React.Component {
 					</label>
 					<MyGoogleMap
 						googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyBj7XDClRGcxA9xTV3KPIwyijuHODynh4w&v=3.exp&libraries=geometry,drawing,places"
+						onMapClick={this.setUserLocation}
 						loadingElement={<SpinLoad/>}
 						center={ user.geolocation }
 						showMarker="true"
@@ -35,8 +46,11 @@ class GeolocationForm extends React.Component {
 						mapElement={<div style={{ height: `100%` }} />}
 					/>
 				</div>
-				<button onClick={this.handleClick} type="button" className="button is-fullwidth is-dark is-radiusless">
-					Allow access to my location
+				<button onClick={this.handleClick} type="button" className="button is-fullwidth is-radiusless">
+					<span className="icon">
+						<i className="fas fa-map-marked-alt"></i>
+					</span>
+					<span>Find my location</span>
 				</button>
 				<div className="field help has-text-centered is-danger">
 					{errors.geolocation}
