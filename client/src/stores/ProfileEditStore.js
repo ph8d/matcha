@@ -140,7 +140,7 @@ class ProfileEditStore {
 			}
 			
 			if (Object.keys(body).length > 0) {
-				const response = await API.User.update(body);
+				const response = await API.User.updateProfile(body);
 				const updatedUser = response.data;
 				UserStore.updateUser(updatedUser);
 				this.resetStore();

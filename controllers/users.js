@@ -25,7 +25,7 @@ router.post('/register', validator.registrationValidation, async (req, res, next
 	try {
 		const { email, password } = req.body;
 		if (req.validationErrors.length > 0) {
-			return res.status(202).json(req.validationErrors);
+			return res.status(422).json({errors: req.validationErrors});
 		}
 		req.body.verification_hash = await User.add(email, password);
 		next();
@@ -206,7 +206,6 @@ router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, r
 			res.sendStatus(500);
 		};
 
-
 		const picResult = await Picture.add({
 			user_id: req.body.profile.user_id,
 			src,
@@ -228,7 +227,20 @@ router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, r
 
 router.all('*', requiresAuth);
 
-router.post('/update', async (req, res) => {
+router.post('/update/email', validator.emailValidation, async (req, res) => {
+	const { email } = req.body;
+	if (req.validationErrors.length > 0) {
+		return res.status(422).json({errors: req.validationErrors});
+	}
+	await User.update({ id: req.user.id }, { email });
+	res.sendStatus(200); 
+});
+
+router.post('/update/password', validator.passwordValidation, async (req, res) => {
+
+})
+
+router.post('/update/profile', async (req, res) => {
 	console.log(req.body);
 
 	try {
@@ -252,25 +264,28 @@ router.post('/update', async (req, res) => {
 		console.error(e);
 		res.sendStatus(500);
 	}
-})
+});
+
 
 router.get('/self', async (req, res) => {
 	try {
 		const user_id = req.user.id;
 
+		const getEmail = User.findOneGetColumns(['email'], { id: user_id });
 		const getProfile = Profile.findOne({ user_id });
 		const getPictures = Picture.findAllByUserIdArranged(user_id);
 		const getTags = Tags.findAll({ user_id });
 		const getNotifications = Notifications.getAllByUserId(user_id);
 
+		const { email } = await getEmail;
 		const user = {
+			email,
 			profile: await getProfile,
 			pictures: await getPictures,
 			tags: await getTags,
 			notifications: await getNotifications
 		};
 
-		
 		res.json(user);
 	} catch (e) {
 		console.error(e);

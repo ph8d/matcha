@@ -67,8 +67,12 @@ class UserStore {
 	}
 
 	@action updateUser(updatedUser) {
-		const { profile, tags } = updatedUser;
+		const { profile, tags, email } = updatedUser;
 	
+		if (email) {
+			this.currentUser.email = email;	
+		}
+		
 		if (tags) {
 			this.currentUser.tags = tags;
 		}
@@ -101,7 +105,7 @@ class UserStore {
 			if (response.status === 401) { // If token is invalid
 				AuthStore.logout();
 			} else {
-				let user = response.data;
+				const user = response.data;
 				this.setCurrentUser(user);
 				SocketStore.connect(user.profile.user_id);
 			}

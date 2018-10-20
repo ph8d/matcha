@@ -83,6 +83,14 @@ class NavigationCard extends React.Component {
 					<li>
 						{ this.renderNotificationsLink(unseenNotificationsCount) }
 					</li>
+					<li>
+						<Link to="/settings">
+							<span className="icon is-size-7">
+								<i className="fas fa-cog"></i>
+							</span>
+							<span> Settings</span>
+						</Link>
+					</li>
 					<hr className="navbar-divider" />
 					<li>
 						<Link to="/">

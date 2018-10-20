@@ -7,6 +7,7 @@ import ProfileStore from './ProfileStore';
 import UserStore from './UserStore';
 import ProfileEditStore from './ProfileEditStore';
 import DiscoverStore from './DiscoverStore';
+import SettingsStore from './SettingsStore';
 
 const stores = {
 	CommonStore,
@@ -17,7 +18,8 @@ const stores = {
 	ProfileStore,
 	UserStore,
 	ProfileEditStore,
-	DiscoverStore
+	DiscoverStore,
+	SettingsStore
 };
 
 export default stores;

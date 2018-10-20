@@ -59,8 +59,11 @@ const User = {
 	getVisitHistory: () => {
 		return request('GET', '/users/self/history');
 	},
-	update: (data) => {
-		return request('POST', '/users/update', data);
+	updateProfile: (data) => {
+		return request('POST', '/users/update/profile', data);
+	},
+	updateEmail: (email) => {
+		return request('POST', '/users/update/email', { email })
 	},
 	exists: (login) => {
 		return request('GET', `/users/exists/${login}`);
