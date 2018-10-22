@@ -34,7 +34,6 @@ router.post('/register', validator.registrationValidation, async (req, res, next
 	}
 }, (req, res) => {
 	const { email, verification_hash } = req.body;
-	console.log(email, verification_hash);
 	res.mailer.send('./emails/registration', {
 		to: email,
 		subject: 'Matcha | Registration',
@@ -113,7 +112,7 @@ router.post('/reset', async (req, res) => {
 		await User.delAllRecoveryRequestsByUserId(recoveryRequest.user_id);
 		res.json({ message: 'Your password was successfuly changed, you may log in now.' });
 	} catch (e) {
-		console.log(e);
+		console.error(e);
 		res.sendStatus(500);
 	}
 });
@@ -143,7 +142,7 @@ router.post('/recovery', async (req, res) => {
 			return res.json({ message: "We have sent instructions on how to reset your password to your email. If letter is not arriving check your spam folder and make sure you entered correct email adress." });
 		});
 	} catch (e) {
-		console.log(e);
+		console.error(e);
 		res.sendStatus(500);
 	}
 });
@@ -156,7 +155,7 @@ router.get('/verify/:hash([0-9a-f]*)', async (req, res) => {
 		}
 		return res.json({ status: !user.is_verified });	
 	} catch (e) {
-		console.log(e);
+		console.error(e);
 		res.sendStatus(500);
 	}
 });
@@ -167,7 +166,7 @@ router.get('/exists/:login', async (req, res) => {
 		const profile = await Profile.findOne({ login });
 		res.json({ exists: !!profile });
 	} catch (e) {
-		console.log(error);
+		console.error(error);
 		res.sendStatus(500);
 	}
 });
@@ -240,8 +239,6 @@ router.post('/update/password', validator.passwordValidation, async (req, res) =
 })
 
 router.post('/update/profile', async (req, res) => {
-	console.log(req.body);
-
 	try {
 		const { profile, tags } = req.body;
 		const response = {};
@@ -257,7 +254,7 @@ router.post('/update/profile', async (req, res) => {
 			}
 			response.tags = await Tags.findAll({ user_id: req.user.id });
 		}
-
+		
 		res.json(response);
 	} catch (e) {
 		console.error(e);
