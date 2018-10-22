@@ -2,6 +2,7 @@ import io from 'socket.io-client';
 
 import iziToast from 'izitoast';
 
+import CommonStore from './CommonStore';
 import UserStore from './UserStore';
 import ConversationStore from './ConversationStore';
 
@@ -18,8 +19,9 @@ iziToast.settings({
 class SocketStore {
 	socket = null;
 
-	connect(user_id) {
-		this.socket = io('http://localhost:5000', { query: { user_id } });
+	connect() {
+		const authToken = CommonStore.token;
+		this.socket = io('http://localhost:5000', { query: { authToken } });
 		
 		this.socket.on('new message', message => {
 			ConversationStore.pushMsgToCurrentConv(message);
