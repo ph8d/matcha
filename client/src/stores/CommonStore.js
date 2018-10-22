@@ -1,8 +1,6 @@
 import { observable, action, reaction } from 'mobx'
 
-class CommonStore {
-	socket = null;
-
+class CommonStore {;
 	@observable token = window.localStorage.getItem('jwt');
 	@observable appLoaded = false;
 

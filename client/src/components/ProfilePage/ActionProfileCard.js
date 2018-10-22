@@ -78,7 +78,7 @@ class ActionProfileCard extends React.Component {
 
 	renderMainActionButton(status) {
 		return (
-			<button onClick={this.props.handleMainAction} className="button is-light is-radiusless is-fullwidth is-size-4">
+			<button onClick={this.props.handleMainAction} className="button is-danger is-radiusless is-fullwidth is-size-4">
 				<span className="icon">
 					<i className="fas fa-heart"></i>
 				</span>

@@ -8,7 +8,7 @@ import FourthStepForm from './FourthStepForm';
 import GeolocationForm from './GeolocationForm';
 
 
-@inject('RegistrationStore', 'AuthStore', 'UserStore') @observer
+@inject('RegistrationStore', 'AuthStore') @observer
 class RegistrationView extends React.Component {
 
 	prevStep() {

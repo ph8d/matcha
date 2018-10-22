@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const validator = require('../lib/validator');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const upload = multer(require('../config/multer'));
