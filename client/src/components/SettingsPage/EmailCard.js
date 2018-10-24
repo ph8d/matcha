@@ -13,34 +13,34 @@ class EmailCard extends React.Component {
         const { fields, errors } = this.props.SettingsStore;
         return (
             <div style={{ marginBottom: '2em' }} className="card">
-            <header className="card-header">
-                <p className="card-header-title is-centered">
-                    Change email
-                </p>
-            </header>
-            <div className="card-content">
+                <header className="card-header">
+                    <p className="card-header-title is-centered">
+                        Change email
+                    </p>
+                </header>
+                <div className="card-content">
 
-                <BaseInputField
-                    value={fields.email}
-                    name="email"
-                    labelText="Email"
-                    type="email"
-                    placeholder="jhondoe@example.com"
-                    error={errors.email}
-                    onChange={this.props.inputHandler}
-                />
+                    <BaseInputField
+                        value={fields.email}
+                        name="email"
+                        labelText="Email"
+                        type="email"
+                        placeholder="jhondoe@example.com"
+                        error={errors.email}
+                        onChange={this.props.inputHandler}
+                    />
 
-                <button
-                    className="button is-dark is-fullwidth"
-                    onClick={this.updateEmail.bind(this)}
-                >
-                    <span className="icon">
-                        <i className="fas fa-save"></i>
-                    </span>
-                    <span>Save</span>
-                </button>
+                    <button
+                        className="button is-dark is-fullwidth"
+                        onClick={this.updateEmail.bind(this)}
+                    >
+                        <span className="icon">
+                            <i className="fas fa-save"></i>
+                        </span>
+                        <span>Save</span>
+                    </button>
+                </div>
             </div>
-        </div>
         )
     }
 }

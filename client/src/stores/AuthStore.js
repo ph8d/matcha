@@ -7,7 +7,7 @@ import ConversationStore from './ConversationStore';
 class AuthStore {
 	@observable isLoading = false;
 
-	@observable values = { // I can implement client side validation here
+	@observable values = {
 		email: '',
 		password: '',
 		password_confirm: '',
@@ -51,98 +51,99 @@ class AuthStore {
 	}
 
 	@action displayErrors(errors) {
+		console.log(errors);
+		if (!errors) return;
 		errors.forEach(error => {
 			this.errors[error.fieldName] = error.msg
 		});
 	}
 
-	@action login() {
+	async login() {
 		this.setIsLoading(true);
-		let credentials = {
+
+		const credentials = {
 			email: this.values.email,
 			password: this.values.password
 		};
-		API.Auth.login(credentials)
-			.then(response => {
-				if (response.status === 200) {
-					CommonStore.setToken(response.data.token);
-					UserStore.pullUser();
-					ConversationStore.pullConversations();
-					return;
-				}
-				// I need to add global error handling
-			})
-			.catch(console.error)
-			.then(() => this.setIsLoading(false));
-		}
 
-	@action register() {
-		this.setIsLoading(true);
-		let userData = { ...this.values };
-		API.Auth.register(userData)
-			.then(response => {
-				this.clearErrors();
-				if (response.status === 202) {
-					this.displayErrors(response.data);
-				} else {
-					this.message = {
-						heading: "Success!",
-						text: response.data.message,
-					}
-					this.setMessageVisible(true);
-				}
-			})
-			.catch(console.error)
-			.then(() => this.setIsLoading(false));
-	}
-
-	@action accountRecovery() {
-		if (!this.values.email) {
-			this.errors.email = 'Please, enter your email first.';
+		const response = await API.Auth.login(credentials);
+		console.log(response);
+		if (response.status !== 200) {
+			this.displayErrors(response.data.errors);
 		} else {
-			this.setIsLoading(true);
-			API.Auth.recovery(this.values.email)
-				.then(response => {
-					if (response.status === 202) {
-						this.displayErrors(response.data);
-					} else {
-						this.message = {
-							heading: "Account Recovery",
-							text: response.data.message,
-						}
-						this.setMessageVisible(true);
-					}
-				})
-				.catch(console.error)
-				.then(() => this.setIsLoading(false));
+			CommonStore.setToken(response.data.token);
+			UserStore.pullUser();
+			ConversationStore.pullConversations();
 		}
+
+		this.setIsLoading(false);
 	}
 
-	@action passwordReset(hash) {
-		if (this.values.password !== this.values.password_confirm) {
-			this.errors.email = 'Please, enter your email first.';
-		}
+	async register() {
 		this.setIsLoading(true);
+		
+		const userData = { ...this.values };
+		const response = await API.Auth.register(userData);
+		
+		this.clearErrors();
+
+		if (response.status !== 200) {
+			this.displayErrors(response.data.errors);
+		} else {
+			this.message = {
+				heading: "Success!",
+				text: response.data.message,
+			}
+			this.setMessageVisible(true);
+		}
+		this.setIsLoading(false);
+	}
+
+	async accountRecovery() {
+		if (!this.values.email) {
+			return this.displayErrors([{ fieldName: 'email', msg: 'Please, enter your email first.' }]);
+		}
+
+		this.setIsLoading(true);
+
+		const response = await API.Auth.recovery(this.values.email);
+		if (response.status === 202) {
+			this.displayErrors(response.data);
+		} else {
+			this.message = {
+				heading: "Account Recovery",
+				text: response.data.message,
+			}
+			this.setMessageVisible(true);
+		}
+
+		this.setIsLoading(false);
+	}
+
+	async passwordReset(hash) {
+		if (this.values.password !== this.values.password_confirm) {
+			return this.displayErrors([{ fieldName: 'password_confirm', msg: "Passwords doesn't match." }]);
+		}
+
+		this.setIsLoading(true);
+
 		let password = this.values.password;
-		return API.Auth.reset({ hash, password })
-			.then(response => {
-				this.clearErrors();
-				if (response.status === 202) {
-					this.displayErrors(response.data);
-				} else {
-					this.message = {
-						heading: "Password reset",
-						text: response.data.message,
-					}
-					this.setMessageVisible(true);
-				}
-				return response;
-			})
-			.catch(console.error)
-			.then(response => { // All async methods should return a promise with response object
-				this.setIsLoading(false);
-				return response;
-			})
+		const response = await API.Auth.reset({ hash, password });
+
+		this.clearErrors();
+
+		if (response.status === 202) {
+			this.displayErrors(response.data);
+		} else {
+			this.message = {
+				heading: "Password reset",
+				text: response.data.message,
+			}
+			this.setMessageVisible(true);
+		}
+
+		this.setIsLoading(false);
+		return response;
 	}
 
 	async verifyHash(hash) {
@@ -154,7 +155,7 @@ class AuthStore {
 		return response.data.status;
 	}
 
-	@action logout() {
+	logout() {
 		CommonStore.setToken(undefined);
 		UserStore.forgetUser();
 		ConversationStore.clearConversations();

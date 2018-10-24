@@ -95,7 +95,7 @@ class ProfileEditStore {
 	async changeProfilePicture(index) {
 		const newProfilePicture = this.user.pictures[index];
 		const profile = { picture_id: newProfilePicture.id }
-		const response = await API.User.update({ profile });
+		const response = await API.User.updateProfile({ profile });
 		if (response.status === 200) {
 			this.setProfilePicture(index);
 		}
