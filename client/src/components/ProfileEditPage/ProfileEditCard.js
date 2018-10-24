@@ -86,6 +86,9 @@ class ProfileEditCard extends React.Component {
 	}
 
 	onFileChange(e) {
+		const { ProfileEditStore } = this.props;
+		ProfileEditStore.setErrors({ pictures: '' });
+
 		const file = e.target.files[0];
 		e.target.value = '';
 
@@ -101,7 +104,7 @@ class ProfileEditCard extends React.Component {
 					console.log(error);
 				});
 		} else {
-			console.error('file is too big')
+			ProfileEditStore.setErrors({ pictures: 'File is too big' });
 		}
 	}
 
@@ -122,8 +125,10 @@ class ProfileEditCard extends React.Component {
 			const { selectedImgFile } = this.state;
 			ProfileEditStore.uploadPicture(selectedImgFile, croppData);
 		} else {
-			console.error('Error occured, file is probably invalid.');
+			const { ProfileEditStore } = this.props;
+			ProfileEditStore.setErrors({ pictures: 'Error occured, file is probably invalid.' });
 		}
+
 		this.closeModal();
 	}
 
