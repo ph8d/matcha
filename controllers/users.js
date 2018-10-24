@@ -114,27 +114,44 @@ router.get('/reset/:hash([0-9a-f]*)', async (req, res) => {
 	}
 })
 
-router.post('/reset', async (req, res) => {
-	try {
-		const { hash: receivedHash, password } = req.body;
-		const isHex = new RegExp(/^[0-9a-f]*$/i);
+router.post('/reset', async (req, res, next) => {
+	const { hash: receivedHash } = req.body;
+	const isHex = new RegExp(/^[0-9a-f]*$/i);
 
-		if (!isHex.test(receivedHash) || !password) return res.sendStatus(401);
+	if (!isHex.test(receivedHash)) {
+		return res.sendStatus(401);
+	}
 
-		const recoveryRequest = await User.findRecoveryRequest(receivedHash);
-		if (!recoveryRequest) return res.sendStatus(401);
+	const recoveryRequest = await User.findRecoveryRequest(receivedHash);
+	if (!recoveryRequest) return res.sendStatus(401);
+	req.user = {id: recoveryRequest.user_id};
+
+	next();
+}, async (req, res, next) => {
+		const { password, password_confirm } = req.body;
+
 		if (!validator.isValidPassword(password)) {
-			return res.status(202).json({ password: 'Password should be 8-24 symbols long, must contain at least one uppercase letter and a number.' });
+			return res.status(422).json([{
+				fieldName: 'password',
+				msg: 'Password should be 8-24 symbols long, must contain at least one uppercase letter and a number.'
+			}]);
+		}
+		if (password !== password_confirm) {
+			return res.status(422).json([{
+				fieldName: 'password_confirm',
+				msg: "Passwords doesn't match"
+			}]);
 		}
 		
-		const hashedPassword = await bcrypt.hash(password, 12)
-		await User.update({ id:recoveryRequest.user_id }, { password:hashedPassword });
-		await User.delAllRecoveryRequestsByUserId(recoveryRequest.user_id);
-		res.json({ message: 'Your password was successfuly changed, you may log in now.' });
-	} catch (e) {
-		console.error(e);
-		res.sendStatus(500);
-	}
+		next();
+}, async (req, res) => {
+	const { password } = req.body;
+	const hashedPassword = await bcrypt.hash(password, 12);
+
+	await User.update({ id: req.user.id }, { password: hashedPassword });
+	await User.delAllRecoveryRequestsByUserId(req.user.id);
+
+	res.json({ message: 'Your password was successfuly changed, you may log in now.' });
 });
 
 
