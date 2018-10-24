@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const upload = multer(require('../config/multer')); // Error handling https://github.com/expressjs/multer#error-handling
-const requiresAuth = require('../lib/requiresAuth');
+const jwtAuth = require('../lib/jwtAuth');
 const Picture = require('../models/picture');
 
 const fs = require('fs');
 const Jimp = require('jimp');
 
-router.use('*', requiresAuth);
+router.use('*', jwtAuth);
 
 router.post('/', upload.single('picture'), async (req, res) => {
 	try {

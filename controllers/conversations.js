@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const requiresAuth = require('../lib/requiresAuth');
+const jwtAuth = require('../lib/jwtAuth');
 
 const Profile = require('../models/profile');
 const Conversations = require('../models/conversations');
 const Messages = require('../models/messages');
 
-router.all('*', requiresAuth);
+router.all('*', jwtAuth);
 
 router.get('/', async (req, res) => {
 	const currentUser = req.user.id;

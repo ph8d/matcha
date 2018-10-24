@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const requiresAuth = require('../lib/requiresAuth');
+const jwtAuth = require('../lib/jwtAuth');
 const Profile = require('../models/profile');
-const Tags = require('../models/tags');
 
-router.use('*', requiresAuth);
+router.use('*', jwtAuth);
 
 router.get('/', async (req, res) => {
 	try {
