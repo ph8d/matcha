@@ -121,18 +121,15 @@ class AuthStore {
 	}
 
 	async passwordReset(hash) {
-		if (this.values.password !== this.values.password_confirm) {
-			return this.displayErrors([{ fieldName: 'password_confirm', msg: "Passwords doesn't match." }]);
-		}
-
 		this.setIsLoading(true);
 
-		let password = this.values.password;
-		const response = await API.Auth.reset({ hash, password });
+		const { password, password_confirm } = this.values;
+		const response = await API.Auth.reset({ hash, password, password_confirm });
 
 		this.clearErrors();
 
-		if (response.status === 202) {
+		console.log(response);
+		if (response.status !== 200) {
 			this.displayErrors(response.data);
 		} else {
 			this.message = {

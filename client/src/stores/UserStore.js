@@ -52,10 +52,12 @@ class UserStore {
 	}
 
 	@computed get user_id() {
+		// if (!this.currentUser) return undefined;
 		return this.currentUser.profile.user_id;
 	}
 
 	@computed get unseenNotificationsCount() {
+		// if (!this.currentUser) return 0;
 		let unseen = 0;
 		const { notifications } = this.currentUser;
 		notifications.forEach(notification => {
@@ -114,8 +116,7 @@ class UserStore {
 		}
 	}
 
-
-	@action forgetUser() {
+	forgetUser() {
 		this.currentUser = undefined;
 		SocketStore.disconnect();
 	}

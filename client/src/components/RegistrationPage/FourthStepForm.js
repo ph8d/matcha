@@ -58,7 +58,7 @@ class FourthStepForm extends React.Component {
 			RegistrationStore.setPicture(selectedFile, croppedSrc, croppData);
 			this.setState({ imgIsLoading: false });
 		} else {
-			let error = {picture: 'Error occured, file is probably invalid.'}
+			let error = [{ fieldName: 'picture', msg: 'Error occured, file is probably invalid.' }];
 			RegistrationStore.setErrors(error);
 		}
 		this.closeModal();
