@@ -5,6 +5,8 @@ import API from '../helpers/api';
 class SettingsStore {    
     _originalEmail = '';
 
+    @observable isLoading = false;
+
     @observable fields = {
         email: '',
         currentPassword: '',
@@ -19,6 +21,10 @@ class SettingsStore {
         confirm: ''
     }
 
+    @action setIsLoading(status) {
+        this.isLoading = status;
+    }
+    
     @action setFiledByName(name, value) {
         this.fields[name] = value;
         this.errors[name] = '';
@@ -31,6 +37,12 @@ class SettingsStore {
         })
     }
 
+    @action resetPasswordForm() {
+        this.fields.currentPassword = '';
+        this.fields.newPassword = '';
+        this.fields.confirm = '';
+    }
+
     pullUserEmail() {
         const { email } = UserStore.currentUser;
         this.setFiledByName('email', email); 
@@ -38,6 +50,8 @@ class SettingsStore {
     }
 
     async updateEmail() {
+        this.setIsLoading(true);
+
         const { email } = this.fields;
         if (email && email !== this._originalEmail) {
             const response = await API.User.updateEmail(email);
@@ -48,18 +62,22 @@ class SettingsStore {
                 this._originalEmail = email;
             }
         }
+
+        this.setIsLoading(false);
     }
 
-    updatePassword() {
+    async updatePassword() {
+        this.setIsLoading(true);
 
-    }
+        const { currentPassword, newPassword, confirm } = this.fields;
+        const response = await API.User.updatePassword({ currentPassword, newPassword, confirm });
+        if (response.status !== 200) {
+            this.setErrors(response.data.errors);
+        } else {
+            this.resetPasswordForm();
+        }
 
-    validateEmail() {
-
-    }
-
-    validatePassword() {
-
+        this.setIsLoading(false);
     }
 
 }

@@ -65,6 +65,9 @@ const User = {
 	updateEmail: (email) => {
 		return request('POST', '/users/update/email', { email })
 	},
+	updatePassword: (data) => {
+		return request('POST', '/users/update/password', data);
+	},
 	exists: (login) => {
 		return request('GET', `/users/exists/${login}`);
 	},

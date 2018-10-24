@@ -5,42 +5,45 @@ import { inject, observer } from 'mobx-react';
 @inject('SettingsStore') @observer
 class EmailCard extends React.Component {
     updateEmail(e) {
-        const { SettingsStore } = this.props;
-        SettingsStore.updateEmail();
+        e.preventDefault();
+        this.props.SettingsStore.updateEmail();
     }
 
     render() {
-        const { fields, errors } = this.props.SettingsStore;
+        const { fields, errors, isLoading } = this.props.SettingsStore;
         return (
-            <div style={{ marginBottom: '2em' }} className="card">
-                <header className="card-header">
-                    <p className="card-header-title is-centered">
-                        Change email
-                    </p>
-                </header>
-                <div className="card-content">
+            <form onSubmit={this.updateEmail.bind(this)}>
+                <div style={{ marginBottom: '2em' }} className="card">
+                    <header className="card-header">
+                        <p className="card-header-title is-centered">
+                            Change email
+                        </p>
+                    </header>
+                    <div className="card-content">
 
-                    <BaseInputField
-                        value={fields.email}
-                        name="email"
-                        labelText="Email"
-                        type="email"
-                        placeholder="jhondoe@example.com"
-                        error={errors.email}
-                        onChange={this.props.inputHandler}
-                    />
+                        <BaseInputField
+                            value={fields.email}
+                            name="email"
+                            labelText="Email"
+                            type="email"
+                            placeholder="jhondoe@example.com"
+                            error={errors.email}
+                            onChange={this.props.inputHandler}
+                        />
 
-                    <button
-                        className="button is-dark is-fullwidth"
-                        onClick={this.updateEmail.bind(this)}
-                    >
-                        <span className="icon">
-                            <i className="fas fa-save"></i>
-                        </span>
-                        <span>Save</span>
-                    </button>
+                        <button
+                            disabled={isLoading}
+                            className={`button ${ isLoading && 'is-loading' } is-dark is-fullwidth`}
+                            type="submit"
+                        >
+                            <span className="icon">
+                                <i className="fas fa-save"></i>
+                            </span>
+                            <span>Save</span>
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </form>
         )
     }
 }

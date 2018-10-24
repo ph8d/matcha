@@ -272,16 +272,21 @@ router.post('/profile/:hash([0-9a-f]*)', async (req, res, next) => {
 router.all('*', jwtAuth);
 
 router.post('/update/email', validator.emailValidation, async (req, res) => {
-	const { email } = req.body;
 	if (req.validationErrors.length > 0) {
 		return res.status(422).json({ errors: req.validationErrors });
 	}
+	const { email } = req.body;
 	await User.update({ id: req.user.id }, { email });
 	res.sendStatus(200); 
 });
 
 router.post('/update/password', validator.passwordValidation, async (req, res) => {
-
+	if (req.validationErrors.length > 0) {
+		return res.status(422).json({ errors: req.validationErrors });
+	}
+	const password = await bcrypt.hash(req.body.newPassword, 12);
+	await User.update({ id: req.user.id }, { password })
+	res.sendStatus(200);
 })
 
 router.post('/update/profile', async (req, res) => {
