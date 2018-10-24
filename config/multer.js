@@ -1,6 +1,18 @@
 const multer = require('multer');
 const crypto = require('crypto');
 
+const isSuportedMimeType = (mimetype) => {
+	if (mimetype.includes('image/jpg')) {
+		return true;
+	} else if (mimetype.includes('image/jpeg')) {
+		return true;
+	} else if (mimetype.includes('image/png')) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 module.exports = {
 	storage: multer.diskStorage({
 		destination: function (req, file, next) {
@@ -15,12 +27,12 @@ module.exports = {
 
 	fileFilter: (req, file, next) => {
 		if (!file) next();
-		if (file.mimetype.startsWith('image/')) {
+		if (isSuportedMimeType(file.mimetype)) {
 			console.log('This picture looking good');
 			return next(null, true);
 		} else {
 			console.log('File format not suported');
-			return next();
+			return next(null, false);
 		}
 	}
 };

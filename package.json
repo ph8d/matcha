@@ -8,8 +8,7 @@
     "start": "node app",
     "server": "nodemon app.js",
     "client": "npm start --prefix client",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "seed-db": "node ./seedDb/seeder.js"
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "keywords": [],
   "author": "rtarasen",

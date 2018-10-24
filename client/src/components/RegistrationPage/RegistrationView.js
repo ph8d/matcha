@@ -22,8 +22,8 @@ class RegistrationView extends React.Component {
 	async submitInfo() {
 		const { RegistrationStore, AuthStore } = this.props;
 		const response = await RegistrationStore.submitInfo(this.props.hash);
+		RegistrationStore.clearLocalStore();
 		if (response.status === 200) {
-			RegistrationStore.clearLocalStore();
 			AuthStore.message = {
 				heading: "Success!",
 				text: response.data.message
@@ -32,7 +32,7 @@ class RegistrationView extends React.Component {
 			this.props.redirectToHome();
 		} else {
 			console.error('Some error occured while submiting user');
-			console.log(response);
+			RegistrationStore.resetRegistration();
 		}
 	}
 

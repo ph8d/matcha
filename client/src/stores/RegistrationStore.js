@@ -4,7 +4,7 @@ import moment from 'moment';
 
 class RegistrationStore {
 	@observable isValidating = false;
-	@observable step = 0;
+	@observable step = 1;
 
 	@observable user = {
 		login: '',
@@ -51,12 +51,13 @@ class RegistrationStore {
 
 	@action loadDataFromLocalStore() {
 		const data = localStorage.getItem('profileData');
-		const step = parseInt(localStorage.getItem('registrationStep'), 10);
-
 		if (data) {
-			this.user = JSON.parse(data);
+			try {
+				this.user = JSON.parse(data);
+			} catch (e) {
+				localStorage.removeItem('profileData');
+			}
 		}
-		this.step = step || 1;
 	}
 
 	@action setGeolocation(location) {
@@ -64,9 +65,10 @@ class RegistrationStore {
 	}
 	
 	@action setErrors(errors) {
-		Object.keys(errors).forEach(field => {
-			this.errors[field] = errors[field];
-		})
+		errors.forEach(error => {
+			const { fieldName, msg } = error;
+			this.errors[fieldName] = msg;
+		});
 	}
 
 	@action setFieldValue(fieldName, value) {
@@ -99,10 +101,10 @@ class RegistrationStore {
 	@action isValidPicture(file) {
 		if (!file) return;
 		if (!file.type.includes('image/')) {
-			this.errors.avatar = 'Invalid file type.';
+			this.errors.picture = 'Invalid file type.';
 			return false;
 		} else if (file.size > 3000000) { // 3MB in bytes
-			this.errors.avatar = 'File is too big, max size is 3MB.'
+			this.errors.picture = 'File is too big, max size is 3MB.'
 			return false;
 		}
 		return true;
@@ -128,16 +130,14 @@ class RegistrationStore {
 
 	@action prevStep() {
 		this.step--;
-		localStorage.setItem('registrationStep', this.step);
 	}
 
 	@action async nextStep() {
 		const validationErrors = await this.validateCurrentStep();
-		if (Object.keys(validationErrors).length > 0) {
+		if (validationErrors.length > 0) {
 			this.setErrors(validationErrors);
 		} else {
 			this.step++;
-			localStorage.setItem('registrationStep', this.step);
 			this.saveDataToLocalStore();
 		}
 	}
@@ -176,11 +176,11 @@ class RegistrationStore {
 
 	getLocationByIp() {
 		if (!this.user.geolocation.lat) {
-			fetch('http://ip-api.com/json')
+			fetch('https://ipapi.co/json')
 				.then(response => response.json())
-				.then(location => {
-					this.user.geolocation.lat = location.lat;
-					this.user.geolocation.lng = location.lon;
+				.then(response => {
+					this.user.geolocation.lat = response.latitude;
+					this.user.geolocation.lng = response.longitude;
 				})
 				.catch(console.error);
 		}
@@ -205,7 +205,7 @@ class RegistrationStore {
 		}
 	}
 
-	validateCurrentStep() { // This is an awful function, i need to rethink validation
+	validateCurrentStep() {
 		switch(this.step) {
 			case 1:
 				return this.validateFirstStep();
@@ -214,43 +214,64 @@ class RegistrationStore {
 			case 4:
 				return this.validateFourthStep();
 			default:
-				return Promise.resolve({});
+				return Promise.resolve([]);
 		}
 	}
 
-	async validateFirstStep() { // This is an awful function
+	async validateFirstStep() {
 		this.setIsValidating(true);
-		const { first_name, last_name, login, birthdate } = this.user;
-		const errors = {};
 
 		const isValidLogin = new RegExp(/^[A-Za-z0-9_]{4,24}$/);
 		const isValidName = new RegExp(/^[A-Za-z- ]{1,32}$/);
 		const isValidDay = RegExp(/^([1-9]|[12][0-9]|3[01])$/);
 		const isValidYear = RegExp(/^(19[0-9][0-9])|(20[0-1][0-8])$/);
 
+		const { first_name, last_name, login, birthdate } = this.user;
+		const errors = [];
+
+
 		if (!isValidName.test(first_name)) {
-			errors.first_name = 'Names should be 1-32 characters long and can contain only letters and dashes.';
+			errors.push({
+				fieldName: 'first_name',
+				msg: 'Names should be 1-32 characters long and can contain only letters and dashes.'
+			});
 		}
 		if (!isValidName.test(last_name)) {
-			errors.last_name = 'Names should be 1-32 characters long and can contain only letters and dashes.';
+			errors.push({
+				fieldName: 'last_name',
+				msg: 'Names should be 1-32 characters long and can contain only letters and dashes.'
+			});
 		}
 		if (!isValidLogin.test(login)) {
-			errors.login = 'Login should be 4-24 symbols long and can contain only letters, numbers or a underline.';
+			errors.push({
+				fieldName: 'login',
+				msg: 'Login should be 4-24 symbols long and can contain only letters, numbers or a underline.' 
+			});
+		} else {
+			const avalible = await this.isLoginAvalible();
+			if (!avalible) {
+				errors.push({
+					fieldName: 'login',
+					msg: 'This login is already taken.'
+				});
+			}
 		}
 
 		if (!birthdate.month || birthdate.month === "0") {
-			errors.birthdate = "Please, enter a valid month";
+			errors.push({
+				fieldName: 'birthdate',
+				msg: "Please, enter a valid month"
+			});
 		} else if (!isValidDay.test(birthdate.day)) {
-			errors.birthdate = "Please, enter a valid day";
+			errors.push({
+				fieldName: 'birthdate',
+				msg: "Please, enter a valid day"
+			});
 		} else if (!isValidYear.test(birthdate.year)) {
-			errors.birthdate = "Please, enter a valid year";
-		}
-
-		if (!errors.login) {
-			const avalible = await this.isLoginAvalible();
-			if (!avalible) {
-				errors.login = 'This login is already taken.';
-			}
+			errors.push({
+				fieldName: 'birthdate',
+				msg: "Please, enter a valid year"
+			});
 		}
 
 		this.setIsValidating(false);
@@ -259,27 +280,35 @@ class RegistrationStore {
 
 	validateThirdStep() {
 		const { tags, bio } = this.user;
-		const errors = {};
+		const errors = [];
 
 		const isValidBio = new RegExp(/^[^>]{0,500}$/);
 
 		if (!isValidBio.test(bio)) {
-			errors.bio = "Bio can not contain '>' character. Max length is 500 symbols."
+			errors.push({
+				fieldName: 'bio',
+				msg: "Bio can not contain '>' character. Max length is 500 symbols."
+			})
 		}
-
 		if (tags.length < 3) {
-			errors.tags = "Please, add at least 3 tags."
+			errors.push({
+				fieldName: 'tags',
+				msg: "Please, add at least 3 tags."
+			});
 		}
 
-		return Promise.resolve(errors); // No-no-no-no-no, returning promise in sync function
+		return Promise.resolve(errors);
 	}
 
 	validateFourthStep() {
 		const { file } = this.picture;
-		const errors = {};
+		const errors = [];
 
 		if (!file) {
-			errors.picture = "Please select a profile picture"
+			errors.push({
+				fieldName: 'picture',
+				msg: "Please select a profile picture"
+			});
 		}
 
 		return Promise.resolve(errors);
@@ -289,9 +318,59 @@ class RegistrationStore {
 		return API.Auth.verify(hash);
 	}
 
-	submitInfo(hash) {
+	async submitInfo(hash) {
 		this.setIsValidating(true);
 
+		const formData = this._infoToFormData();
+		const response = await API.User.createProfile(hash, formData);
+
+		this.setIsValidating(false);
+		return response;
+	}
+
+	@action resetRegistration() {
+		this.user = {
+			login: '',
+			first_name: '',
+			last_name: '',
+			gender: 'male',
+			searching_for: '*',
+			bio: '',
+			tags: [],
+			birthdate: {
+				month: '',
+				day: '',
+				year: ''
+			},
+			geolocation: {
+				lat: 0,
+				lng: 0,
+				accurate: false
+			}
+		};
+	
+		this.picture = {
+			placeholder: `https://avatars.dicebear.com/v2/identicon/${Math.random() * (100 - 1) + 1}.svg`,
+			file: '',
+			src: '',
+			croppData: null
+		};
+	
+		this.errors = {
+			login: '',
+			first_name: '',
+			last_name: '',
+			bio: '',
+			tags: '',
+			birthdate: '',
+			picture: '',
+		};
+
+		this.step = 1;
+		this.getLocationByIp();
+	}
+
+	_infoToFormData() {
 		const formData = new FormData();
 		const profile = {
 			login: this.user.login,
@@ -312,7 +391,7 @@ class RegistrationStore {
 		formData.append('picture', this.picture.file || this.picture.placeholder);
 		formData.append('croppData', JSON.stringify(this.picture.croppData));
 		
-		return API.User.createProfile(hash, formData);
+		return formData;
 	}
 
 }

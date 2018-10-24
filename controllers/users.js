@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const validator = require('../lib/validator');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const upload = multer(require('../config/multer'));
-const requiresAuth = require('../lib/requiresAuth');
 const fs = require('fs');
 const Jimp = require('jimp');
 
@@ -19,12 +17,14 @@ const Notifications = require('../models/notifications');
 const BlockList = require('../models/block_list');
 const ReportedUsers = require('../models/reported_users');
 
+const jwtAuth = require('../lib/jwtAuth');
+const validator = require('../lib/validator');
 
 router.post('/register', validator.registrationValidation, async (req, res, next) => {
 	try {
 		const { email, password } = req.body;
 		if (req.validationErrors.length > 0) {
-			return res.status(422).json({errors: req.validationErrors});
+			return res.status(422).json({ errors: req.validationErrors });
 		}
 		req.body.verification_hash = await User.add(email, password);
 		next();
@@ -54,19 +54,39 @@ router.post('/register', validator.registrationValidation, async (req, res, next
 	});
 });
 
+router.post('/login', async (req, res, next) => {
+	const user = await User.findOne({ email: req.body.email })
+	if (!user) {
+		return res.status(401).json({
+			errors: [
+				{ fieldName: 'email', msg: 'Email or password is incorrect.' }
+			]
+		});
+	}
+	if (user.is_verified === 0) {
+		return res.status(401).json({
+			errors: [
+				{ fieldName: 'email', msg: 'Your account is not yet created, check your email.' }
+			]
+		});
+	}
 
-router.post('/login', async (req, res) => {
+	const isMatch = await bcrypt.compare(req.body.password, user.password)
+	if (!isMatch) {
+		return res.status(401).json({
+			errors: [
+				{ fieldName: 'email', msg: 'Email or password is incorrect.' }
+			]
+		});
+	}
+
+	req.user = user;
+	next();
+}, async (req, res, next) => {
 	try {
-		const user = await User.findOne({ email: req.body.email })
-		if (!user || user.is_verified === 0) {
-			return res.sendStatus(401);
-		}
-		const isMatch = await bcrypt.compare(req.body.password, user.password)
-		if (!isMatch) return res.sendStatus(401);
-
 		jwt.sign({
-			userId: user.id,
-			login: user.login
+			userId: req.user.id,
+			login: req.user.login
 		}, 'SECRET_KEY_THAT_I_NEED_TO_REPLACE_LATER', {
 			expiresIn: '1h'
 		}, (error, token) => {
@@ -75,7 +95,7 @@ router.post('/login', async (req, res) => {
 		});
 	} catch (e) {
 		console.error(e);
-		res.sendStatus(401);
+		res.sendStatus(500);
 	}
 });
 
@@ -171,20 +191,29 @@ router.get('/exists/:login', async (req, res) => {
 	}
 });
 
-router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, res, next) => {
+
+router.post('/profile/:hash([0-9a-f]*)', async (req, res, next) => {
 	const user = await User.findOne({ verification_hash: req.params.hash });
-	if (!user) return res.sendStatus(401);
+	if (!user) {
+        res.sendStatus(401);
+    } else if (user.is_verified === 1) {
+		res.status(403).json({ error: 'Profile already created.' });
+	} else {
+		req.user = user;
+        next();
+    }
+}, upload.single('picture'), validator.profileCreationValidation, async (req, res, next) => {
+	if (req.validationErrors.length > 0) {
+		return res.status(422).json({ errors: req.validationErrors });
+	}
 
 	const { profile, tags, croppData } = req.body;
-	if (!profile|| !tags || !req.file || !croppData) {
-		return res.sendStatus(400);
-	}
 
 	req.body.profile = JSON.parse(profile);
 	req.body.croppData = JSON.parse(req.body.croppData);
-	req.body.profile.user_id = user.id;
+	req.body.profile.user_id = req.user.id;
 
-	return next();
+	next();
 }, async (req, res, next) => {
 	const { filename, path } = req.file;
 	const { x, y, width, height } = req.body.croppData;
@@ -201,7 +230,7 @@ router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, r
 	fs.unlink(req.file.path, async (err) => {
 		if (err) {
 			console.error(err);
-			res.sendStatus(500);
+			return res.sendStatus(500);
 		};
 
 		const picResult = await Picture.add({
@@ -223,12 +252,12 @@ router.post('/profile/:hash([0-9a-f]*)', upload.single('picture'), async (req, r
 	res.json({ message: 'Registration successful! You may log in now.' });
 });
 
-router.all('*', requiresAuth);
+router.all('*', jwtAuth);
 
 router.post('/update/email', validator.emailValidation, async (req, res) => {
 	const { email } = req.body;
 	if (req.validationErrors.length > 0) {
-		return res.status(422).json({errors: req.validationErrors});
+		return res.status(422).json({ errors: req.validationErrors });
 	}
 	await User.update({ id: req.user.id }, { email });
 	res.sendStatus(200); 
@@ -254,7 +283,7 @@ router.post('/update/profile', async (req, res) => {
 			}
 			response.tags = await Tags.findAll({ user_id: req.user.id });
 		}
-		
+
 		res.json(response);
 	} catch (e) {
 		console.error(e);
