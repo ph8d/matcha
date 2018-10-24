@@ -2,8 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { inject, observer } from 'mobx-react';
 
-@inject('UserStore', 'ConversationStore') @observer
+@inject('UserStore', 'ConversationStore', 'AuthStore') @observer
 class NavigationCard extends React.Component {
+	logout(e) {
+		this.props.AuthStore.logout();
+	}
+
 	renderNotificationsLink(unseen) {
 		if (unseen > 0) {
 			return (
@@ -93,7 +97,7 @@ class NavigationCard extends React.Component {
 					</li>
 					<hr className="navbar-divider" />
 					<li>
-						<Link to="/">
+						<Link to="/" onClick={this.logout.bind(this)}>
 							<span className="icon is-size-7">
 								<i className="fas fa-sign-out-alt"></i>
 							</span>

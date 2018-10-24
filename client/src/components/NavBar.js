@@ -7,16 +7,9 @@ import { inject, observer } from 'mobx-react';
 class NavBar extends React.Component {
 	constructor(props) {
 		super(props);
-
 		this.state = {
 			isActive: false
 		}
-
-		this.logout = this.logout.bind(this);
-	}
-
-	logout() {
-		this.props.AuthStore.logout();
 	}
 
 	expandMenu(e) {
@@ -44,12 +37,6 @@ class NavBar extends React.Component {
 					<div className={navMenuClass}>
 						<div className="navbar-start">
 							<Link className="navbar-item" to="/">Home</Link>
-						</div>
-
-						<div className="navbar-end">
-							<a onClick={this.logout} className="navbar-item">
-								<span>Logout</span>
-							</a>
 						</div>
 					</div>
 				</div>
