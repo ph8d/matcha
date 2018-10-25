@@ -63,7 +63,7 @@ class FiltersMenu extends React.Component {
 	}
 
 	formatFame(value) {
-		if (value === 1000) {
+		if (value === 250) {
 			return `${value}+`;
 		}
 		return `${value}`;
@@ -171,7 +171,7 @@ class FiltersMenu extends React.Component {
 						<div className="control">
 							<Range
 								min={0}
-								max={1000}
+								max={250}
 								value={filters.fame}
 								tipFormatter={this.formatFame}
 								pushable={10}

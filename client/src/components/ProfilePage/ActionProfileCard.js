@@ -44,9 +44,6 @@ class ActionProfileCard extends React.Component {
 		return (
 			<header className="card-header">
 				<p className="card-header-title is-centered">
-					<span className="icon has-text-danger">
-						<i className="fas fa-fire"></i>
-					</span>
 					{profile.login}
 					&nbsp;
 					{ this.renderStatus(profile.online, profile.last_seen) }
@@ -121,6 +118,17 @@ class ActionProfileCard extends React.Component {
 		);
 	}
 
+	renderBio(bio) {
+		if (bio) {
+			return (
+				<React.Fragment>
+					<hr/>
+					<p style={{'whiteSpace': 'pre-line'}}>{bio}</p>
+				</React.Fragment>
+			);
+		}
+	}
+	
 	render() {
 		const { status, profile, pictures, tags } = this.props.user;
 		const { visibleStatus } = this.props.ProfileStore;
@@ -147,8 +155,7 @@ class ActionProfileCard extends React.Component {
 							{profile.distance} km away
 						</label>
 					</p>
-					<hr/>
-					<p style={{'whiteSpace': 'pre-line'}}>{profile.bio}</p>
+					{ this.renderBio() }
 					<hr />
 					<div className="field is-grouped is-grouped-multiline">
 					{

@@ -38,7 +38,7 @@ class PasswordResetView extends React.Component {
 						<div className="column is-4">
 							<div className="card">
 								<header className="card-header">
-									<p className="card-header-title">Password reset</p>
+									<p className="card-header-title is-centered">Password reset</p>
 								</header>
 								<div className="card-content">
 									<form onSubmit={this.onSubmit}>
