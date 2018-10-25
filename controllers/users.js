@@ -66,7 +66,7 @@ router.post('/login', async (req, res, next) => {
 	if (user.is_verified === 0) {
 		return res.status(401).json({
 			errors: [
-				{ fieldName: 'email', msg: 'Your account is not yet created, check your email.' }
+				{ fieldName: 'email', msg: 'Your profile is not yet created, check your email.' }
 			]
 		});
 	}
@@ -124,7 +124,7 @@ router.post('/reset', async (req, res, next) => {
 
 	const recoveryRequest = await User.findRecoveryRequest(receivedHash);
 	if (!recoveryRequest) return res.sendStatus(401);
-	req.user = {id: recoveryRequest.user_id};
+	req.user = { id: recoveryRequest.user_id };
 
 	next();
 }, async (req, res, next) => {
@@ -159,7 +159,7 @@ router.post('/recovery', async (req, res) => {
 	try {
 		const email = req.body.email;
 		if (!validator.isValidEmail(email)) {
-			return res.status(202).json({ email: 'Email is invalid.' });
+			return res.status(422).json({ errors: [{ fieldName: 'email', msg: 'Email is invalid.' }] });
 		}
 
 		const user = await User.findOne({ email })
