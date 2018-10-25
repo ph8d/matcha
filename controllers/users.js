@@ -289,8 +289,21 @@ router.post('/update/password', validator.passwordValidation, async (req, res) =
 	res.sendStatus(200);
 })
 
-router.post('/update/profile', async (req, res) => {
+router.post('/update/profile', [
+	validator.checkProfileField('login'),
+	validator.checkProfileField('first_name'),
+	validator.checkProfileField('last_name'),
+	validator.checkProfileField('gender'),
+	validator.checkProfileField('searching_for'),
+	validator.checkProfileField('birthdate'),
+	validator.checkProfileField('lat'),
+	validator.checkProfileField('lng')
+], async (req, res) => {
 	try {
+		if (req.validationErrors.length > 0) {
+			return res.status(422).json({ errors: req.validationErrors });
+		}
+
 		const { profile, tags } = req.body;
 		const response = {};
 		if (profile) {
