@@ -237,7 +237,7 @@ class ProfileEditStore {
 		const isValidName = new RegExp(/^[A-Za-z- ]{1,32}$/);
 		const isValidDay = RegExp(/^([1-9]|[12][0-9]|3[01])$/);
 		const isValidYear = RegExp(/^(19[0-9][0-9])|(20[0-1][0-8])$/);
-		const isValidBio = new RegExp(/^[^>]{0,500}$/);
+		const isValidBio = new RegExp(/^[\x00-\x7F]{0,500}$/);
 
 		const { first_name, last_name, login, birthdate, bio } = this.user.profile;
 		const { tags } = this.user;
@@ -253,7 +253,7 @@ class ProfileEditStore {
 			errors.login = 'Login should be 4-24 symbols long and can contain only letters, numbers or a underline.';
 		}
 		if (!isValidBio.test(bio)) {
-			errors.bio = "Bio can not contain '>' character. Max length is 500 symbols."
+			errors.bio = "Bio can contain only ascii characters. Max length is 500 symbols."
 		}
 		if (!isValidYear.test(birthdate.year)) {
 			errors.birthdate = "Please, enter a valid year";

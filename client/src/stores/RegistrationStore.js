@@ -283,12 +283,12 @@ class RegistrationStore {
 		const { tags, bio } = this.user;
 		const errors = [];
 
-		const isValidBio = new RegExp(/^[^>]{0,500}$/);
+		const isValidBio = new RegExp(/^[\x00-\x7F]{0,500}$/);
 
 		if (!isValidBio.test(bio)) {
 			errors.push({
 				fieldName: 'bio',
-				msg: "Bio can not contain '>' character. Max length is 500 symbols."
+				msg: "Bio can contain only ascii characters. Max length is 500 symbols."
 			})
 		}
 		if (tags.length < 3) {
