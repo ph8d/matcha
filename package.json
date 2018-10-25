@@ -8,7 +8,8 @@
     "start": "node app",
     "server": "nodemon app.js",
     "client": "npm start --prefix client",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "seed-db": "sh ./scripts/seed_db/seed.sh"
   },
   "keywords": [],
   "author": "rtarasen",
@@ -23,7 +24,6 @@
     "express": "^4.16.3",
     "express-mailer": "^0.3.1",
     "express-session": "^1.15.6",
-    "faker": "^4.1.0",
     "jimp": "^0.4.0",
     "jsonwebtoken": "^8.3.0",
     "moment": "^2.22.2",
@@ -31,7 +31,6 @@
     "mysql": "^2.16.0",
     "nodemon": "^1.18.4",
     "promise-mysql": "^3.3.1",
-    "random-location": "^1.0.12",
     "socket.io": "^2.1.1"
   }
 }
