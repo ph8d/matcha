@@ -225,6 +225,7 @@ class RegistrationStore {
 		const isValidName = new RegExp(/^[A-Za-z- ]{1,32}$/);
 		const isValidDay = RegExp(/^([1-9]|[12][0-9]|3[01])$/);
 		const isValidYear = RegExp(/^(19[0-9][0-9])|(20[0-1][0-8])$/);
+		const isValidMonth = RegExp(/^([1-9]|1[0-2])$/);
 
 		const { first_name, last_name, login, birthdate } = this.user;
 		const errors = [];
@@ -257,10 +258,10 @@ class RegistrationStore {
 			}
 		}
 
-		if (!birthdate.month || birthdate.month === "0") {
+		if (!isValidMonth.test(birthdate.month)) {
 			errors.push({
 				fieldName: 'birthdate',
-				msg: "Please, enter a valid month"
+				msg: "Please, select a valid month"
 			});
 		} else if (!isValidDay.test(birthdate.day)) {
 			errors.push({
