@@ -13,7 +13,6 @@ class ChatList extends React.Component {
 		super(props);
 		this.state = {
 			conversationId: props.conversation.conversation_id,
-			value: ''
 		}
 		this.handleInput = this.handleInput.bind(this);
 		this.scrollToBottom = this.scrollToBottom.bind(this);
@@ -34,12 +33,9 @@ class ChatList extends React.Component {
 	}
 
 	sendMessage() {
-		const value = this.state.value.trim();
-		if (!value) return;
 		const { ConversationStore } = this.props;
 		const { conversationId } = this.state;
-		ConversationStore.sendMessage(conversationId, value.trim());
-		this.setState({ value: '' });
+		ConversationStore.sendMessage(conversationId);
 	}
 
 	handleKeyDown(e) {
@@ -50,9 +46,8 @@ class ChatList extends React.Component {
 	}
 
 	handleInput(e) {
-		const { value } = e.target;
-		if (value.length > 500) return;
-		this.setState({ value });
+		const { ConversationStore } = this.props;
+		ConversationStore.setMessageInput(e.target.value);
 	}
 
 	unsetSelectedConversation() {
@@ -159,6 +154,7 @@ class ChatList extends React.Component {
 	}
 
 	renderCardFooter() {
+		const { messageInput } = this.props.ConversationStore;
 		return (
 			<footer className="card-footer">
 				<div className="card-footer-item is-paddingless field has-addons">
@@ -166,7 +162,7 @@ class ChatList extends React.Component {
 						<TextareaAutosize
 							onKeyDown={this.handleKeyDown.bind(this)}
 							onChange={this.handleInput}
-							value={this.state.value}
+							value={messageInput}
 							rows="1"
 							maxRows={3}
 							className="textarea is-radiusless is-shadowless"

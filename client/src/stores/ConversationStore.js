@@ -10,6 +10,8 @@ class ConversationStore {
 	@observable conversations = [];
 	@observable selectedIndex = null;
 
+	@observable messageInput = ''
+
 	@computed get selectedConversation() {
 		if (this.selectedIndex === null) return null;
 		return this.conversations[this.selectedIndex];
@@ -28,13 +30,22 @@ class ConversationStore {
 	@action setIsLoading(status) {
 		this.isLoading = status;
 	}
-
 	@action setConversations(conversations) {
 		this.conversations = conversations;
 	}
 
 	@action setMessages(messages) {
 		this.conversations[this.selectedIndex].messages = messages;
+	}
+
+	@action setMessageInput(value) {
+		if (this.isValidMessage(value)) {
+			this.messageInput = value;
+		} 
+	}
+
+	@action clearMessageInput() {
+		this.messageInput = '';
 	}
 
 	@action selectConversation(index) {
@@ -131,7 +142,10 @@ class ConversationStore {
 		SocketStore.emit('leave conversation', conversation_id);
 	}
 
-	sendMessage(conversation_id, content) {
+	sendMessage(conversation_id) {
+		const content = this.messageInput.trim();
+		if (!content) return;
+
 		const recipient = this.selectedConversation.user_id;
 		const author_id = UserStore.currentUser.profile.user_id;
 		const date = moment().format('YYYY-MM-DD HH:mm:ss');
@@ -150,6 +164,12 @@ class ConversationStore {
 
 		SocketStore.emit('send message', data);
 		this.pushMsgToCurrentConv(message);
+		this.clearMessageInput()
+	}
+
+	isValidMessage(message) {
+		const isValidMessage = new RegExp(/^[\x00-\x7F]{0,500}$/);
+		return isValidMessage.test(message);
 	}
 
 	clearConversations() {
