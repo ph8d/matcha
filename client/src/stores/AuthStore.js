@@ -51,7 +51,6 @@ class AuthStore {
 	}
 
 	@action displayErrors(errors) {
-		console.log(errors);
 		if (!errors) return;
 		errors.forEach(error => {
 			this.errors[error.fieldName] = error.msg
@@ -67,7 +66,6 @@ class AuthStore {
 		};
 
 		const response = await API.Auth.login(credentials);
-		console.log(response);
 		if (response.status !== 200) {
 			this.displayErrors(response.data.errors);
 		} else {
@@ -107,14 +105,14 @@ class AuthStore {
 		this.setIsLoading(true);
 
 		const response = await API.Auth.recovery(this.values.email);
-		if (response.status === 202) {
-			this.displayErrors(response.data);
-		} else {
+		if (response.status === 200) {
 			this.message = {
 				heading: "Account Recovery",
 				text: response.data.message,
 			}
 			this.setMessageVisible(true);
+		} else {
+			this.displayErrors(response.data.errors);
 		}
 
 		this.setIsLoading(false);
@@ -128,7 +126,6 @@ class AuthStore {
 
 		this.clearErrors();
 
-		console.log(response);
 		if (response.status !== 200) {
 			this.displayErrors(response.data);
 		} else {
@@ -146,7 +143,6 @@ class AuthStore {
 	async verifyHash(hash) {
 		const response = await API.Auth.verifyRecoveryReq(hash);
 		if (response.status !== 200) {
-			console.error(response);
 			return false;
 		}
 		return response.data.status;

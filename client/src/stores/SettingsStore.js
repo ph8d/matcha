@@ -32,7 +32,6 @@ class SettingsStore {
 
     @action setErrors(errors = []) {
         errors.forEach(error => {
-            console.log(error);
             this.errors[error.fieldName] = error.msg;
         })
     }

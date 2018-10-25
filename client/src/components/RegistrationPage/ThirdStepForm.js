@@ -16,7 +16,6 @@ class ThirdStepForm extends React.Component {
 	}
 
 	preventFormSubmisson(e) {
-		console.log('oops!');
 		e.preventDefault();
 	}
 

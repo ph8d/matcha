@@ -41,7 +41,7 @@ class FourthStepForm extends React.Component {
 					this.showModal();
 				})
 				.catch(error => {
-					console.log(error);
+					console.error(error);
 				})
 		}
 	}

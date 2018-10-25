@@ -59,7 +59,6 @@ class ProfileStore {
 		if (response.status !== 200) {
 			console.error(response);
 		} else {
-			console.log(`liked ${this.user.profile.login}`);
 			this.setIsLiked(true);
 		}
 		this.setActionInProcess(false);
@@ -71,7 +70,6 @@ class ProfileStore {
 		if (response.status !== 200) {
 			console.error(response);
 		} else {
-			console.log(`unliked ${this.user.profile.login}`);
 			this.setIsLiked(false);
 		}
 		this.setActionInProcess(false);
@@ -83,7 +81,6 @@ class ProfileStore {
 		if (response.status !== 200) {
 			console.error(response);
 		} else {
-			console.log(`blocked ${this.user.profile.login}`);
 			this.setIsBlocked(true);
 		}
 		this.setActionInProcess(false);
@@ -96,7 +93,6 @@ class ProfileStore {
 		if (response.status !== 200) {
 			console.error(response);
 		} else {
-			console.log(`unblocked ${this.user.profile.login}`);
 			this.setIsBlocked(false);
 		}
 		this.setActionInProcess(false);
@@ -109,7 +105,6 @@ class ProfileStore {
 		if (response.status !== 200) {
 			console.error(response);
 		} else {
-			console.log(`reported ${this.user.profile.login}`);
 		}
 		this.setActionInProcess(false);
 	}

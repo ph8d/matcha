@@ -97,7 +97,7 @@ class UserStore {
 				this.setVisitHistory(response.data);
 			}
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 	}
 

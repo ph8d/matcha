@@ -26,7 +26,6 @@ const imgFileToBase64 = (file) => {
  */
 
 const getCroppedImgBlob = (image, crop) => {
-	console.log('crop', crop);
 	const canvas = document.createElement('canvas');
 	canvas.width = crop.width;
 	canvas.height = crop.height;

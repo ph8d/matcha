@@ -101,7 +101,7 @@ class ProfileEditCard extends React.Component {
 					this.showModal();
 				})
 				.catch(error => {
-					console.log(error);
+					console.error(error);
 				});
 		} else {
 			ProfileEditStore.setErrors({ pictures: 'File is too big' });
@@ -264,7 +264,6 @@ class ProfileEditCard extends React.Component {
 					onChangeHandler={this.handleInput}
 					defaultValue={profile.gender}
 				>
-					<option value="not specified">Not specified</option>
 					<option value="male">Male</option>
 					<option value="female">Female</option>
 				</SelectInputField>

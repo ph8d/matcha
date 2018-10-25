@@ -31,7 +31,6 @@ class RegistrationView extends React.Component {
 			AuthStore.setMessageVisible(true);
 			this.props.redirectToHome();
 		} else {
-			console.error('Some error occured while submiting user');
 			RegistrationStore.resetRegistration();
 		}
 	}
