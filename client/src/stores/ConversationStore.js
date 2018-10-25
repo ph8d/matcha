@@ -91,7 +91,6 @@ class ConversationStore {
 
 	@action updateUserStatus(status) {
 		if (this.selectedIndex === null) {
-			console.warn('Recieved status update but conversation is not selected!');
 			return;
 		}
 
@@ -154,8 +153,8 @@ class ConversationStore {
 	}
 
 	clearConversations() {
-		this.conversations = [];
 		this.selectedIndex = null;
+		this.conversations = [];
 	}
 
 }
