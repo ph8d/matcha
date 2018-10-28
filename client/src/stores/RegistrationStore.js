@@ -198,7 +198,7 @@ class RegistrationStore {
 				this.setGeolocation(geolocation);
 				this.saveDataToLocalStore();
 			}, error => {
-				this.setErrors({ geolocation: error.message });
+				this.setErrors([{ fieldName: 'geolocation', msg: error.message }]);
 			});
 		} else {
 			this.setErrors({ geolocation: 'Geolocation is not enabled on this browser' });
