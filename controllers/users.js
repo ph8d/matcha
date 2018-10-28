@@ -88,7 +88,7 @@ router.post('/login', async (req, res, next) => {
 			userId: req.user.id,
 			login: req.user.login
 		}, 'SECRET_KEY_THAT_I_NEED_TO_REPLACE_LATER', {
-			expiresIn: '1h'
+			expiresIn: '24h'
 		}, (error, token) => {
 			if (error) throw error;
 			res.json({ token });

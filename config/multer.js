@@ -28,10 +28,8 @@ module.exports = {
 	fileFilter: (req, file, next) => {
 		if (!file) next();
 		if (isSuportedMimeType(file.mimetype)) {
-			console.log('This picture looking good');
 			return next(null, true);
 		} else {
-			console.log('File format not suported');
 			return next(null, false);
 		}
 	}

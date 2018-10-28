@@ -4,12 +4,13 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "client-install": "cd client && npm install",
+    "install-client": "cd client && npm install",
     "start": "node app",
     "server": "nodemon app.js",
     "client": "npm start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "seed-db": "sh ./scripts/seed_db/seed.sh"
+    "seed-db": "sh ./scripts/seed_db/seed.sh",
+    "postinstall": "cd client && npm install && cd .. && sh ./scripts/create_public_dirs.sh && sh ./scripts/seed_db/seed.sh"
   },
   "keywords": [],
   "author": "rtarasen",

@@ -4,3 +4,4 @@ public/uploaded/images/*
 public/uploaded/tmp/*
 config/db.js
 config/mailer.js
+scripts/seed_db/seed.log
